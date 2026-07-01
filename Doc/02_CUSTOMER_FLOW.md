@@ -93,13 +93,16 @@ First dashboard visit for a newly registered MSME with no score yet.
   Udyam didn't supply one.
 - Once GSTIN is confirmed, proceed into AA consent request (data window
   6-12 months — see below) and the rest of the multi-source data pull,
-  same as previously scoped: GST, AA bank statements, EPFO, and
-  anything Udyam didn't already cover.
+  same as previously scoped: GST, ITR, AA bank statements, EPFO, and
+  anything Udyam didn't already cover. ITR is keyed off `Msme.PanNumber`
+  (already populated from the Udyam response) and, like GST, doesn't
+  need a separate consent artifact.
 - This stage is where `BorrowerType` (NTC / NTB / ExistingBorrower) gets
   determined, based on whether a bureau record is found during the AA/
   bureau pull.
-- **Data window:** the AA consent request and the GST return pull
-  should both target a 6-12 month history. Where a source has less than
+- **Data window:** the AA consent request, the GST return pull, and the
+  ITR pull should all target a 6-12 month / most-recent-available-
+  assessment-year history respectively. Where a source has less than
   6 months of history available (a genuinely young business), take
   what's available rather than blocking — this is exactly the
   thin-file case `03_SCORING_ENGINE.md` already handles via
@@ -109,7 +112,7 @@ First dashboard visit for a newly registered MSME with no score yet.
 
 **Decision point:** same as the previous AA-consent decision point — if
 AA consent is rejected or times out, still produce a partial score from
-GST + EPFO + Udyam alone, don't hard-block.
+GST + ITR + EPFO + Udyam alone, don't hard-block.
 
 ## Step 5 — Existing user: dashboard shows current score
 

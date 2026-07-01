@@ -34,7 +34,7 @@ throwaway test or a minimal controller action.
 
 ## Phase 2 — Synthetic data generator + connector interfaces
 
-Build the four connector interfaces (`05_INTEGRATIONS.md`) and the
+Build the five connector interfaces (`05_INTEGRATIONS.md`) and the
 synthetic data generator implementing all of them. This unblocks
 everything downstream without waiting for sandbox access.
 

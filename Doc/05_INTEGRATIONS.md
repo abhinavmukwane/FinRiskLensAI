@@ -1,10 +1,11 @@
 # External Integrations
 
 Each of these is a connector the `Services` layer calls out to. Build
-each behind an interface (`IGstConnector`, `IAaConnector`,
-`IEpfoConnector`, `IUdyamConnector`) so the synthetic-data generator and
-the eventual real sandbox/production call can be swapped without
-touching the scoring engine or the customer flow logic.
+each behind an interface (`IGstConnector`, `IItrConnector`,
+`IAaConnector`, `IEpfoConnector`, `IUdyamConnector`) so the
+synthetic-data generator and the eventual real sandbox/production call
+can be swapped without touching the scoring engine or the customer
+flow logic.
 
 ## Account Aggregator (AA) — FIP-AA-FIU framework
 
@@ -59,6 +60,41 @@ be consistent.
 **What we store:** `DataSourceSnapshot` with `SourceType = Gst`,
 containing the trailing 12-24 months of return summaries needed for the
 Revenue Vitality and Compliance Quotient features.
+
+## ITR (Income Tax Return) API
+
+**What it is:** access to a business's filed Income Tax Returns — the
+declared gross/net income figures and filing history across available
+assessment years. This is the second income-side signal alongside GST,
+and it's what lets Revenue Vitality work for MSMEs that don't clear the
+GST registration threshold but still file ITR (a real segment of
+credit-invisible micro-businesses).
+
+**Flow shape:** typically accessed via an authorized ITR data-access
+API/GSP-equivalent intermediary (e.g. through the income tax
+department's e-filing data-sharing mechanisms, or a licensed
+aggregator), similar in spirit to the GST access pattern. For the
+hackathon build, treat this as a black-box HTTP call behind
+`IItrConnector` — the commercial/empanelment relationship is out of
+scope for the prototype.
+
+**Authorization:** same as GST — authorized once at onboarding as part
+of the terms the MSME accepts (see `Msme` field mapping in
+`01_DOMAIN_MODEL.md`), not a separate per-pull consent artifact. Keep
+this consistent with however GST's authorization was modeled (boolean/
+timestamp on `Msme`, or unified under `ConsentRecord`).
+
+**What we store:** `DataSourceSnapshot` with `SourceType = Itr`,
+containing declared income by assessment year and filing dates, feeding
+Revenue Vitality (income trend, GST-vs-ITR cross-check) and Compliance
+Quotient (filing regularity) per `03_SCORING_ENGINE.md`.
+
+**Missing-data note:** not every MSME will have ITR history — very
+young businesses may not have filed yet. Treat absence the same way as
+other missing sources: don't zero the dimension, redistribute weight
+across whatever income signal is available (GST, or bank-credit-derived
+revenue proxies from AA if GST is also thin), and disclose the
+reduced-input basis on the Financial Health Card.
 
 ## EPFO REST API
 
@@ -127,10 +163,10 @@ reason a third-party lender query needs bank account details).
 
 These aren't inbound data sources — they're the outbound side described
 in `04_API_CONTRACTS.md` §3-4. Documented here only to note the
-distinction clearly: AA/GST/EPFO/Udyam are things we *call*; ULI/OCEN
-are the standards our *own* API should conform to so other lenders can
-call *us*. Don't build an "ULI connector" — build a compliant DSP-facing
-endpoint instead.
+distinction clearly: AA/GST/ITR/EPFO/Udyam are things we *call*; ULI/
+OCEN are the standards our *own* API should conform to so other lenders
+can call *us*. Don't build an "ULI connector" — build a compliant
+DSP-facing endpoint instead.
 
 ## Connector interface shape (suggested)
 
@@ -138,13 +174,14 @@ Keep each connector interface narrow and focused on one responsibility
 — fetch the data, return it in a normalized shape, don't do feature
 engineering inside the connector. `IUdyamConnector` is the one called
 first and synchronously (the MSME is waiting on the confirmation
-screen in `02_CUSTOMER_FLOW.md` Step 1); the other three are called
+screen in `02_CUSTOMER_FLOW.md` Step 1); the other four are called
 later, during Step 4, and can tolerate the async/partial-completeness
 handling described there:
 
 ```
 Task<UdyamLookupResult> FetchAsync(string udyamRegistrationNumber, CancellationToken ct);
 Task<GstDataResult> FetchAsync(string gstin, DateRange window, CancellationToken ct);
+Task<ItrDataResult> FetchAsync(string panNumber, DateRange window, CancellationToken ct);
 ```
 
 Where each result type carries either the successful payload or a
@@ -155,21 +192,25 @@ implement the partial-completeness handling described in
 
 ## Synthetic data generator (build this first)
 
-Before any real connector, build a generator that implements all four
+Before any real connector, build a generator that implements all five
 connector interfaces against fixture data. Since every MSME now enters
 through Udyam lookup, every fixture profile needs a valid Udyam
-response — vary the *other* three sources to cover:
+response — vary the *other* four sources to cover:
 
-- A clean NTB MSME: full Udyam, GST, AA, EPFO data, healthy across all
-  dimensions
-- A clean NTC MSME: valid Udyam, strong GST and EPFO history, no
+- A clean NTB MSME: full Udyam, GST, ITR, AA, EPFO data, healthy across
+  all dimensions
+- A clean NTC MSME: valid Udyam, strong GST and ITR history, no
   bureau record, AA consent granted
 - A thin-file MSME: valid Udyam with a linked GSTIN, but AA consent
   not granted and no EPFO (below headcount threshold) — this is now
   the right way to model "thin file", since Udyam itself is no longer
   optional
-- An anomalous MSME: GST-declared turnover significantly exceeds AA
-  bank credits (to exercise the fraud/anomaly signal)
+- A below-GST-threshold MSME: valid Udyam, ITR filed but no GST
+  registration — exercises Revenue Vitality and Compliance Quotient
+  falling back to ITR alone
+- An anomalous MSME: GST-declared turnover, ITR-declared income, and
+  AA bank credits disagree significantly with each other (to exercise
+  the three-way fraud/anomaly signal)
 - A declining MSME: negative revenue trend over the trailing 6 months,
   to exercise the trend overlay and produce a realistic "at risk" band
 

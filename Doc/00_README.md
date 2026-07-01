@@ -1,7 +1,7 @@
 # FinRiskLensAI — Documentation Index
 
 FinRiskLensAI is an MSME Financial Health Score platform, built for IDBI
-Innovate 2026 (Problem Statement 3). It aggregates alternate data (GST, AA
+Innovate 2026 (Problem Statement 3). It aggregates alternate data (GST, ITR, AA
 bank statements, UPI patterns, EPFO payroll) for New-to-Credit (NTC) and
 New-to-Bank (NTB) MSMEs, computes a 6-dimension weighted credit health score,
 and exposes it to IDBI's Loan Origination System and to the broader
@@ -20,7 +20,8 @@ handing this to Claude Code rather than writing it all by hand.
 2. `02_CUSTOMER_FLOW.md` — the end-to-end MSME journey, step by step
 3. `03_SCORING_ENGINE.md` — how the 6-dimension score is computed
 4. `04_API_CONTRACTS.md` — internal + external API surface (ULI/OCEN, LOS)
-5. `05_INTEGRATIONS.md` — AA, GST, EPFO, Udyam — what each one is and how
+5. `05_INTEGRATIONS.md` — AA, GST, ITR, EPFO, Udyam — what each one is
+   and how
    we talk to it
 6. `06_BUILD_PLAN.md` — suggested build order, mapped to the hackathon
    timeline

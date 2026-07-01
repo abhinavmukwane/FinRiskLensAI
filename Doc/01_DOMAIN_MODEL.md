@@ -97,7 +97,7 @@ score can always be explained by walking back to the exact data it was
 computed from.
 
 - `MsmeId` — FK to Msme
-- `SourceType` — enum: `Gst`, `AaBankStatement`, `Epfo`, `Udyam`
+- `SourceType` — enum: `Gst`, `Itr`, `AaBankStatement`, `Epfo`, `Udyam`
 - `ConsentRecordId` — FK to ConsentRecord, nullable (GST/Udyam/EPFO pulls
   may not require AA consent depending on integration approach — see
   `05_INTEGRATIONS.md`)

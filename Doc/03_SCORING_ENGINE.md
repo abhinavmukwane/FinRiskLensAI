@@ -10,10 +10,10 @@ invisible MSMEs are the whole point of the product.
 
 | Dimension | Weight | Points | Primary source |
 |---|---|---|---|
-| Revenue Vitality | 25% | 250 | GST |
+| Revenue Vitality | 25% | 250 | GST + ITR |
 | Cash Flow Health | 20% | 200 | AA bank statements |
 | Transaction Trustworthiness | 15% | 150 | AA bank statements (UPI credits) |
-| Compliance Quotient | 15% | 150 | GST + EPFO |
+| Compliance Quotient | 15% | 150 | GST + ITR + EPFO |
 | Business Stability | 15% | 150 | EPFO + Udyam |
 | Debt Serviceability | 10% | 100 | AA + bureau (if available) |
 
@@ -23,15 +23,25 @@ stored on `ScoreComputation` (per `01_DOMAIN_MODEL.md`) should be stored
 as the 0-(dimension max) value, not the raw 0-1 model output — keep the
 UI simple by storing display-ready numbers.
 
-### Revenue Vitality (GST-derived)
+### Revenue Vitality (GST + ITR derived)
 
 What it's trying to capture: is the business generating real, growing,
 consistent revenue.
 
-Candidate features: month-over-month GST turnover trend (slope over
-trailing 12 months), GSTR-1 vs GSTR-3B consistency (large persistent gaps
-are a red flag), ITC claim pattern, B2B-to-B2C ratio, inter-state trade
-spread.
+Candidate features from GST: month-over-month GST turnover trend (slope
+over trailing 12 months), GSTR-1 vs GSTR-3B consistency (large
+persistent gaps are a red flag), ITC claim pattern, B2B-to-B2C ratio,
+inter-state trade spread.
+
+Candidate features from ITR: declared gross/net income trend across
+available assessment years, income stability year-over-year, and — as a
+cross-check rather than a standalone feature — the gap between
+ITR-declared income and GST-declared turnover. A large unexplained gap
+here is a second, independent read on the same fraud/misrepresentation
+signal described below, distinct from the GST-vs-bank-credit check.
+ITR is also the dimension's fallback for MSMEs below the GST
+registration threshold (very small businesses that file ITR but aren't
+GST-registered) — see the missing-data handling below.
 
 ### Cash Flow Health (AA-derived)
 
@@ -52,13 +62,15 @@ Candidate features: transaction velocity, counterparty diversity
 (concentration in 1-2 payers is a risk even at high volume),
 business-hours proportion of transactions, repeat-payer ratio.
 
-### Compliance Quotient (GST + EPFO)
+### Compliance Quotient (GST + ITR + EPFO)
 
 What it's trying to capture: organizational maturity and regulatory
 discipline, which correlates with repayment discipline.
 
-Candidate features: GST filing regularity over trailing 24 months, EPFO
-contribution consistency, any recorded penalty/demand notices.
+Candidate features: GST filing regularity over trailing 24 months, ITR
+filing regularity across available assessment years (filed on time vs.
+late vs. not filed), EPFO contribution consistency, any recorded
+penalty/demand notices.
 
 ### Business Stability (EPFO + Udyam)
 
@@ -97,24 +109,27 @@ Cash Flow Health and Transaction Trustworthiness have no input):
    excluded on the `ScoreComputation` (add a field or explanation entry
    noting reduced-input scoring).
 3. Surface this clearly on the Financial Health Card — "Score computed
-   from GST + EPFO + Udyam only; AA consent not granted" — so a credit
-   officer isn't misreading a partial score as a complete one.
+   from GST + ITR + EPFO + Udyam only; AA consent not granted" — so a
+   credit officer isn't misreading a partial score as a complete one.
 
-## Fraud / anomaly signal: GST vs bank-credit cross-validation
+## Fraud / anomaly signal: cross-source income validation
 
-Independent of the six dimensions, run a simple cross-check: compare
-GST-declared turnover against actual bank credits from the AA
-statements over the same period. A large, unexplained gap (declared
-turnover far exceeding actual bank credits, or vice versa) is a
-red flag worth surfacing as its own explanation entry, separate from
-the dimension scores — it's a data-integrity signal, not a
-creditworthiness signal, and conflating the two would confuse the
-officer.
+Independent of the six dimensions, run a cross-check across three
+independent income signals: GST-declared turnover, ITR-declared
+income, and actual bank credits from the AA statements over the same
+period. Having three sources instead of two makes this materially
+stronger — a two-way mismatch could be a timing artifact (e.g. invoiced
+but uncollected revenue), but a consistent pattern where two sources
+agree and the third diverges sharply is a much clearer signal of which
+source is misrepresenting. A large, unexplained gap is a red flag worth
+surfacing as its own explanation entry, separate from the dimension
+scores — it's a data-integrity signal, not a creditworthiness signal,
+and conflating the two would confuse the officer.
 
 This is a good candidate for the ML.NET RandomizedPca anomaly detector
-mentioned in the tech stack — treat the (declared turnover, actual bank
-credit) pair, plus a few related ratios, as the anomaly detection
-input.
+mentioned in the tech stack — treat (GST turnover, ITR income, actual
+bank credit) as a three-way feature set, plus their pairwise ratios, as
+the anomaly detection input.
 
 ## Trend overlay (SSA)
 
@@ -169,10 +184,11 @@ build — this doesn't need to be a model:
 
 IDBI's sandbox (with real synthetic banking datasets) opens July 22.
 Until then, build a synthetic data generator that produces MSME
-profiles spanning the `BorrowerType` spectrum — NTC with strong GST but
-no AA history, NTB with full data, thin-file, and a couple of
-deliberately anomalous profiles (the GST-vs-bank-credit mismatch case)
-to exercise the fraud signal. Swap the generator for real sandbox calls
-behind the same connector interfaces described in `05_INTEGRATIONS.md`
+profiles spanning the `BorrowerType` spectrum — NTC with strong GST/ITR
+but no AA history, NTB with full data, thin-file, and a couple of
+deliberately anomalous profiles (mismatches across GST, ITR, and bank
+credit) to exercise the fraud signal. Swap the generator for real
+sandbox calls behind the same connector interfaces described in
+`05_INTEGRATIONS.md`
 — the scoring engine shouldn't need to change when the data source
 changes.
