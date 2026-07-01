@@ -768,3 +768,11 @@ footer.brand-footer {
         border-bottom: 1px solid var(--line);
     }
 }
+.custom-checkbox {
+    border: 2px solid #0d6efd; /* Bootstrap primary */
+}
+
+    .custom-checkbox:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
