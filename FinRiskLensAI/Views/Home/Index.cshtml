@@ -1,8 +1,313 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+
+<main class="hero-bg position-relative">
+
+    <!-- Hero Section -->
+    <section class="mx-auto px-margin-desktop py-5" style="max-width: 1440px;">
+        <div class="row g-4 align-items-center">
+            <!-- Hero Info -->
+            <div class="col-lg-6 space-y-4">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 bg-success bg-opacity-10 border border-success border-opacity-25 rounded-pill mb-3">
+                    <span class="material-symbols-outlined text-success small"
+                          style="font-size: 1rem; font-variation-settings: 'FILL' 1;">verified</span>
+                    <span class="font-data uppercase tracking-wider text-success"
+                          style="font-size: 10px; font-weight: 700;">Institutional Grade Risk Modeling</span>
+                </div>
+                <h2 class="display-4 text-primary font-heading fw-bold mb-3" style="line-height: 1.15;">
+                    AI-powered MSME <br />
+                    <span class="text-secondary">credit risk intelligence</span>
+                </h2>
+                <p class="text-secondary lead mb-4" style="max-width: 500px;">
+                    Bridge the credit gap for micro, small, and medium enterprises. Our proprietary AI engine
+                    analyzes alternative data to provide high-precision risk scores in seconds.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
+                    <button class="btn btn-primary-maroon px-4 py-3 rounded-3 d-flex align-items-center justify-content-center gap-2 font-heading"
+                            onclick="window.location.href='/Onboarding/CustOnboarding';">
+                        Start Onboarding
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                    <button class="btn btn-outline-maroon px-4 py-3 rounded-3 font-heading"
+                            onclick="window.location.href='CustomerOnboarding.html';">
+                        Request Demo
+                    </button>
+                </div>
+
+                <div class="d-flex align-items-center gap-3 pt-3">
+                    <div class="d-flex -space-x-3" style="margin-left: 0.5rem;">
+                        <div class="rounded-circle border-2 border-white shadow bg-cover bg-center"
+                             style="width: 2.5rem; height: 2.5rem; background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAH8N9ENhsFAGIuOFCl5Yap1up7qcyNgiBZxCcGpvFpV31c1T6A11cWEuGwfmWeWGMEuXKbHcF2tx_UwKUDmDdKzzk_mQGJmX9uc8bT4s0-mcqAKIgMCaU_TF-vsIwuLPkyXfQGHqcyedxhtvY7hQ7uNrOayUBBOs3_po92lLexkN34kQ5jHIwhtOfCFODFcgrOEnG2UDca5U9tTcSssy0LCuH0f6c5X6-fDFjYpKqKAoSkYvpZ6xXzLfHyj9zqEMgnq1ybghbJKe4');">
+                        </div>
+                        <div class="rounded-circle border-2 border-white shadow bg-cover bg-center"
+                             style="width: 2.5rem; height: 2.5rem; background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBrsFk1AX8FfWr555jOTIymIAIRWgrEFDBrhDo92GtThgt6uLLI4KtUfkdTBBh0IEUZ-ggguNY-rkxiQ38RufvT4LlXzS2heIdmaYVRigk977mel0lYeoU88DAwvhW0VaQzDJXtp2D2VKjKOVsAcYy_3fj9oks6m4oH15uW_6PdBZJDRHa4u3u22RL4hZM_UTQAi-jbecaBMxtrDn2q4NRH8b-eGWGWdNGluINVVMS0W8o585CNPs09Uo1K3R7j0olSfrtbw9-Mkg'); margin-left: -10px;">
+                        </div>
+                        <div class="rounded-circle border-2 border-white shadow bg-cover bg-center"
+                             style="width: 2.5rem; height: 2.5rem; background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBUVOVIeihfwVogjPteF9IfJvDVI6lgVAZFH-ftbKX0pJ2oaBP5LnYSJohgAXRE6IxqDhmT_dmiRc5Bjmlocmj4YXC6ROCF4rYi-cNKcD1ItuWKVZFnWnuhGpJ0qNTWL8O0kbD23E6qMxhcFJXGQ9CX53sU6Qbsbm-lXxC1_gBxtU0L6gItbZyFC7uQ22eOwmbdeJDpT4ZXUesjmATuJb2gDL5TuJzEnfpGzrkeF9ah5TIpAuiaNr1sji75oP5VL7w1AS1GpVbxT5Q'); margin-left: -10px;">
+                        </div>
+                    </div>
+                    <p class="font-data small text-secondary mb-0 leading-tight">
+                        <span class="fw-bold text-dark">500+ Financial Institutions</span> <br />
+                        already trust FinRiskLens AI
+                    </p>
+                </div>
+            </div>
+
+            <!-- Hero Mockups (Bento Cluster) -->
+            <div class="col-lg-6 position-relative d-none d-lg-block" style="height: 520px;">
+                <!-- Main Preview Panel -->
+                <div class="position-absolute top-50 start-50 translate-middle w-100 card-premium overflow-hidden"
+                     style="max-width: 440px; z-index: 10;">
+                    <div class="bg-light border-bottom p-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex gap-1.5">
+                            <div class="rounded-circle bg-danger bg-opacity-50" style="width: 8px; height: 8px;">
+                            </div>
+                            <div class="rounded-circle bg-warning bg-opacity-75" style="width: 8px; height: 8px;">
+                            </div>
+                            <div class="rounded-circle bg-success bg-opacity-75" style="width: 8px; height: 8px;">
+                            </div>
+                        </div>
+                        <span class="font-data text-secondary uppercase opacity-50"
+                              style="font-size: 8px; font-weight: 700;">FR_LENS_ANALYTICS_V4</span>
+                    </div>
+
+                    <div class="p-4 row g-3">
+                        <div class="col-7 space-y-3">
+                            <div class="bg-light rounded" style="height: 12px; width: 80%;"></div>
+                            <div class="bg-white border rounded-3 p-3 d-flex flex-column align-items-center justify-content-center">
+                                <!-- Dial -->
+                                <div class="position-relative d-flex align-items-center justify-content-center rounded-circle risk-gauge-gradient p-1"
+                                     style="width: 100px; height: 100px;">
+                                    <div class="w-100 h-100 rounded-circle bg-white d-flex flex-column align-items-center justify-content-center">
+                                        <span class="h4 text-primary font-heading mb-0 fw-bold">842</span>
+                                        <span class="font-data text-secondary uppercase"
+                                              style="font-size: 6px; letter-spacing: 1px;">EXCELLENT</span>
+                                    </div>
+                                    <div class="position-absolute top-50 start-50 translate-middle w-100 h-100"
+                                         style="transform: rotate(120deg);">
+                                        <div class="bg-primary rounded-circle mx-auto"
+                                             style="width: 3px; height: 8px; margin-top: -3px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-5 pt-3 d-flex flex-column justify-content-center gap-2">
+                            <div class="bg-light rounded w-100" style="height: 8px;"></div>
+                            <div class="bg-light rounded w-75" style="height: 8px;"></div>
+                            <div class="bg-light rounded w-50" style="height: 8px;"></div>
+                            <div class="row g-2 pt-3">
+                                <div class="col-6">
+                                    <div class="bg-primary bg-opacity-10 rounded" style="height: 36px;"></div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-success bg-opacity-10 rounded" style="height: 36px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating identity card -->
+                <div class="position-absolute top-0 end-0 glass-card-float p-3 rounded-3"
+                     style="width: 180px; z-index: 20;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="material-symbols-outlined text-primary"
+                              style="font-size: 1.25rem; font-variation-settings: 'FILL' 1;">verified_user</span>
+                        <span class="font-data small text-secondary"
+                              style="font-size: 9px; font-weight: 700; text-transform: uppercase;">
+                            IDENTITY
+                            MATCH
+                        </span>
+                    </div>
+                    <div class="h4 font-heading text-dark mb-0 fw-bold">99.8%</div>
+                </div>
+
+                <!-- Floating chart card -->
+                <div class="position-absolute bottom-0 start-0 glass-card-float p-3 rounded-3"
+                     style="width:220px; z-index: 20;">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-secondary"
+                              style="font-size: 1.25rem; font-variation-settings: 'FILL' 1;">monitoring</span>
+                        <span class="font-data small text-secondary"
+                              style="font-size: 9px; font-weight: 700; text-transform: uppercase;">
+                            LIQUIDITY
+                            TREND
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-end gap-1.5" style="height: 60px;">
+                        <div class="bg-secondary bg-opacity-25 rounded-top" style="height: 40%; flex: 1;"></div>
+                        <div class="bg-secondary bg-opacity-50 rounded-top" style="height: 70%; flex: 1;"></div>
+                        <div class="bg-secondary bg-opacity-25 rounded-top" style="height: 55%; flex: 1;"></div>
+                        <div class="bg-secondary bg-opacity-75 rounded-top" style="height: 85%; flex: 1;"></div>
+                        <div class="bg-secondary rounded-top" style="height: 100%; flex: 1;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Bento Section -->
+    <section class="mx-auto px-margin-desktop py-5" style="max-width: 1440px;">
+        <div class="text-center mb-5">
+            <h3 class="h2 text-primary font-heading fw-bold mb-2">Intelligence for the modern lender</h3>
+            <p class="text-secondary mx-auto" style="max-width: 600px;">
+                Our platform combines traditional banking
+                rigor with advanced AI to unlock credit opportunities for MSMEs.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Alternative Data Synthesis (Wide Bento Card) -->
+            <div class="col-lg-8">
+                <div class="card-premium p-4 p-md-5 h-100 d-flex flex-column flex-md-row align-items-center gap-4">
+                    <div class="flex-grow-1 space-y-3" style="flex: 1;">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center border border-primary border-opacity-25 mb-3"
+                             style="width: 3.5rem; height: 3.5rem;">
+                            <span class="material-symbols-outlined fs-2">hub</span>
+                        </div>
+                        <h4 class="h5 text-primary font-heading fw-bold">Alternative Data Synthesis</h4>
+                        <p class="small text-secondary leading-relaxed mb-4">
+                            We look beyond credit bureaus. Our AI
+                            synthesizes cash flow, supply chain data, and digital footprints to create a holistic
+                            MSME risk profile.
+                        </p>
+                        <ul class="list-unstyled space-y-2">
+                            <li class="d-flex align-items-center gap-2 small text-dark font-data fw-semibold">
+                                <span class="material-symbols-outlined text-secondary fs-5">check_circle</span>
+                                Real-time Transaction Analysis
+                            </li>
+                            <li class="d-flex align-items-center gap-2 small text-dark font-data fw-semibold">
+                                <span class="material-symbols-outlined text-secondary fs-5">check_circle</span>
+                                Supplier Sentiment Mapping
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="rounded-3 overflow-hidden border"
+                         style="height: 250px; flex: 1; min-width: 250px; max-width: 100%;">
+                        <img class="w-100 h-100 object-cover"
+                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7gb6ryYHbGR6Uw8WjxXUV38px-69zbd-891aCZIOKJgoGpQstTGxZo-xXCA9bwDURZ-vOYJZpcVIpTeH6o5nokorKnekQgClS_ZykGYgtPMWd8apiiUYLVxiLD9UVs3bem3Yzm3o24WMRumpyy83t4xKDTqP3jkkqr0L48JjPpOtbixTt6Ymjos8Ds9nKAFVJPJB313Xp46XkkRfMO_B9PKLEHDAehsufcVumOKGU_AOjo0gg9LVNa23GCK32gtXM9OkEYo0FhjE"
+                             alt="Data Network Synthesis" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instant Decisioning -->
+            <div class="col-lg-4">
+                <div class="card-premium p-4 p-md-5 h-100 d-flex flex-column justify-content-between">
+                    <div class="space-y-3">
+                        <div class="bg-secondary bg-opacity-10 text-secondary rounded-3 d-flex align-items-center justify-content-center border border-secondary border-opacity-25 mb-3"
+                             style="width: 3.5rem; height: 3.5rem;">
+                            <span class="material-symbols-outlined fs-2">speed</span>
+                        </div>
+                        <h4 class="h5 text-primary font-heading fw-bold">Instant Decisioning</h4>
+                        <p class="small text-secondary leading-relaxed mb-0">
+                            Reduce turnaround time from days to
+                            seconds with automated underwriting workflows.
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-top border-light mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="font-data small uppercase text-secondary">Decision Speed</span>
+                            <span class="font-data small fw-bold text-secondary">+400%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-secondary" role="progressbar" style="width: 80%;"
+                                 aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regulatory Compliance -->
+            <div class="col-lg-4">
+                <div class="card-premium p-4 p-md-5 h-100 d-flex flex-column justify-content-between">
+                    <div class="space-y-3">
+                        <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center border border-success border-opacity-25 mb-3"
+                             style="width: 3.5rem; height: 3.5rem;">
+                            <span class="material-symbols-outlined fs-2"
+                                  style="color: var(--success-custom);">policy</span>
+                        </div>
+                        <h4 class="h5 text-primary font-heading fw-bold">Regulatory Compliance</h4>
+                        <p class="small text-secondary leading-relaxed mb-4">
+                            Built-in KYC/AML checks and explainable
+                            AI (XAI) models that meet local financial regulations.
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-light text-dark font-data uppercase p-2 border border-secondary border-opacity-10"
+                              style="font-size: 9px;">GDPR READY</span>
+                        <span class="badge bg-light text-dark font-data uppercase p-2 border border-secondary border-opacity-10"
+                              style="font-size: 9px;">BASEL III</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scale with confidence (Wide Bento Card) -->
+            <div class="col-lg-8">
+                <div class="card-premium p-4 p-md-5 h-100 bg-primary text-white d-flex flex-column flex-md-row align-items-center gap-4 position-relative overflow-hidden"
+                     style="border: none;">
+                    <div class="position-absolute end-0 bottom-0 bg-secondary bg-opacity-20 rounded-circle"
+                         style="width: 250px; height: 250px; filter: blur(50px); pointer-events: none; transform: translate(50px, 50px);">
+                    </div>
+
+                    <div class="flex-grow-1 space-y-3 relative-z" style="flex: 1; z-index: 2;">
+                        <h4 class="h3 text-white font-heading fw-bold leading-tight">
+                            Scale your MSME portfolio with
+                            confidence
+                        </h4>
+                        <p class="small text-white text-opacity-75 leading-relaxed mb-4">
+                            Our partners see an average
+                            12% reduction in non-performing loans within the first 6 months of deployment.
+                        </p>
+                        <button class="btn btn-light text-primary px-4 py-2.5 rounded-3 font-heading fw-bold"
+                                onclick="alert('Downloading Whitepaper: FinRiskLens AI Credit Modeling Guide.pdf');">
+                            Download
+                            Whitepaper
+                        </button>
+                    </div>
+                    <div class="rounded-3 overflow-hidden shadow-lg border border-white border-opacity-10"
+                         style="height: 200px; flex: 1; min-width: 220px; z-index: 2;">
+                        <img class="w-100 h-100 object-cover"
+                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuDx6bsCOWHZAuyTwX8FpSlyOdrmGvZVySCwK4NRUWV79Kl5YnqJb02fn8xBOYugxWgQCzodeJOtaO0HKKxGdbtqa7Sv5FvYISSgD94F3XzT-W2Dvu7_04LTJJG78-FxQQ2fvtRikAUp5vTeWqhOQpxjerAyVp95-mKcLd1aV7xf_z2ejB0A3TdGGcJL5S8jVjisA4IREYGC7F2QXPdtrMEQboajRmETnPDZx8Plix88-7Ia3oAirdwWsEclpAPXUw8zIAsyFktdC8o"
+                             alt="Growth Pillars Chart" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="mx-auto px-margin-desktop py-5" style="max-width: 1440px;">
+        <div class="bg-white rounded-5 p-4 p-md-5 text-center border shadow-sm position-relative overflow-hidden"
+             style="background-image: radial-gradient(rgba(87, 0, 29, 0.05) 1px, transparent 1px); background-size: 24px 24px;">
+            <div class="position-absolute start-0 top-0 translate-middle bg-opacity-5 rounded-circle blur-3xl"
+                 style="width: 300px; height: 300px; filter: blur(60px);"></div>
+            <div class="position-absolute end-0 bottom-0 translate-middle-y  bg-opacity-5 rounded-circle blur-3xl"
+                 style="width: 250px; height: 250px; filter: blur(60px);"></div>
+
+            <div class="position-relative z-10 space-y-4 py-4">
+                <h3 class="display-5 text-primary font-heading fw-bold mb-3">Ready to redefine MSME lending?</h3>
+                <p class="text-secondary lead mx-auto mb-4" style="max-width: 600px;">
+                    Join the institutions using
+                    FinRiskLens AI to drive financial inclusion and precision risk management.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center align-items-center">
+                    <button class="btn btn-primary-maroon px-5 py-3 rounded-3 shadow font-heading"
+                            onclick="window.location.href='CustomerOnboarding.html';">
+                        Start Onboarding Now
+                    </button>
+                    <a class="font-data text-primary fw-semibold d-flex align-items-center gap-1 text-decoration-none hover-underline"
+                       href="#">
+                        Talk to an advisor
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>

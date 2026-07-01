@@ -4,7 +4,7 @@ namespace FinRiskLensAI.Controllers
 {
     public class OnboardingController : Controller
     {
-        public IActionResult Index()
+        public IActionResult CustOnboarding()
         {
             return View();
         }
