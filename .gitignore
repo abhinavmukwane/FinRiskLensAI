@@ -7,6 +7,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
+# Sample API responses with real personal data (PAN/Aadhaar/bank details) — never commit
+Json files/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
