@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FinRiskLensAI.Core.DI;
 using FinRiskLensAI.Data.DI;
+using FinRiskLensAI.ML.DI;
 using FinRiskLensAI.Services.DI;
 using Serilog;
 
@@ -19,10 +20,13 @@ builder.Host.ConfigureContainer<ContainerBuilder>(container =>
     container.RegisterModule(new CoreModule());
     container.RegisterModule(new DataModule());
     container.RegisterModule(new ServicesModule());
+    container.RegisterModule(new MLModule());
 });
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
+        new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddAppDbContext(builder.Configuration);
 
 var app = builder.Build();

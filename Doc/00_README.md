@@ -27,6 +27,10 @@ handing this to Claude Code rather than writing it all by hand.
    timeline
 7. `07_SETUP_GAPS.md` — the two known gaps in the current scaffold
    (DbContext registration, JWT handler) plus PostgreSQL provider wiring
+8. `08_ML_ENGINE.md` — the implemented ML.NET scoring engine
+   (`FinRiskLensAI.ML`): use cases, API contract (direct endpoint + the
+   Azure Blob Storage collection flow for large payloads), pipeline
+   internals with code, and extension points (EPFO, sandbox swap, bureau)
 
 ## Ground rules for implementation
 
