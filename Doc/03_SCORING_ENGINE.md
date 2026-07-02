@@ -1,5 +1,16 @@
 # Scoring Engine
 
+> **Implementation status (2026-07-02): IMPLEMENTED** in the `FinRiskLensAI.ML`
+> project — six weighted dimensions, missing-dimension weight redistribution,
+> NTC neutral default, LightGBM + PFI explanations, SSA trend, RandomizedPca
+> three-way income anomaly check, band → product mapping, synthetic training
+> data pending the July 22 sandbox. See `08_ML_ENGINE.md` for the API contract
+> and pipeline internals. Differences from this spec worth knowing: features are
+> currently extracted from raw payloads (blob folder / request body) rather than
+> `DataSourceSnapshot` rows (those entities don't exist yet), and sub-score
+> calculators are heuristic formulas blended 60/40 with the LightGBM model
+> rather than per-dimension trained models — revisit both once sandbox data lands.
+
 The Financial Health Score is 0-1000, composed of six weighted
 dimensions. This document defines what each dimension measures, its
 weight, its primary data source, and how to handle missing data —

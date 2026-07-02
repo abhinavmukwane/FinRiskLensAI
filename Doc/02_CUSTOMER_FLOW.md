@@ -1,5 +1,15 @@
 # Customer Flow — End to End
 
+> **Implementation status (2026-07-02):** Steps 1–6 (onboarding/login UI +
+> services) are not built yet — only the landing page and an onboarding page
+> shell exist. Step 7 (feature engineering + scoring) is **implemented** in
+> `FinRiskLensAI.ML` (see `08_ML_ENGINE.md`), currently reading raw payloads
+> from the per-UAN Azure Blob folder rather than `DataSourceSnapshot` rows.
+> Step 5's "explicit refresh" already works at the API level: re-calling
+> `POST /api/msme-data/{uan}/analyze` recomputes and overwrites `result.json`.
+> The `t_MsmeEnquiry` Udyam cache (see `01_DOMAIN_MODEL.md` status note)
+> gives Step 1 its "second lookup needs no API call" behavior.
+
 This is the MSME's journey from first landing on the platform to a credit
 officer seeing their Financial Health Card in the IDBI LOS. Each step
 names the service/controller responsible and what decision or state

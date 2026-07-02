@@ -1,5 +1,19 @@
 # External Integrations
 
+> **Implementation status (2026-07-02):** the connector interfaces below are
+> not built yet, but the plumbing around them exists:
+> - Real sample responses for Udyam, ITR (ITR-1 and ITR-3), and AA are in hand
+>   (kept in the git-ignored `Json files/` folder — real personal data, never
+>   commit); GST responses exist as schema files only so far. EPFO pending.
+> - The **destination** for every pull is decided: each raw response is saved
+>   into the MSME's Azure Blob folder (container `msme-data`, folder = UAN,
+>   file names per `MsmeDataFiles` — see `08_ML_ENGINE.md` §2b). Connectors
+>   should inject `IMsmeDataStore` and call `UploadAsync(uan, fileName, json)`
+>   as each response arrives; analysis is then triggered by UAN alone.
+> - Udyam responses are additionally cached relationally in `t_MsmeEnquiry`
+>   (one row per UAN) so repeat lookups skip the API.
+> - A teammate has started AA/HTTP client groundwork (`HttpClientHelper` in Core).
+
 Each of these is a connector the `Services` layer calls out to. Build
 each behind an interface (`IGstConnector`, `IItrConnector`,
 `IAaConnector`, `IEpfoConnector`, `IUdyamConnector`) so the

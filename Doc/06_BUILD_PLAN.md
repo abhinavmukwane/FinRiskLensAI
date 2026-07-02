@@ -1,5 +1,25 @@
 # Build Plan
 
+> **Progress status (2026-07-02):**
+> - **Phase 0** — half done: DbContext registered (SQL Server chosen over
+>   PostgreSQL — see `07_SETUP_GAPS.md` status note); JWT bearer still open.
+> - **Phase 1** — partially done, different entities than planned: `ADM_Login`
+>   + the `t_MsmeEnquiry`/`t_MsmeLocations`/`t_MsmeNicCodes` Udyam cache are
+>   live on the remote SQL Server; the core domain entities (`Msme`,
+>   `ScoreComputation`, …) are still pending.
+> - **Phase 4 (the July 9 target) — substantially done, ahead of order:** the
+>   `FinRiskLensAI.ML` scoring engine implements all seven items below
+>   (LightGBM, redistribution, RandomizedPca anomaly, SSA, PFI explanations,
+>   recommendations) and is verified with real sample payloads — see
+>   `08_ML_ENGINE.md`. It reads raw payloads (Azure Blob folder per UAN, or
+>   request body) instead of `DataSourceSnapshot` rows for now.
+> - Also built (not in the original plan): the blob-storage collection flow
+>   with manifest gating (`api/msme-data/{uan}`), which handles payloads too
+>   large for a single request.
+> - **Phases 2, 3, 5, 6, 7** — not started. Home page UI aligned to the
+>   product story (partial Phase 5 groundwork). A teammate has started AA
+>   connector code (`HttpClientHelper` in Core) and a dashboard controller.
+
 Suggested build order, sequenced so there's always something
 demonstrable, and mapped loosely to the IDBI Innovate 2026 timeline
 (initial submission July 9, sandbox access July 22-31, final prototype

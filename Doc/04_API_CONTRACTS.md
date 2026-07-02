@@ -1,5 +1,19 @@
 # API Contracts
 
+> **Implementation status (2026-07-02):** the onboarding/login (§1), score
+> retrieval (§2), ULI DSP (§3), LOS (§4) and refresh (§5) surfaces below are
+> **not yet built**. What exists today, not anticipated by this doc, is the
+> scoring/analysis surface (see `08_ML_ENGINE.md` for full contracts):
+> - `POST /api/scoring/analyze` — stateless direct analysis, payloads in body
+>   (dev/test/what-if harness, not the production path)
+> - `api/msme-data/{uan}` — the blob-storage collection + analysis flow:
+>   `PUT /manifest`, `PUT /files/{fileName}`, `GET /status`,
+>   `POST /analyze?force=`, `GET /result`
+> When §2 (score retrieval) is built, `GET /api/msme-data/{uan}/result` already
+> covers most of "get current score" — §2 should either wrap it or read the
+> persisted `ScoreComputation` rows once those entities exist. §3/§4 remain
+> blocked on the JWT bearer registration (gap 2 in `07_SETUP_GAPS.md`).
+
 This defines the API surface at a contract level — request/response
 shape and purpose. Exact route naming, versioning scheme, and DTO class
 names are left to you; follow whatever convention the rest of the

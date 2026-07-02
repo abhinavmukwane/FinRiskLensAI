@@ -1,5 +1,22 @@
 # Setup Gaps — Fix These First
 
+> **Implementation status (2026-07-02):**
+> - **Gap 1 (DbContext) — CLOSED**, but with a decision change: **SQL Server is
+>   the actual target**, not PostgreSQL (see gap 3 note below). Registered via
+>   `DataServiceCollectionExtensions.AddAppDbContext()` in the Data project,
+>   called from `Program.cs`, driven by `Database:DbType`. The Npgsql branch
+>   exists in code but is unused. Migrations live in
+>   `FinRiskLensAI.Data/Migrations/SqlServer/` and are applied to the remote
+>   shared SQL Server (connection string in `appsettings.json`). Migration
+>   commands are documented in `HANDOFF.md`.
+> - **Gap 2 (JWT bearer) — STILL OPEN.** Nothing registers
+>   `AddAuthentication().AddJwtBearer(...)` yet; the `Jwt` config section
+>   remains inert. Needed before the external API surface
+>   (`04_API_CONTRACTS.md` §3/§4) ships.
+> - **Gap 3 (PostgreSQL as target) — DECISION REVERSED.** The team chose SQL
+>   Server (remote instance at 4.247.173.231). Do NOT regenerate migrations
+>   for Npgsql; the guidance below is retained for history only.
+
 `ARCHITECTURE.md` §11 flags these explicitly. Listing them here as a
 concrete first task for Claude Code, plus the PostgreSQL provider
 decision that touches the same area of `Program.cs`.

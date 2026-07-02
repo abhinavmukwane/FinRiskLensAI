@@ -1,5 +1,21 @@
 # Domain Model
 
+> **Implementation status (2026-07-02):** the core entities below (`Msme`,
+> `ConsentRecord`, `DataSourceSnapshot`, `ScoreComputation`, `ScoreExplanation`,
+> `CreditProductRecommendation`) are **not yet implemented**. What exists so far
+> (in `Core/Models/`, configured in `Data/Configurations/`, applied to the DB):
+> - `AdmLogin` → table `ADM_Login` — admin login (username + password hash),
+>   seeded admin user. Supporting table, not part of this domain model.
+> - `MsmeEnquiry` → `t_MsmeEnquiry` — Udyam API response cache, one row per UAN
+>   (unique), full raw JSON in `Payload`; serves repeat lookups without an API
+>   hit. This is the natural feeder for `Msme` when Step 2 (Register) is built.
+> - `MsmeLocation` / `MsmeNicCode` → `t_MsmeLocations` / `t_MsmeNicCodes` —
+>   children of `MsmeEnquiry` for `location_of_plant_details` and `nic_code`.
+> The scoring output shape (`ScoreComputation` etc.) currently exists only as
+> the in-memory `RiskAnalysisResult` in `FinRiskLensAI.ML` (see `08_ML_ENGINE.md`)
+> plus `result.json` in the MSME's blob folder — mapping it onto these entities
+> is a pending step.
+
 This describes the core entities the rest of the system is built around.
 All entities live in `FinRiskLensAI.Core/Models` and derive from
 `BaseEntity` or `AuditableEntity` (see `ARCHITECTURE.md` §5).
