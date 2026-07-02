@@ -23,6 +23,7 @@ builder.Host.ConfigureContainer<ContainerBuilder>(container =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddAppDbContext(builder.Configuration);
 
 var app = builder.Build();
 

@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -14,45 +14,28 @@
                 <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 bg-success bg-opacity-10 border border-success border-opacity-25 rounded-pill mb-3">
                     <i class="bi bi-patch-check-fill text-success" style="font-size:1rem;"></i>
                     <span class="font-data uppercase tracking-wider text-success"
-                          style="font-size: 10px; font-weight: 700;">Institutional Grade Risk Modeling</span>
+                          style="font-size: 10px; font-weight: 700;">IDBI Innovate 2026 · MSME Financial Health Score</span>
                 </div>
                 <h2 class="display-4 text-primary font-heading fw-bold mb-3" style="line-height: 1.15;">
-                    AI-powered MSME <br />LIQUIDITY TREND
-                    <span class="text-secondary">credit risk intelligence</span>
+                    A financial health score for <br />
+                    <span class="text-secondary">credit-invisible MSMEs</span>
                 </h2>
                 <p class="text-secondary lead mb-4" style="max-width: 500px;">
-                    Bridge the credit gap for micro, small, and medium enterprises. Our proprietary AI engine
-                    analyzes alternative data to provide high-precision risk scores in seconds.
+                    FinRiskLens AI aggregates alternate data — GST returns, ITR, Account Aggregator bank
+                    statements, UPI patterns, and EPFO payroll — to compute a 6-dimension health score
+                    (0–1000) for New-to-Credit and New-to-Bank enterprises.
                 </p>
                 <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
                     <button class="btn btn-primary-maroon px-4 py-3 rounded-3 d-flex align-items-center justify-content-center gap-2 font-heading"
                             onclick="window.location.href='/Onboarding/CustOnboarding';">
-                        Start Onboarding
+                        Start with your Udyam number
                         <i class="bi bi-arrow-right"></i>
                     </button>
                     <button class="btn btn-outline-maroon px-4 py-3 rounded-3 font-heading"
-                            onclick="window.location.href='CustomerOnboarding.html';">
-                        Request Demo
+                            onclick="document.getElementById('score-dimensions').scrollIntoView({behavior:'smooth'});">
+                        How the score works
                     </button>
                 </div>
-
-               @*  <div class="d-flex align-items-center gap-3 pt-3">
-                    <div class="d-flex -space-x-3" style="margin-left: 0.5rem;">
-                        <div class="rounded-circle border-2 border-white shadow bg-cover bg-center"
-                             style="width: 2.5rem; height: 2.5rem; background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAH8N9ENhsFAGIuOFCl5Yap1up7qcyNgiBZxCcGpvFpV31c1T6A11cWEuGwfmWeWGMEuXKbHcF2tx_UwKUDmDdKzzk_mQGJmX9uc8bT4s0-mcqAKIgMCaU_TF-vsIwuLPkyXfQGHqcyedxhtvY7hQ7uNrOayUBBOs3_po92lLexkN34kQ5jHIwhtOfCFODFcgrOEnG2UDca5U9tTcSssy0LCuH0f6c5X6-fDFjYpKqKAoSkYvpZ6xXzLfHyj9zqEMgnq1ybghbJKe4');">
-                        </div>
-                        <div class="rounded-circle border-2 border-white shadow bg-cover bg-center"
-                             style="width: 2.5rem; height: 2.5rem; background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBrsFk1AX8FfWr555jOTIymIAIRWgrEFDBrhDo92GtThgt6uLLI4KtUfkdTBBh0IEUZ-ggguNY-rkxiQ38RufvT4LlXzS2heIdmaYVRigk977mel0lYeoU88DAwvhW0VaQzDJXtp2D2VKjKOVsAcYy_3fj9oks6m4oH15uW_6PdBZJDRHa4u3u22RL4hZM_UTQAi-jbecaBMxtrDn2q4NRH8b-eGWGWdNGluINVVMS0W8o585CNPs09Uo1K3R7j0olSfrtbw9-Mkg'); margin-left: -10px;">
-                        </div>
-                        <div class="rounded-circle border-2 border-white shadow bg-cover bg-center"
-                             style="width: 2.5rem; height: 2.5rem; background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBUVOVIeihfwVogjPteF9IfJvDVI6lgVAZFH-ftbKX0pJ2oaBP5LnYSJohgAXRE6IxqDhmT_dmiRc5Bjmlocmj4YXC6ROCF4rYi-cNKcD1ItuWKVZFnWnuhGpJ0qNTWL8O0kbD23E6qMxhcFJXGQ9CX53sU6Qbsbm-lXxC1_gBxtU0L6gItbZyFC7uQ22eOwmbdeJDpT4ZXUesjmATuJb2gDL5TuJzEnfpGzrkeF9ah5TIpAuiaNr1sji75oP5VL7w1AS1GpVbxT5Q'); margin-left: -10px;">
-                        </div>
-                    </div>
-                     <p class="font-data small text-secondary mb-0 leading-tight">
-                        <span class="fw-bold text-dark">500+ Financial Institutions</span> <br />
-                        already trust FinRiskLens AI
-                    </p> 
-                </div> *@
             </div>
 
             <!-- Hero Mockups (Bento Cluster) -->
@@ -70,7 +53,7 @@
                             </div>
                         </div>
                         <span class="font-data text-secondary uppercase opacity-50"
-                              style="font-size: 8px; font-weight: 700;">FR_LENS_ANALYTICS_V4</span>
+                              style="font-size: 8px; font-weight: 700;">FINANCIAL_HEALTH_CARD</span>
                     </div>
 
                     <div class="p-4 row g-3">
@@ -116,11 +99,11 @@
                         <i class="bi bi-shield-check text-primary" style="font-size:1.25rem;"></i>
                         <span class="font-data small text-secondary"
                               style="font-size: 9px; font-weight: 700; text-transform: uppercase;">
-                            IDENTITY
-                            MATCH
+                            UDYAM
+                            VERIFIED
                         </span>
                     </div>
-                    <div class="h4 font-heading text-dark mb-0 fw-bold">99.8%</div>
+                    <div class="h4 font-heading text-dark mb-0 fw-bold">Identity ✓</div>
                 </div>
 
                 <!-- Floating chart card -->
@@ -130,8 +113,8 @@
                         <i class="bi bi-graph-up-arrow text-secondary" style="font-size:1.25rem;"></i>
                         <span class="font-data small text-secondary"
                               style="font-size: 9px; font-weight: 700; text-transform: uppercase;">
-                            LIQUIDITY
-                            TREND
+                            12-MONTH
+                            SCORE TREND
                         </span>
                     </div>
                     <div class="d-flex align-items-end gap-1.5" style="height: 60px;">
@@ -146,39 +129,149 @@
         </div>
     </section>
 
-    <!-- Features Bento Section -->
-    <section class="mx-auto px-margin-desktop py-5" style="max-width: 1440px;">
+    <!-- Six Dimensions Section -->
+    <section id="score-dimensions" class="mx-auto px-margin-desktop py-5" style="max-width: 1440px;">
         <div class="text-center mb-5">
-            <h3 class="h2 text-primary font-heading fw-bold mb-2">Intelligence for the modern lender</h3>
+            <h3 class="h2 text-primary font-heading fw-bold mb-2">One score, six dimensions</h3>
             <p class="text-secondary mx-auto" style="max-width: 600px;">
-                Our platform combines traditional banking
-                rigor with advanced AI to unlock credit opportunities for MSMEs.
+                Every Financial Health Score (0–1000) is a weighted blend of six sub-scores, each traceable
+                to the exact data it was computed from — with plain-language reasons, not black-box numbers.
             </p>
         </div>
 
         <div class="row g-4">
-            <!-- Alternative Data Synthesis (Wide Bento Card) -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Revenue Vitality</h4>
+                        <span class="font-data small fw-bold text-secondary">25%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 25%;"
+                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Real, growing, consistent revenue — GST turnover trends and ITR income
+                        stability, cross-checked against each other.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Cash Flow Health</h4>
+                        <span class="font-data small fw-bold text-secondary">20%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 20%;"
+                             aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Cash cushion and inflow predictability from consented Account Aggregator bank
+                        statements — balances, volatility, bounce rates.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Transaction Trustworthiness</h4>
+                        <span class="font-data small fw-bold text-secondary">15%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 15%;"
+                             aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Quality of the customer base from UPI patterns — counterparty diversity,
+                        repeat payers, transaction velocity.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Compliance Quotient</h4>
+                        <span class="font-data small fw-bold text-secondary">15%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 15%;"
+                             aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Regulatory discipline — GST and ITR filing regularity plus EPFO contribution
+                        consistency, a strong proxy for repayment discipline.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Business Stability</h4>
+                        <span class="font-data small fw-bold text-secondary">15%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 15%;"
+                             aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        A durable, ongoing concern — business vintage from Udyam, employee headcount
+                        trends from EPFO, and sector risk.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Debt Serviceability</h4>
+                        <span class="font-data small fw-bold text-secondary">10%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 10%;"
+                             aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Existing obligations vs. capacity — EMI-to-inflow ratio and projected DSCR.
+                        No credit history? Scored neutrally, never penalized.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Bento Section -->
+    <section class="mx-auto px-margin-desktop py-5" style="max-width: 1440px;">
+        <div class="text-center mb-5">
+            <h3 class="h2 text-primary font-heading fw-bold mb-2">Built for New-to-Credit India</h3>
+            <p class="text-secondary mx-auto" style="max-width: 600px;">
+                No credit bureau file needed. FinRiskLens AI reads the digital exhaust every registered
+                MSME already produces — with the owner's explicit consent at every step.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Alternate Data, Consent-First (Wide Bento Card) -->
             <div class="col-lg-8">
                 <div class="card-premium p-4 p-md-5 h-100 d-flex flex-column flex-md-row align-items-center gap-4">
                     <div class="flex-grow-1 space-y-3" style="flex: 1;">
                         <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center border border-primary border-opacity-25 mb-3"
                              style="width: 3.5rem; height: 3.5rem;">
-                            <span class="material-symbols-outlined fs-2">hub</span>
+                            <i class="bi bi-diagram-3 fs-2"></i>
                         </div>
-                        <h4 class="h5 text-primary font-heading fw-bold">Alternative Data Synthesis</h4>
+                        <h4 class="h5 text-primary font-heading fw-bold">Alternate Data, Consent-First</h4>
                         <p class="small text-secondary leading-relaxed mb-4">
-                            We look beyond credit bureaus. Our AI
-                            synthesizes cash flow, supply chain data, and digital footprints to create a holistic
-                            MSME risk profile.
+                            Five verified sources instead of a bureau file: GST returns, ITR filings,
+                            Account Aggregator bank statements, UPI transaction patterns, and EPFO
+                            payroll — anchored on Udyam-verified identity.
                         </p>
                         <ul class="list-unstyled space-y-2">
                             <li class="d-flex align-items-center gap-2 small text-dark font-data fw-semibold">
-                                <span class="material-symbols-outlined text-secondary fs-5">check_circle</span>
-                                Real-time Transaction Analysis
+                                <i class="bi bi-check-circle-fill text-secondary fs-5"></i>
+                                Udyam-first onboarding — just your registration number
                             </li>
                             <li class="d-flex align-items-center gap-2 small text-dark font-data fw-semibold">
-                                <span class="material-symbols-outlined text-secondary fs-5">check_circle</span>
-                                Supplier Sentiment Mapping
+                                <i class="bi bi-check-circle-fill text-secondary fs-5"></i>
+                                AA-framework consent for 6–12 months of bank data
                             </li>
                         </ul>
                     </div>
@@ -191,25 +284,26 @@
                 </div>
             </div>
 
-            <!-- Instant Decisioning -->
+            <!-- Scores in Seconds -->
             <div class="col-lg-4">
                 <div class="card-premium p-4 p-md-5 h-100 d-flex flex-column justify-content-between">
                     <div class="space-y-3">
                         <div class="bg-secondary bg-opacity-10 text-secondary rounded-3 d-flex align-items-center justify-content-center border border-secondary border-opacity-25 mb-3"
                              style="width: 3.5rem; height: 3.5rem;">
-                            <span class="material-symbols-outlined fs-2">speed</span>
+                            <i class="bi bi-speedometer2 fs-2"></i>
                         </div>
-                        <h4 class="h5 text-primary font-heading fw-bold">Instant Decisioning</h4>
+                        <h4 class="h5 text-primary font-heading fw-bold">Scores in Seconds</h4>
                         <p class="small text-secondary leading-relaxed mb-0">
-                            Reduce turnaround time from days to
-                            seconds with automated underwriting workflows.
+                            Once data is collected, the ML scoring pipeline computes all six
+                            dimensions, explanations, and product recommendations in under
+                            five seconds.
                         </p>
                     </div>
 
                     <div class="pt-4 border-top border-light mt-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="font-data small uppercase text-secondary">Decision Speed</span>
-                            <span class="font-data small fw-bold text-secondary">+400%</span>
+                            <span class="font-data small uppercase text-secondary">Score Pipeline</span>
+                            <span class="font-data small fw-bold text-secondary">&lt; 5 sec</span>
                         </div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar bg-secondary" role="progressbar" style="width: 80%;"
@@ -219,31 +313,31 @@
                 </div>
             </div>
 
-            <!-- Regulatory Compliance -->
+            <!-- Explainable & Fair -->
             <div class="col-lg-4">
                 <div class="card-premium p-4 p-md-5 h-100 d-flex flex-column justify-content-between">
                     <div class="space-y-3">
                         <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center border border-success border-opacity-25 mb-3"
                              style="width: 3.5rem; height: 3.5rem;">
-                            <span class="material-symbols-outlined fs-2"
-                                  style="color: var(--success-custom);">policy</span>
+                            <i class="bi bi-clipboard2-check fs-2" style="color: var(--success-custom);"></i>
                         </div>
-                        <h4 class="h5 text-primary font-heading fw-bold">Regulatory Compliance</h4>
+                        <h4 class="h5 text-primary font-heading fw-bold">Explainable &amp; Fair</h4>
                         <p class="small text-secondary leading-relaxed mb-4">
-                            Built-in KYC/AML checks and explainable
-                            AI (XAI) models that meet local financial regulations.
+                            Every sub-score comes with plain-language reasons — e.g. "3 of last 6
+                            GSTR-3B filings were late". Declining bank-data consent never looks like
+                            bad credit: the score adapts, and says so.
                         </p>
                     </div>
                     <div class="d-flex gap-2">
                         <span class="badge bg-light text-dark font-data uppercase p-2 border border-secondary border-opacity-10"
-                              style="font-size: 9px;">GDPR READY</span>
+                              style="font-size: 9px;">AA FRAMEWORK</span>
                         <span class="badge bg-light text-dark font-data uppercase p-2 border border-secondary border-opacity-10"
-                              style="font-size: 9px;">BASEL III</span>
+                              style="font-size: 9px;">EXPLAINABLE AI</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Scale with confidence (Wide Bento Card) -->
+            <!-- Lending ecosystem (Wide Bento Card) -->
             <div class="col-lg-8">
                 <div class="card-premium p-4 p-md-5 h-100 bg-primary text-white d-flex flex-column flex-md-row align-items-center gap-4 position-relative overflow-hidden"
                      style="border: none;">
@@ -253,17 +347,17 @@
 
                     <div class="flex-grow-1 space-y-3 relative-z" style="flex: 1; z-index: 2;">
                         <h4 class="h3 text-white font-heading fw-bold leading-tight">
-                            Scale your MSME portfolio with
-                            confidence
+                            One score, the whole lending ecosystem
                         </h4>
                         <p class="small text-white text-opacity-75 leading-relaxed mb-4">
-                            Our partners see an average
-                            12% reduction in non-performing loans within the first 6 months of deployment.
+                            Your Financial Health Card flows straight into IDBI's Loan Origination
+                            System and is published to the ULI/OCEN network — so any participating
+                            lender can act on it. Scores map to real products: working capital,
+                            CGTMSE-backed loans, and MUDRA schemes.
                         </p>
                         <button class="btn btn-light text-primary px-4 py-2.5 rounded-3 font-heading fw-bold"
-                                onclick="alert('Downloading Whitepaper: FinRiskLens AI Credit Modeling Guide.pdf');">
-                            Download
-                            Whitepaper
+                                onclick="window.location.href='/Onboarding/CustOnboarding';">
+                            Get your score
                         </button>
                     </div>
                     <div class="rounded-3 overflow-hidden shadow-lg border border-white border-opacity-10"
@@ -287,20 +381,20 @@
                  style="width: 250px; height: 250px; filter: blur(60px);"></div>
 
             <div class="position-relative z-10 space-y-4 py-4">
-                <h3 class="display-5 text-primary font-heading fw-bold mb-3">Ready to redefine MSME lending?</h3>
+                <h3 class="display-5 text-primary font-heading fw-bold mb-3">Know your business's financial health</h3>
                 <p class="text-secondary lead mx-auto mb-4" style="max-width: 600px;">
-                    Join the institutions using
-                    FinRiskLens AI to drive financial inclusion and precision risk management.
+                    Enter your Udyam Registration Number, verify by email OTP, and get a Financial
+                    Health Card your lender can trust — in minutes, not weeks.
                 </p>
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center align-items-center">
                     <button class="btn btn-primary-maroon px-5 py-3 rounded-3 shadow font-heading"
-                            onclick="window.location.href='CustomerOnboarding.html';">
+                            onclick="window.location.href='/Onboarding/CustOnboarding';">
                         Start Onboarding Now
                     </button>
                     <a class="font-data text-primary fw-semibold d-flex align-items-center gap-1 text-decoration-none hover-underline"
-                       href="#">
-                        Talk to an advisor
-                        <span class="material-symbols-outlined">chevron_right</span>
+                       href="#score-dimensions">
+                        See how the score works
+                        <i class="bi bi-chevron-right"></i>
                     </a>
                 </div>
             </div>
