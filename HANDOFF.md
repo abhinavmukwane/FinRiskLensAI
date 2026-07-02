@@ -37,6 +37,28 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
     for `location_of_plant_details` and `nic_code` arrays.
 - Entities in `Core/Models/{Admin,Onboarding}`, configs in `Data/Configurations/`,
   all derive from `AuditableEntity`.
+- **Migration commands** (run from the solution root, `F:\FinRiskLensAI_Git`; needs
+  the `dotnet-ef` global tool — `dotnet tool install --global dotnet-ef`):
+
+  ```powershell
+  # add a new migration (SQL Server is the active provider)
+  dotnet ef migrations add <MigrationName> --project FinRiskLensAI.Data --startup-project FinRiskLensAI --output-dir Migrations/SqlServer
+
+  # apply pending migrations to the database in appsettings/factory
+  dotnet ef database update --project FinRiskLensAI.Data --startup-project FinRiskLensAI
+
+  # check which migrations are applied vs pending
+  dotnet ef migrations list --project FinRiskLensAI.Data --startup-project FinRiskLensAI
+
+  # undo the last (unapplied) migration
+  dotnet ef migrations remove --project FinRiskLensAI.Data --startup-project FinRiskLensAI
+  ```
+
+  `--output-dir Migrations/SqlServer` matters — keeps SQL Server migrations separate
+  from the (unused) PostgreSQL folder. Design-time commands use the connection string
+  in `ApplicationDbContextFactory` (Data project), runtime uses `appsettings.json` —
+  both currently point at the same remote server; keep them in sync when it changes.
+  Note: `database update` runs against the REMOTE shared DB — teammates share it.
 
 ### 2. ML.NET scoring engine — `FinRiskLensAI.ML` project (see Doc/08_ML_ENGINE.md)
 - Feature extractors (Newtonsoft `JObject`, tolerant probing) for Udyam, GST
