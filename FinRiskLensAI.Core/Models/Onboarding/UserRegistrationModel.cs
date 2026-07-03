@@ -20,5 +20,8 @@ namespace FinRiskLensAI.Core.Models.Onboarding
         public string? GstinNumber { get; set; }
 
         public string? PanNumber { get; set; }
+        public int? MsmeEnquiryID { get; set; }
+
+        public virtual MsmeEnquiry? MsmeEnquiry { get; set; }
     }
 }

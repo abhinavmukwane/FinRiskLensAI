@@ -31,6 +31,13 @@ namespace FinRiskLensAI.Data.Configurations
             builder.Property(x => x.PanNumber)
                    .HasMaxLength(100);
 
+            builder.Property(x => x.MsmeEnquiryID);
+
+            builder.HasOne(x => x.MsmeEnquiry)
+                   .WithMany()
+                   .HasForeignKey(x => x.MsmeEnquiryID)
+                   .OnDelete(DeleteBehavior.Restrict);
+
             // Optional indexes for faster lookups
             builder.HasIndex(x => x.UdyamNumber);
 
