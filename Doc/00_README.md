@@ -43,8 +43,11 @@ handing this to Claude Code rather than writing it all by hand.
   auto-register via `DataModule`. New services end in `Service` and
   implement an interface — they auto-register via `ServicesModule`. Don't
   hand-register anything that fits this convention.
-- All entities derive from `BaseEntity` or `AuditableEntity`. Don't add
-  ad-hoc `Id`/timestamp fields.
+- ~~All entities derive from `BaseEntity` or `AuditableEntity`.~~
+  **Changed 2026-07-03:** `BaseEntity` was removed. Entities derive from
+  `AuditableEntity` (audit timestamps/actors only) and each declares its own
+  **int identity primary key named `<EntityName>ID`** (e.g. `MsmeEnquiryID`) —
+  no Guid keys, no shared `Id`, no `IsDeleted`/soft-delete.
 - Money and score fields are `decimal`, relying on the existing
   `precision(18,4)` convention — don't override precision per-field
   without a reason.

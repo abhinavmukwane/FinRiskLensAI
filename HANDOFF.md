@@ -71,17 +71,28 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   Note: `database update` runs against the REMOTE shared DB — teammates share it.
 
 ### 2. ML.NET scoring engine — `FinRiskLensAI.ML` project (see Doc/08_ML_ENGINE.md)
-- Feature extractors (Newtonsoft `JObject`, tolerant probing) for Udyam, GST
-  (taxpayer + monthly GSTR-3B + GSTR-1 summary/B2B), ITR (handles ITR-1 and ITR-3
-  shapes across up to 3 years), AA (dedupes txns by `txnId` — same txns appear under
-  multiple FIPs in real responses).
+- Feature extractors (Newtonsoft `JObject`, tolerant probing) for Udyam, GST, ITR
+  (handles ITR-1 and ITR-3 shapes across up to 3 years), AA (dedupes txns by
+  `txnId` — same txns appear under multiple FIPs in real responses).
+- GST covers six return types: taxpayer profile, monthly GSTR-3B (turnover),
+  GSTR-1 summary (B2B share/counterparties), GSTR-1 B2B/e-invoices, GSTR-1 CDNR
+  (credit-note revenue reversals), GSTR-1 HSN (product-mix diversity), GSTR-2A
+  (purchase-to-sales trade cycle). **Real GST API responses are wrapped in a
+  `response.message.data` envelope** — `GstFeatureExtractor.Unwrap()` handles
+  wrapped and bare payloads.
 - Six dimensions with doc weights (25/20/15/15/15/10), missing-source weight
   redistribution, NTC neutral default on Debt Serviceability (never zero).
-- ML.NET: LightGBM calibration (lazy-trained on 3000 synthetic profiles; final score
-  = 0.6 heuristic + 0.4 model), per-instance permutation importance → fixed template
-  explanations, SSA cashflow trend, RandomizedPca 3-way income anomaly check
-  (GST vs ITR vs bank credits — data-integrity signal, separate from score).
-- Verified with real sample payloads: **748/1000, band Good**.
+  Missing sources feed neutral values into the ML vector too, not zeros.
+- ML.NET: LightGBM calibration on a 15-feature vector (lazy-trained on 3000
+  synthetic profiles; final score = 0.6 heuristic + 0.4 model), per-instance
+  permutation importance → fixed template explanations, SSA cashflow trend,
+  RandomizedPca 3-way income anomaly check (GST vs ITR vs bank credits —
+  data-integrity signal, separate from score).
+- Verified twice: demo payloads **748/1000 Good**; real 6-month GST data for
+  UDYAM-MH-20-0067394 (UCN Fibrenet) **719/1000 Good** (₹2.99 cr/mo turnover,
+  Compliance 150/150). Known gap: that folder's aa.json is demo data mismatched
+  to the business; anomaly score 0.426 sat just under the 0.5 flag threshold —
+  tune thresholds when real paired AA data exists.
 
 ### 3. Two API entry paths
 - `POST /api/scoring/analyze` (`ScoringController`) — payloads in the body. Kept
@@ -91,8 +102,10 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   `POST /analyze?force=` (409 + missing list until manifest satisfied; force analyzes
   partial data), `GET /result`. Azure Blob container `msme-data`, folder per UAN,
   file conventions in `MsmeDataFiles` (`udyam.json`, `itr.json`, `aa.json`,
-  `gst_taxpayer.json`, `gstr3b_MMyyyy.json`, `gstr1_summary_MMyyyy.json`,
-  `gstr1_b2b_MMyyyy.json`, `epfo.json`, `_manifest.json`, `result.json`).
+  `gst_taxpayer.json`, `epfo.json`, monthly GST files `gstr3b_MMyyyy.json`,
+  `gstr1_summary_MMyyyy.json`, `gstr1_b2b_Invoice_MMyyyy.json`,
+  `gstr1_cdnr_MMyyyy.json`, `gstr1_hsn_summary_MMyyyy.json`,
+  `gstr2a_b2b_MMyyyy.json`, plus `_manifest.json` and `result.json`).
   Engine writes `result.json` back; manifest lifecycle Collecting→Processing→Completed/Failed.
 - Azure Storage connection string in `appsettings.json` under `AzureBlob:*`
   (account `tflgspblobstorage`). Verified end-to-end against the real account;
@@ -116,9 +129,11 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   would go elsewhere (e.g. `Doc/sample-payloads/`).
 - Credentials (SQL `sa`, Azure storage key, JWT key) live in `appsettings.json` —
   accepted hackathon trade-off; rotate/move to a secret store before anything public.
-- Follow repo ground rules in `Doc/00_README.md`: strict layering, `*Repository`/
-  `*Service` naming for Autofac auto-registration, entities derive from
-  `BaseEntity`/`AuditableEntity`, decimals use the 18,4 convention.
+- Follow repo ground rules in `Doc/00_README.md` (strict layering, `*Repository`/
+  `*Service` naming for Autofac auto-registration, decimals 18,4) — EXCEPT the
+  entity-base rule, which changed on 2026-07-03: entities derive from
+  `AuditableEntity` (audit fields only) and declare their own int identity PK
+  named `<EntityName>ID`. `BaseEntity` no longer exists.
 
 ## Gotchas discovered (save yourself the debugging)
 
@@ -131,6 +146,11 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   (startup project), tool version 10.x works against EF Core 8.
 - First call to a scoring endpoint pays ~1–2s of lazy LightGBM/PCA training; all
   later calls are instant.
+- Real GST API responses are enveloped (`response.message.data`) — never parse
+  GST payloads from the root without going through `GstFeatureExtractor.Unwrap()`.
+- Missing data sources must feed NEUTRAL values into the ML feature vector, not
+  zeros — a zero reads as worst-case behavior (this bit us: "no ITR" produced a
+  bogus "ITR filed late" explanation until fixed).
 
 ## Likely next steps (not started)
 

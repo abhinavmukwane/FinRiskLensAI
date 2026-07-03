@@ -128,13 +128,22 @@ during analysis only one file is in memory at a time.
 
 ```
 Container: msme-data                     (config: AzureBlob:ConnectionString / :Container)
-└── UDYAM-MH-20-0033382/                 ← folder per MSME, named by UAN
+└── UDYAM-MH-20-0067394/                 ← folder per MSME, named by UAN
     ├── _manifest.json                   ← control file: what to expect + status
     ├── udyam.json  itr.json  aa.json  gst_taxpayer.json  epfo.json
-    ├── gstr3b_012026.json … gstr3b_122025.json          (one per month, MMyyyy)
-    ├── gstr1_summary_MMyyyy.json  gstr1_b2b_MMyyyy.json
+    ├── gstr3b_MMyyyy.json               ← monthly outward supplies (turnover)
+    ├── gstr1_summary_MMyyyy.json        ← section totals (B2B share, counterparties)
+    ├── gstr1_b2b_Invoice_MMyyyy.json    ← B2B / e-invoices (counterparty diversity)
+    ├── gstr1_cdnr_MMyyyy.json           ← credit/debit notes (revenue reversals)
+    ├── gstr1_hsn_summary_MMyyyy.json    ← HSN summaries (product-mix diversity)
+    ├── gstr2a_b2b_MMyyyy.json           ← inward purchases (trade-cycle sanity)
     └── result.json                      ← written by the engine after analysis
 ```
+
+> **Envelope note:** real GST API responses arrive wrapped as
+> `{ "response_code": 1, "response": { "message": { "data": { …payload… } } } }`.
+> `GstFeatureExtractor.Unwrap()` handles both wrapped and bare payloads, so
+> fixtures and real pulls work interchangeably.
 
 Endpoints (all under `api/msme-data/{uan}`, see `MsmeDataController`):
 
@@ -233,9 +242,17 @@ Key engineered features:
 | Source | Features |
 |--------|----------|
 | Udyam | business vintage (months), enterprise class (Micro/Small/Medium), plant + NIC footprint |
-| GST | monthly turnover series (GSTR-3B `osup_det.txval`), turnover trend slope, filing regularity, B2B share, counterparty count, registration status |
+| GST — GSTR-3B | monthly turnover series (`osup_det.txval`), turnover trend slope, filing regularity |
+| GST — GSTR-1 summary / B2B invoices | B2B share, counterparty count, registration status (taxpayer profile) |
+| GST — GSTR-1 CDNR | credit/debit-note value vs turnover (revenue-reversal ratio → Revenue Vitality penalty) |
+| GST — GSTR-1 HSN | distinct HSN/SAC codes sold (product-mix diversity → Business Stability footprint) |
+| GST — GSTR-2A | inward purchase value, purchase-to-sales ratio (healthy trade-cycle band → Business Stability) |
 | ITR | per-year income series, income trend slope, filed-on-time ratio, years filed |
 | AA | monthly credit/debit series, inflow volatility (CV), days-cash-on-hand, bounce count, UPI share, counterparty diversity, repeat-payer ratio, EMI-to-inflow ratio |
+
+Missing sources feed **neutral values** into the model vector, never zeros — a
+missing ITR must not read as "filed late" (same fairness rule as the dimension
+weight redistribution).
 
 ### Stage 2 — Six dimensions (weights from the scoring doc)
 
@@ -285,7 +302,8 @@ if (!f.HasBureau && !f.HasAa)
 
 ### Stage 4 — LightGBM calibration (ML.NET)
 
-A LightGBM regressor maps the 12-feature vector to a 0–1000 score. It trains
+A LightGBM regressor maps the 15-feature vector (see
+`ScoreFeatureVector.FeatureNames`) to a 0–1000 score. It trains
 **lazily, once per process**, on 3,000 synthetic profiles spanning the borrower
 spectrum (the doc's synthetic-data strategy until the IDBI sandbox opens July 22):
 
@@ -417,10 +435,23 @@ Invoke-RestMethod -Uri "$api/analyze" -Method Post      # 409 + missing list if 
 Invoke-RestMethod -Uri "$api/result"                    # persisted result, no recompute
 ```
 
-Verified end-to-end against the real storage account: early `/analyze` was refused
-with `Missing: gstr3b_* (0 of 12 months uploaded)`; after all 16 files landed the
-analysis returned **748/1000, band Good**, `result.json` was persisted, and the
-manifest finished as `Completed`.
+**From Postman:** set the method to `POST`, URL
+`http://localhost:5199/api/msme-data/{uan}/analyze`, body **none** (everything
+comes from the blob folder), Send. Incomplete folders return `409` with the
+missing-file list; `GET .../result` returns the saved result without recomputing.
+
+Verified end-to-end against the real storage account twice:
+- Demo folder (`UDYAM-MH-20-0033382`, synthetic GSTR-3B): early `/analyze` was
+  refused with `Missing: gstr3b_* (0 of 12 months uploaded)`; after all 16 files
+  landed it returned **748/1000, band Good**.
+- **Real GST data** (`UDYAM-MH-20-0067394`, UCN Fibrenet — 6 months of actual
+  GSTR-3B/1/2A/CDNR/HSN pulls, no ITR): **719/1000, band Good** — ₹2.99 cr/month
+  average turnover extracted through the response envelope, Compliance Quotient
+  150/150, ITR excluded cleanly via neutral defaults. Caveat: the folder's
+  `aa.json` was the demo AA file (₹27k/month credits vs ₹2.99 cr GST turnover);
+  the three-way anomaly check scored 0.426 — just under the 0.5 flag threshold —
+  which is the concrete case to tune thresholds against once real paired AA
+  data exists.
 
 ### Direct endpoint (small payloads)
 

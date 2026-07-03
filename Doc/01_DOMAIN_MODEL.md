@@ -15,6 +15,13 @@
 > the in-memory `RiskAnalysisResult` in `FinRiskLensAI.ML` (see `08_ML_ENGINE.md`)
 > plus `result.json` in the MSME's blob folder — mapping it onto these entities
 > is a pending step.
+>
+> **Entity conventions changed (2026-07-03):** this doc's references to
+> `BaseEntity` are historical. Entities derive from `AuditableEntity` (audit
+> fields only) and declare their own **int identity PK named `<EntityName>ID`**
+> (e.g. `MsmeEnquiryID`); Guid keys and `IsDeleted` were removed. When building
+> the entities below, follow the new convention (`MsmeID`, `ConsentRecordID`,
+> `ScoreComputationID`, …).
 
 This describes the core entities the rest of the system is built around.
 All entities live in `FinRiskLensAI.Core/Models` and derive from
