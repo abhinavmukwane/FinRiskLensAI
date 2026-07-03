@@ -10,7 +10,8 @@ namespace FinRiskLensAI.Data.Configurations
         {
             builder.ToTable("ADM_Login");
 
-            builder.HasKey(x => x.Id);
+            builder.HasKey(x => x.AdmLoginID);
+            builder.Property(x => x.AdmLoginID).UseIdentityColumn();
 
             builder.Property(x => x.Username).IsRequired().HasMaxLength(100);
             builder.Property(x => x.Email).IsRequired().HasMaxLength(256);
@@ -26,13 +27,12 @@ namespace FinRiskLensAI.Data.Configurations
             // Fixed values keep the generated migration deterministic.
             builder.HasData(new
             {
-                Id = new Guid("a1b2c3d4-0000-4000-8000-000000000001"),
+                AdmLoginID = 1,
                 Username = "admin",
                 Email = "admin@finrisklens.ai",
                 PasswordHash = "AQAAAAIAAYagAAAAECqQCLDS1XMpIauPSCY8GXjyewL5WfquYrxarGU82tSJ8a+XzMzhzkdWS+Dfu1hVcA==",
                 Role = "SuperAdmin",
                 IsActive = true,
-                IsDeleted = false,
                 CreatedAt = new DateTime(2026, 7, 1, 0, 0, 0, DateTimeKind.Utc),
                 UpdatedAt = new DateTime(2026, 7, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "seed"

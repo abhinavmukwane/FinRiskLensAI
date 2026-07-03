@@ -10,7 +10,8 @@ namespace FinRiskLensAI.Data.Configurations
         {
             builder.ToTable("t_MsmeEnquiry");
 
-            builder.HasKey(x => x.Id);
+            builder.HasKey(x => x.MsmeEnquiryID);
+            builder.Property(x => x.MsmeEnquiryID).UseIdentityColumn();
 
             builder.Property(x => x.ClientId).IsRequired().HasMaxLength(100);
             builder.Property(x => x.Uan).IsRequired().HasMaxLength(30);
@@ -44,12 +45,12 @@ namespace FinRiskLensAI.Data.Configurations
 
             builder.HasMany(x => x.Locations)
                    .WithOne(x => x.MsmeEnquiry)
-                   .HasForeignKey(x => x.MsmeEnquiryId)
+                   .HasForeignKey(x => x.MsmeEnquiryID)
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(x => x.NicCodes)
                    .WithOne(x => x.MsmeEnquiry)
-                   .HasForeignKey(x => x.MsmeEnquiryId)
+                   .HasForeignKey(x => x.MsmeEnquiryID)
                    .OnDelete(DeleteBehavior.Cascade);
         }
     }

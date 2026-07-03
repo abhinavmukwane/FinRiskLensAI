@@ -10,7 +10,8 @@ namespace FinRiskLensAI.Data.Configurations
         {
             builder.ToTable("t_MsmeNicCodes");
 
-            builder.HasKey(x => x.Id);
+            builder.HasKey(x => x.MsmeNicCodeID);
+            builder.Property(x => x.MsmeNicCodeID).UseIdentityColumn();
 
             // Values arrive as "code - description" strings, e.g.
             // "62011 - Writing, modifying, testing of computer program..."
@@ -21,7 +22,7 @@ namespace FinRiskLensAI.Data.Configurations
             builder.Property(x => x.CreatedBy).HasMaxLength(100);
             builder.Property(x => x.UpdatedBy).HasMaxLength(100);
 
-            builder.HasIndex(x => x.MsmeEnquiryId);
+            builder.HasIndex(x => x.MsmeEnquiryID);
         }
     }
 }

@@ -16,10 +16,20 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 ## Current state — everything below is BUILT, TESTED, and PUSHED to main
 
 ### 1. Database (SQL Server, remote)
-- Connection: remote SQL Server at `4.247.173.231`, DB `FinRiskLensAI`, SQL auth —
-  full string in `FinRiskLensAI/appsettings.json` (`Database:ConnectionStrings:SqlServer`).
-  `TrustServerCertificate=True` is required (self-signed cert). PostgreSQL branch kept
-  in code but unused.
+- Connection: remote SQL Server at `103.21.58.192` (moved from 4.247.173.231 on
+  2026-07-03), DB `FinRiskLensAI`, SQL auth (login `FinRiskLensAI`) — full string in
+  `FinRiskLensAI/appsettings.json` (`Database:ConnectionStrings:SqlServer`) and
+  mirrored in `ApplicationDbContextFactory`. `TrustServerCertificate=True` required.
+  Tables land in the login's default schema `FinRiskLensAI`, not `dbo`. PostgreSQL
+  branch kept in code but unused.
+- **PK convention (2026-07-03): int identity, named `<EntityName>ID`**
+  (`AdmLoginID`, `MsmeEnquiryID`, …) — NOT Guid, NOT a shared base `Id`.
+  `BaseEntity` was deleted; `AuditableEntity` has audit fields only; no
+  `IsDeleted`/soft-delete. `IRepository<T>.GetByIdAsync` takes `int`. Migrations
+  were re-baselined to a single `InitialCreate` under this convention.
+- ⚠ `m_StaticResponces` table exists in the DB but its entity/config/migration code
+  was never pushed to git (created directly by a teammate). It must be re-added as
+  an entity with `StaticResponcesID` (int identity) under the new convention.
 - DbContext registered via `DataServiceCollectionExtensions.AddAppDbContext()` (in
   Data project), called from `Program.cs`. Generic `IRepository<T>` →
   `RepositoryBase<T>` registered in `DataModule`.

@@ -6,14 +6,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace FinRiskLensAI.Data.Migrations.SqlServer
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260702054052_Add_MsmeEnquiryTables")]
-    partial class Add_MsmeEnquiryTables
+    [Migration("20260703091528_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,9 +28,12 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
 
             modelBuilder.Entity("FinRiskLensAI.Core.Models.Admin.AdmLogin", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("AdmLoginID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AdmLoginID"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -44,9 +48,6 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastLoginAt")
@@ -74,7 +75,7 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("Id");
+                    b.HasKey("AdmLoginID");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -87,12 +88,11 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a1b2c3d4-0000-4000-8000-000000000001"),
+                            AdmLoginID = 1,
                             CreatedAt = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "seed",
                             Email = "admin@finrisklens.ai",
                             IsActive = true,
-                            IsDeleted = false,
                             PasswordHash = "AQAAAAIAAYagAAAAECqQCLDS1XMpIauPSCY8GXjyewL5WfquYrxarGU82tSJ8a+XzMzhzkdWS+Dfu1hVcA==",
                             Role = "SuperAdmin",
                             UpdatedAt = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
@@ -102,9 +102,12 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
 
             modelBuilder.Entity("FinRiskLensAI.Core.Models.Onboarding.MsmeEnquiry", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("MsmeEnquiryID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MsmeEnquiryID"));
 
                     b.Property<DateTime?>("AppliedDate")
                         .HasColumnType("datetime2");
@@ -154,9 +157,6 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                     b.Property<string>("Gender")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<string>("MajorActivity")
                         .HasMaxLength(100)
@@ -222,7 +222,7 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.HasKey("Id");
+                    b.HasKey("MsmeEnquiryID");
 
                     b.HasIndex("Uan")
                         .IsUnique();
@@ -232,9 +232,12 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
 
             modelBuilder.Entity("FinRiskLensAI.Core.Models.Onboarding.MsmeLocation", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("MsmeLocationID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MsmeLocationID"));
 
                     b.Property<string>("Building")
                         .HasMaxLength(200)
@@ -255,15 +258,12 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Line1")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<Guid>("MsmeEnquiryId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("MsmeEnquiryID")
+                        .HasColumnType("int");
 
                     b.Property<string>("Pin")
                         .HasMaxLength(10)
@@ -296,18 +296,21 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.HasKey("Id");
+                    b.HasKey("MsmeLocationID");
 
-                    b.HasIndex("MsmeEnquiryId");
+                    b.HasIndex("MsmeEnquiryID");
 
                     b.ToTable("t_MsmeLocations", (string)null);
                 });
 
             modelBuilder.Entity("FinRiskLensAI.Core.Models.Onboarding.MsmeNicCode", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("MsmeNicCodeID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MsmeNicCodeID"));
 
                     b.Property<string>("ActivityType")
                         .HasMaxLength(50)
@@ -323,11 +326,8 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("MsmeEnquiryId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("MsmeEnquiryID")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nic2Digit")
                         .HasMaxLength(200)
@@ -348,9 +348,9 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("Id");
+                    b.HasKey("MsmeNicCodeID");
 
-                    b.HasIndex("MsmeEnquiryId");
+                    b.HasIndex("MsmeEnquiryID");
 
                     b.ToTable("t_MsmeNicCodes", (string)null);
                 });
@@ -359,7 +359,7 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                 {
                     b.HasOne("FinRiskLensAI.Core.Models.Onboarding.MsmeEnquiry", "MsmeEnquiry")
                         .WithMany("Locations")
-                        .HasForeignKey("MsmeEnquiryId")
+                        .HasForeignKey("MsmeEnquiryID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -370,7 +370,7 @@ namespace FinRiskLensAI.Data.Migrations.SqlServer
                 {
                     b.HasOne("FinRiskLensAI.Core.Models.Onboarding.MsmeEnquiry", "MsmeEnquiry")
                         .WithMany("NicCodes")
-                        .HasForeignKey("MsmeEnquiryId")
+                        .HasForeignKey("MsmeEnquiryID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

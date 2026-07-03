@@ -5,7 +5,9 @@ namespace FinRiskLensAI.Core.Models.Onboarding
     /// <summary>One row per entry in the Udyam response's nic_code array.</summary>
     public class MsmeNicCode : AuditableEntity
     {
-        public Guid MsmeEnquiryId { get; set; }
+        public int MsmeNicCodeID { get; set; }
+
+        public int MsmeEnquiryID { get; set; }
         public MsmeEnquiry? MsmeEnquiry { get; set; }
 
         public string? Nic2Digit { get; set; }

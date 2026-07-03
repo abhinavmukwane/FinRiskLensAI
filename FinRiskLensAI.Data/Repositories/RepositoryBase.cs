@@ -1,20 +1,19 @@
-﻿using FinRiskLensAI.Core.Interfaces;
-using FinRiskLensAI.Core.Models.Common;
+using FinRiskLensAI.Core.Interfaces;
 using FinRiskLensAI.Data.DbContextEDMX;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace FinRiskLensAI.Data.Repositories
 {
-    public class RepositoryBase<T> : IRepository<T> where T : BaseEntity
+    public class RepositoryBase<T> : IRepository<T> where T : class
     {
         protected readonly ApplicationDbContext Db;
         protected DbSet<T> Set => Db.Set<T>();
 
         public RepositoryBase(ApplicationDbContext db) => Db = db;
 
-        public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default)
-            => await Set.FirstOrDefaultAsync(e => e.Id == id, ct);
+        public virtual async Task<T?> GetByIdAsync(int id, CancellationToken ct = default)
+            => await Set.FindAsync(new object[] { id }, ct);
 
         public virtual async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken ct = default)
             => await Set.ToListAsync(ct);

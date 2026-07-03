@@ -9,6 +9,8 @@ namespace FinRiskLensAI.Core.Models.Onboarding
     /// </summary>
     public class MsmeEnquiry : AuditableEntity
     {
+        public int MsmeEnquiryID { get; set; }
+
         public string ClientId { get; set; } = string.Empty;
 
         /// <summary>Udyam Registration Number, e.g. UDYAM-MH-20-0033382 — the cache lookup key.</summary>

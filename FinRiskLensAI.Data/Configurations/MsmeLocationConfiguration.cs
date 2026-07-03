@@ -10,7 +10,8 @@ namespace FinRiskLensAI.Data.Configurations
         {
             builder.ToTable("t_MsmeLocations");
 
-            builder.HasKey(x => x.Id);
+            builder.HasKey(x => x.MsmeLocationID);
+            builder.Property(x => x.MsmeLocationID).UseIdentityColumn();
 
             builder.Property(x => x.UnitName).HasMaxLength(300);
             builder.Property(x => x.Line1).HasMaxLength(200);
@@ -25,7 +26,7 @@ namespace FinRiskLensAI.Data.Configurations
             builder.Property(x => x.CreatedBy).HasMaxLength(100);
             builder.Property(x => x.UpdatedBy).HasMaxLength(100);
 
-            builder.HasIndex(x => x.MsmeEnquiryId);
+            builder.HasIndex(x => x.MsmeEnquiryID);
         }
     }
 }
