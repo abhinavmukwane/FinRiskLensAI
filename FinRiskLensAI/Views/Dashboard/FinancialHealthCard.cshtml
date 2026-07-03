@@ -1,0 +1,349 @@
+@model FinRiskLensAI.Models.FinancialHealthCardViewModel
+@{
+    ViewBag.Title = "Financial Health Card";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    var r = Model.Result;
+}
+
+<style>
+    .fhc-wrap { padding: 24px; max-width: 1320px; margin: 0 auto; font-family: var(--font-data, 'Inter', sans-serif); }
+    .fhc-card { background: #fff; border: 1px solid #ead9df; border-radius: 16px; padding: 20px 22px; box-shadow: 0 2px 10px rgba(87,0,29,.05); height: 100%; }
+    .fhc-title { font-family: var(--font-headline, 'Sora', sans-serif); font-weight: 700; color: #57001d; }
+    .fhc-sub { color: #974354; font-size: .85rem; }
+    .fhc-section-label { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #974354; margin-bottom: 12px; }
+
+    .band-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: .85rem; }
+    .band-Excellent { background: #e3f4ea; color: #0f5137; }
+    .band-Good { background: #e8f1e3; color: #3d6b1f; }
+    .band-Fair { background: #fdf3d7; color: #8a6d00; }
+    .band-AtRisk { background: #fde8d7; color: #9c4a00; }
+    .band-HighRisk { background: #fbe0e0; color: #8b1020; }
+
+    .stat-tile { background: #faf7f8; border: 1px solid #ead9df; border-radius: 12px; padding: 12px 14px; }
+    .stat-tile .v { font-family: var(--font-headline, 'Sora', sans-serif); font-weight: 700; font-size: 1.15rem; color: #2b2026; }
+    .stat-tile .k { font-size: .72rem; color: #974354; text-transform: uppercase; letter-spacing: .06em; }
+
+    .dim-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+    .dim-name { flex: 0 0 210px; font-size: .85rem; color: #2b2026; }
+    .dim-track { flex: 1; height: 10px; border-radius: 999px; background: #f2e6ea; overflow: hidden; }
+    .dim-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #974354, #57001d); }
+    .dim-val { flex: 0 0 90px; text-align: right; font-size: .82rem; font-weight: 600; color: #57001d; }
+    .dim-muted { opacity: .45; }
+
+    .expl-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px dashed #f0e2e7; font-size: .87rem; align-items: flex-start; }
+    .expl-item:last-child { border-bottom: none; }
+    .expl-item .bi { margin-top: 2px; }
+    .expl-dim { font-size: .7rem; color: #974354; text-transform: uppercase; letter-spacing: .05em; }
+
+    .reco-card { border: 1px solid #ead9df; border-left: 5px solid #57001d; border-radius: 12px; padding: 14px 16px; background: #fffdfb; }
+    .reco-amt { font-family: var(--font-headline, 'Sora', sans-serif); font-weight: 700; color: #57001d; }
+
+    .gauge-box { position: relative; max-width: 340px; margin: 0 auto; }
+    .gauge-center { position: absolute; left: 0; right: 0; bottom: -6px; text-align: center; pointer-events: none; }
+    .gauge-score { font-family: var(--font-headline, 'Sora', sans-serif); font-size: 2.6rem; font-weight: 800; color: #57001d; line-height: 1; }
+    .gauge-of { font-size: .78rem; color: #974354; }
+
+    .fhc-search { max-width: 560px; }
+    .fhc-search .form-control { height: 48px; border-radius: 12px 0 0 12px; border: 1px solid #d8c3ca; }
+    .fhc-search .btn { border-radius: 0 12px 12px 0; background: #57001d; color: #fff; font-weight: 600; padding: 0 22px; }
+
+    .anomaly-box { border: 1px solid #f3d19c; background: #fff8ec; border-radius: 12px; padding: 14px 16px; font-size: .88rem; }
+    .anomaly-box.flagged { border-color: #e79b9b; background: #fdf0f0; }
+    canvas { max-width: 100%; }
+</style>
+
+<div class="fhc-wrap">
+
+    <!-- Header + search -->
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+        <div>
+            <h3 class="fhc-title mb-1">Financial Health Card</h3>
+            <div class="fhc-sub">AI-computed 6-dimension credit health score from GST, ITR, bank &amp; Udyam data</div>
+        </div>
+        <form method="get" class="fhc-search d-flex flex-grow-1" style="min-width:320px;">
+            <input type="text" class="form-control" name="uan" value="@Model.Uan"
+                   placeholder="Enter Udyam number, e.g. UDYAM-MH-20-0067394" />
+            <button class="btn" type="submit"><i class="bi bi-search me-1"></i>Load</button>
+        </form>
+    </div>
+
+    @if (string.IsNullOrWhiteSpace(Model.Uan))
+    {
+        <div class="fhc-card text-center py-5">
+            <i class="bi bi-speedometer2" style="font-size:3rem;color:#974354;"></i>
+            <h5 class="fhc-title mt-3">Enter an Udyam number to view its Financial Health Card</h5>
+            <div class="fhc-sub">The MSME must have completed data collection and analysis.</div>
+        </div>
+    }
+    else if (Model.LoadError != null)
+    {
+        <div class="alert alert-danger rounded-4">@Model.LoadError</div>
+    }
+    else if (!Model.HasResult)
+    {
+        <div class="fhc-card text-center py-5">
+            <i class="bi bi-hourglass-split" style="font-size:3rem;color:#974354;"></i>
+            <h5 class="fhc-title mt-3">No analysis result yet for @Model.Uan</h5>
+            <div class="fhc-sub mb-3">
+                Files in folder: @(Model.Status?.FilesPresent.Count ?? 0)
+                @if (Model.Status?.FilesMissing.Count > 0)
+                {
+                    <br /><span>Missing: @string.Join(", ", Model.Status.FilesMissing)</span>
+                }
+            </div>
+            <button id="runAnalysisBtn" class="btn text-white" style="background:#57001d;border-radius:10px;padding:10px 26px;font-weight:600;">
+                <i class="bi bi-cpu me-1"></i> Run AI Analysis Now
+            </button>
+            <div id="runStatus" class="fhc-sub mt-2"></div>
+        </div>
+        <script>
+            document.getElementById('runAnalysisBtn').addEventListener('click', async function () {
+                this.disabled = true;
+                document.getElementById('runStatus').textContent = 'Running ML analysis — first run trains the models, please wait…';
+                try {
+                    const resp = await fetch('/api/msme-data/@Model.Uan/analyze?force=true', { method: 'POST' });
+                    if (resp.ok) { location.reload(); }
+                    else { document.getElementById('runStatus').textContent = 'Failed: ' + await resp.text(); this.disabled = false; }
+                } catch (e) { document.getElementById('runStatus').textContent = 'Error: ' + e; this.disabled = false; }
+            });
+        </script>
+    }
+    else
+    {
+        <!-- ===================== Row 1: Gauge + summary ===================== -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-5">
+                <div class="fhc-card text-center">
+                    <div class="fhc-section-label">Overall Financial Health Score</div>
+                    <div class="gauge-box">
+                        <canvas id="scoreGauge" height="180"></canvas>
+                        <div class="gauge-center">
+                            <div class="gauge-score">@r!.OverallScore.ToString("0")</div>
+                            <div class="gauge-of">out of 1000</div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="band-chip band-@r.ScoreBand">
+                            <i class="bi bi-patch-check-fill"></i> @r.ScoreBand
+                        </span>
+                    </div>
+                    <div class="fhc-sub mt-3">
+                        @(Model.EnterpriseName ?? Model.Uan) &middot; computed @r.ComputedAt.ToString("dd MMM yyyy HH:mm") UTC
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="fhc-card">
+                    <div class="fhc-section-label">Score Composition</div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6 col-md-3"><div class="stat-tile"><div class="v">@r.HeuristicScore.ToString("0")</div><div class="k">Rules Engine</div></div></div>
+                        <div class="col-6 col-md-3"><div class="stat-tile"><div class="v">@r.MlCalibratedScore.ToString("0")</div><div class="k">ML Model</div></div></div>
+                        <div class="col-6 col-md-3">
+                            <div class="stat-tile">
+                                <div class="v">
+                                    @(r.CashflowTrendSlope >= 0 ? "▲" : "▼") @Math.Abs(r.CashflowTrendSlope).ToString("0.00")
+                                </div>
+                                <div class="k">Cashflow Trend</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3"><div class="stat-tile"><div class="v">@(Model.Status?.FilesPresent.Count ?? 0)</div><div class="k">Data Files Used</div></div></div>
+                    </div>
+
+                    <div class="fhc-section-label">Six Dimensions</div>
+                    @foreach (var d in r.Dimensions)
+                    {
+                        var pct = d.MaxPoints > 0 ? Math.Round(d.Score / d.MaxPoints * 100) : 0;
+                        <div class="dim-row @(d.DataAvailable ? "" : "dim-muted")">
+                            <div class="dim-name">
+                                @d.Dimension
+                                @if (d.UsedNeutralDefault) { <i class="bi bi-info-circle text-secondary" title="Neutral default used (New-to-Credit)"></i> }
+                                @if (!d.DataAvailable) { <i class="bi bi-slash-circle text-secondary" title="Source unavailable — weight redistributed"></i> }
+                            </div>
+                            <div class="dim-track"><div class="dim-fill" style="width:@pct%;"></div></div>
+                            <div class="dim-val">@d.Score.ToString("0") / @d.MaxPoints.ToString("0")</div>
+                        </div>
+                    }
+                    @if (r.ExcludedDimensions.Count > 0)
+                    {
+                        <div class="fhc-sub mt-2"><i class="bi bi-exclamation-triangle me-1"></i>Score computed without: @string.Join(", ", r.ExcludedDimensions) — weights redistributed.</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== Row 2: Charts ===================== -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="fhc-card">
+                    <div class="fhc-section-label">Dimension Radar</div>
+                    <canvas id="radarChart" height="300"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="fhc-card">
+                    <div class="fhc-section-label">Points Earned vs Maximum</div>
+                    <canvas id="barChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== Row 3: Strengths / Risks ===================== -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="fhc-card">
+                    <div class="fhc-section-label"><i class="bi bi-arrow-up-circle-fill me-1" style="color:#0f5137;"></i>Key Strengths</div>
+                    @foreach (var e in r.Explanations.Where(x => x.Impact == FinRiskLensAI.ML.Models.ImpactDirection.Positive).OrderByDescending(x => x.RelativeWeight))
+                    {
+                        <div class="expl-item">
+                            <i class="bi bi-check-circle-fill" style="color:#0f5137;"></i>
+                            <div><div class="expl-dim">@e.Dimension</div>@e.ExplanationText</div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="fhc-card">
+                    <div class="fhc-section-label"><i class="bi bi-arrow-down-circle-fill me-1" style="color:#8b1020;"></i>Risk Factors</div>
+                    @{ var risks = r.Explanations.Where(x => x.Impact == FinRiskLensAI.ML.Models.ImpactDirection.Negative).OrderByDescending(x => x.RelativeWeight).ToList(); }
+                    @if (risks.Count == 0)
+                    {
+                        <div class="fhc-sub py-3"><i class="bi bi-emoji-smile me-1"></i>No material risk factors surfaced by the model.</div>
+                    }
+                    @foreach (var e in risks)
+                    {
+                        <div class="expl-item">
+                            <i class="bi bi-exclamation-circle-fill" style="color:#9c4a00;"></i>
+                            <div><div class="expl-dim">@e.Dimension</div>@e.ExplanationText</div>
+                        </div>
+                    }
+
+                    <div class="fhc-section-label mt-4">Cross-Source Income Check</div>
+                    <div class="anomaly-box @(r.Anomaly.IsAnomalous ? "flagged" : "")">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi @(r.Anomaly.IsAnomalous ? "bi-flag-fill" : "bi-shield-check")"></i>
+                            <strong>@(r.Anomaly.IsAnomalous ? "Mismatch flagged for review" : "No cross-source mismatch flagged")</strong>
+                            <span class="ms-auto fhc-sub">anomaly score @r.Anomaly.AnomalyScore.ToString("0.00")</span>
+                        </div>
+                        GST ₹@FormatInr(r.Anomaly.GstMonthlyTurnover)/mo &middot;
+                        ITR ₹@FormatInr(r.Anomaly.ItrMonthlyIncome)/mo &middot;
+                        Bank credits ₹@FormatInr(r.Anomaly.BankMonthlyCredits)/mo
+                        @if (!string.IsNullOrEmpty(r.Anomaly.Note)) { <div class="fhc-sub mt-1">@r.Anomaly.Note</div> }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== Row 4: Recommendations ===================== -->
+        <div class="fhc-card mb-4">
+            <div class="fhc-section-label"><i class="bi bi-lightbulb-fill me-1" style="color:#8a6d00;"></i>Recommended Credit Products</div>
+            @if (r.Recommendations.Count == 0)
+            {
+                <div class="fhc-sub py-2">No products recommended at this band — improve the weak dimensions above first.</div>
+            }
+            <div class="row g-3">
+                @foreach (var p in r.Recommendations)
+                {
+                    <div class="col-md-6">
+                        <div class="reco-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <strong>@p.ProductName</strong>
+                                <span class="badge" style="background:#f2e6ea;color:#57001d;">@p.SchemeCode</span>
+                            </div>
+                            <div class="reco-amt my-1">₹@FormatInr((double)p.IndicativeAmountMin) – ₹@FormatInr((double)p.IndicativeAmountMax)</div>
+                            <div class="fhc-sub">@p.RecommendationReason</div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="fhc-sub mt-3">Model @r.ModelVersion &middot; indicative amounts anchored to observed turnover — not a sanctioned limit.</div>
+        </div>
+
+        <!-- ===================== Charts script ===================== -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+        <script>
+            const dims = @Html.Raw(Json.Serialize(r.Dimensions.Select(d => new { d.Dimension, d.Score, d.MaxPoints })));
+            const score = @r.OverallScore.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            const maroon = '#57001d', rose = '#974354';
+
+            // ── Score meter: 5 band segments + needle
+            const bandColors = ['#c22f3e', '#e08a3c', '#e6c34c', '#7fae5e', '#2e7d4f'];
+            const needle = {
+                id: 'needle',
+                afterDatasetsDraw(chart) {
+                    const { ctx } = chart;
+                    const meta = chart.getDatasetMeta(0).data[0];
+                    const cx = meta.x, cy = meta.y, r = meta.outerRadius;
+                    const angle = Math.PI + (score / 1000) * Math.PI;
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(angle);
+                    ctx.beginPath();
+                    ctx.moveTo(0, -4); ctx.lineTo(r * 0.82, 0); ctx.lineTo(0, 4);
+                    ctx.fillStyle = maroon; ctx.fill();
+                    ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill();
+                    ctx.restore();
+                }
+            };
+            new Chart(document.getElementById('scoreGauge'), {
+                type: 'doughnut',
+                data: { datasets: [{
+                    data: [350, 150, 150, 150, 200],       // HighRisk / AtRisk / Fair / Good / Excellent widths
+                    backgroundColor: bandColors, borderWidth: 2, borderColor: '#fff'
+                }]},
+                options: {
+                    rotation: -90, circumference: 180, cutout: '72%',
+                    aspectRatio: 1.9,
+                    layout: { padding: { bottom: 4 } },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    animation: { animateRotate: true }
+                },
+                plugins: [needle]
+            });
+
+            // ── Radar: % of each dimension's max
+            new Chart(document.getElementById('radarChart'), {
+                type: 'radar',
+                data: {
+                    labels: dims.map(d => d.dimension.replace(' ', '\n')),
+                    datasets: [{
+                        label: '% of maximum',
+                        data: dims.map(d => d.maxPoints > 0 ? Math.round(d.score / d.maxPoints * 100) : 0),
+                        backgroundColor: 'rgba(151,67,84,.18)', borderColor: maroon,
+                        pointBackgroundColor: maroon, borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: { r: { min: 0, max: 100, ticks: { stepSize: 20, backdropColor: 'transparent' }, pointLabels: { font: { size: 11 } } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // ── Horizontal bars: earned vs max
+            new Chart(document.getElementById('barChart'), {
+                type: 'bar',
+                data: {
+                    labels: dims.map(d => d.dimension),
+                    datasets: [
+                        { label: 'Earned', data: dims.map(d => d.score), backgroundColor: maroon, borderRadius: 6 },
+                        { label: 'Maximum', data: dims.map(d => d.maxPoints), backgroundColor: '#f2e6ea', borderRadius: 6 }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    scales: { x: { beginAtZero: true, max: 260 } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        </script>
+    }
+</div>
+
+@functions {
+    private static string FormatInr(double v)
+    {
+        if (v >= 10_000_000) return (v / 10_000_000).ToString("0.##") + " Cr";
+        if (v >= 100_000) return (v / 100_000).ToString("0.##") + " L";
+        return v.ToString("N0");
+    }
+}
