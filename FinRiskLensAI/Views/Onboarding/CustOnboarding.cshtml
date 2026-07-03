@@ -79,26 +79,33 @@
                     </div>
                 </div>
 
-                <!-- ============ FETCH LOADER ============ -->
-                <div id="fetchLoader">
-                    <div class="spinner-cv"></div>
-                    <div class="screen-title"
-                         style="font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--maroon-deep);">
-                        Talking to the Udyam registry…
+
+            <!-- ============ FETCH LOADER ============ -->
+            <div id="fetchLoader">
+                <div class="spinner-cv"></div>
+
+                <div class="screen-title"
+                     style="font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--maroon-deep);">
+                    Verifying Udyam details...
+                </div>
+
+                <div class="loading-steps">
+                    <div class="li" id="ls1">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Validating Udyam number
                     </div>
-                    <div class="loading-steps">
-                        <div class="li" id="ls1">
-                            <i class="bi bi-check-circle-fill"></i> Validating Udyam number format
-                        </div>
-                        <div class="li" id="ls2">
-                            <i class="bi bi-check-circle-fill"></i> Fetching enterprise &amp; PAN
-                            record
-                        </div>
-                        <div class="li" id="ls3">
-                            <i class="bi bi-check-circle-fill"></i> Sending OTP to registered email
-                        </div>
+
+                    <div class="li" id="ls2">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Fetching enterprise information
+                    </div>
+
+                    <div class="li" id="ls3">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Preparing verification details
                     </div>
                 </div>
+            </div>
 
                 <!-- ============ STEP 2 : REVIEW & PROCEED ============ -->
                 <div class="fade-step d-none" id="step2">
