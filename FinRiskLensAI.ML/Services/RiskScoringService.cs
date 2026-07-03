@@ -49,7 +49,9 @@ namespace FinRiskLensAI.ML.Services
             if (!string.IsNullOrWhiteSpace(request.ItrJson)) _itr.Extract(request.ItrJson!, features);
             if (!string.IsNullOrWhiteSpace(request.AaJson)) _aa.Extract(request.AaJson!, features);
             _gst.Extract(request.GstTaxpayerJson, request.Gstr3bJsons,
-                         request.Gstr1SummaryJsons, request.Gstr1B2bJsons, features);
+                         request.Gstr1SummaryJsons, request.Gstr1B2bJsons,
+                         request.Gstr1CdnrJsons, request.Gstr1HsnJsons,
+                         request.Gstr2aB2bJsons, features);
 
             features.AaCashflowTrendSlope = _trend.ComputeTrend(features.AaMonthlyCredits.Values.ToList());
 
@@ -125,6 +127,8 @@ namespace FinRiskLensAI.ML.Services
                 var itr = 0.5 + 0.5 * f.ItrIncomeTrendSlope;
                 score = weightUsed > 0 ? weightUsed * score + (1 - weightUsed) * itr : itr;
             }
+            // Heavy credit/debit-note reversals (CDNR) undercut headline turnover
+            score -= 0.3 * f.GstCreditNoteRatio;
             return Math.Clamp(score, 0, 1);
         }
 
@@ -173,9 +177,17 @@ namespace FinRiskLensAI.ML.Services
             {
                 "medium" => 1.0, "small" => 0.75, "micro" => 0.5, _ => 0.5
             };
-            var footprint = Math.Min(1, (f.PlantLocationCount + f.NicCodeCount) / 8.0);
+            // Footprint: locations + activity codes + product/service mix (HSN)
+            var footprint = Math.Min(1, (f.PlantLocationCount + f.NicCodeCount + f.GstHsnProductCount / 5.0) / 8.0);
+
+            // Purchase-to-sales in a business-normal band (≈0.4–1.1) signals a real
+            // operating trade cycle; only applies when GSTR-2A data exists
+            var tradeCycle = f.GstPurchaseToSalesRatio > 0
+                ? 1 - Math.Min(1, Math.Abs(f.GstPurchaseToSalesRatio - 0.75) / 0.75)
+                : 0.5;
+
             // EPFO headcount trend joins here when the source arrives
-            return Math.Clamp(0.55 * vintage + 0.30 * sizeClass + 0.15 * footprint, 0, 1);
+            return Math.Clamp(0.45 * vintage + 0.25 * sizeClass + 0.15 * footprint + 0.15 * tradeCycle, 0, 1);
         }
 
         private static double DebtServiceability(MsmeFeatureSet f, out bool usedNeutral)
@@ -215,7 +227,10 @@ namespace FinRiskLensAI.ML.Services
             ["RepeatPayerRatio"] = ("Transaction Trustworthiness", "Recurring customers keep paying — sticky counterparty base", "Few repeat payers — customer base may be transient"),
             ["GstB2bShare"] = ("Business Stability", "Meaningful B2B trade share indicates established buyers", "Sales are almost entirely B2C/unregistered"),
             ["BusinessVintage"] = ("Business Stability", "Established business vintage per Udyam registration", "Young business with limited operating history"),
-            ["EmiToInflowRatio"] = ("Debt Serviceability", "Existing EMI obligations are small relative to inflows", "Existing EMI obligations consume a large share of inflows")
+            ["EmiToInflowRatio"] = ("Debt Serviceability", "Existing EMI obligations are small relative to inflows", "Existing EMI obligations consume a large share of inflows"),
+            ["CreditNoteRatio"] = ("Revenue Vitality", "Minimal credit-note reversals — invoiced revenue holds up", "Significant share of invoiced revenue reversed via credit notes"),
+            ["PurchaseCoverage"] = ("Business Stability", "Purchases (GSTR-2A) sit in a healthy band relative to sales — real trading cycle", "Purchases are out of proportion to declared sales"),
+            ["HsnDiversity"] = ("Business Stability", "Diversified product/service mix across HSN codes", "Revenue concentrated in very few product lines")
         };
 
         private List<ScoreExplanationItem> BuildExplanations(

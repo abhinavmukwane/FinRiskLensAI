@@ -31,6 +31,13 @@ namespace FinRiskLensAI.ML.Models
         public int GstCounterpartyCount { get; set; }
         public bool GstRegistrationActive { get; set; }
         public double GstAnnualisedTurnover { get; set; }
+        /// <summary>Credit/debit note value (GSTR-1 CDNR) relative to turnover — high = heavy revenue reversals.</summary>
+        public double GstCreditNoteRatio { get; set; }
+        /// <summary>GSTR-2A inward (purchase) value relative to outward turnover — sanity band for a real trading business.</summary>
+        public double GstPurchaseToSalesRatio { get; set; }
+        /// <summary>Distinct HSN/SAC codes sold (GSTR-1 HSN summary) — product/service mix diversity.</summary>
+        public int GstHsnProductCount { get; set; }
+        public double GstMonthlyAvgPurchases { get; set; }
 
         // ── ITR (income + compliance)
         /// <summary>Gross total income keyed by assessment year label (e.g. "2024-2025").</summary>

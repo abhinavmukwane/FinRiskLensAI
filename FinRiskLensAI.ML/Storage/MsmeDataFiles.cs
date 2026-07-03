@@ -18,10 +18,14 @@ namespace FinRiskLensAI.ML.Storage
         // Monthly GST files carry a MMyyyy period suffix, e.g. gstr3b_012026.json
         public const string Gstr3bPrefix = "gstr3b_";
         public const string Gstr1SummaryPrefix = "gstr1_summary_";
-        public const string Gstr1B2bPrefix = "gstr1_b2b_";
+        public const string Gstr1B2bPrefix = "gstr1_b2b_";          // also matches gstr1_b2b_Invoice_MMyyyy.json
+        public const string Gstr1CdnrPrefix = "gstr1_cdnr_";
+        public const string Gstr1HsnPrefix = "gstr1_hsn_summary_";
+        public const string Gstr2aB2bPrefix = "gstr2a_b2b_";
 
         private static readonly string[] KnownFixed = { Udyam, Itr, Aa, GstTaxpayer, Epfo, Manifest, Result };
-        private static readonly string[] KnownPrefixes = { Gstr3bPrefix, Gstr1SummaryPrefix, Gstr1B2bPrefix };
+        private static readonly string[] KnownPrefixes =
+            { Gstr3bPrefix, Gstr1SummaryPrefix, Gstr1B2bPrefix, Gstr1CdnrPrefix, Gstr1HsnPrefix, Gstr2aB2bPrefix };
 
         public static bool IsKnown(string fileName)
             => KnownFixed.Contains(fileName, StringComparer.OrdinalIgnoreCase)

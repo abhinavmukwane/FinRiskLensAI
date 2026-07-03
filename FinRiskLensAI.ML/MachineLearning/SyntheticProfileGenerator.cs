@@ -26,6 +26,9 @@ namespace FinRiskLensAI.ML.MachineLearning
                 f[9] = (float)random.NextDouble();                 // repeat payer ratio
                 f[10] = (float)random.NextDouble();                // vintage (normalized)
                 f[11] = (float)random.NextDouble();                // EMI-to-inflow
+                f[12] = (float)(Math.Pow(random.NextDouble(), 2) * 0.6);  // credit-note ratio (usually small)
+                f[13] = (float)random.NextDouble();                // purchase coverage (0.5 ≈ healthy)
+                f[14] = (float)random.NextDouble();                // HSN diversity
 
                 yield return new ScoreFeatureVector { Features = f, Label = Label(f, random) };
             }
@@ -34,11 +37,14 @@ namespace FinRiskLensAI.ML.MachineLearning
         /// <summary>Domain formula ≈ the six-dimension weighting, on a 0-1000 scale, with noise.</summary>
         private static float Label(float[] f, Random random)
         {
-            double revenue = 0.5 + 0.35 * f[0] + 0.15 * f[3];                // trends
+            // Purchase coverage: 0.5 (≈ purchases at 75% of sales) is healthiest for a trading business
+            double tradeBand = 1 - Math.Min(1, Math.Abs(f[13] - 0.5) * 2);
+
+            double revenue = 0.5 + 0.30 * f[0] + 0.15 * f[3] - 0.30 * f[12];    // trends minus reversals
             double cashflow = 0.55 + 0.25 * f[6] - 0.20 * Math.Min(1, f[5]) - 0.25 * f[7];
             double txnTrust = 0.30 + 0.35 * f[8] + 0.35 * f[9];
             double compliance = 0.60 * f[1] + 0.40 * f[4];
-            double stability = 0.30 + 0.55 * f[10] + 0.15 * f[2];
+            double stability = 0.25 + 0.40 * f[10] + 0.10 * f[2] + 0.10 * f[14] + 0.15 * tradeBand;
             double debt = 0.85 - 0.70 * f[11];
 
             var score = 1000 * (0.25 * revenue + 0.20 * cashflow + 0.15 * txnTrust
