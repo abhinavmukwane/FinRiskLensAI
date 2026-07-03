@@ -152,7 +152,6 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
 
             await _context.SaveChangesAsync();
         }
-
         public async Task<UdyamDetailsModel> GetUdyamDetails(string uan)
         {
             var data = await (
@@ -190,6 +189,50 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                 PinCode = data.Pin
             };
         }
+        //public async Task<ResultModel<RegisterModel>> AddUpdateConsentRegister(RegisterModel entity)
+        //{
+        //    var result = new ResultModel<RegisterModel>();
+        //    try
+        //    {
+        //        T_APPROVEDLOAN paObj = new T_APPROVEDLOAN();
+        //        entity.MapToModelObject(paObj);
+        //        _context.T_APPROVEDLOAN.Add(paObj);
+        //        await _context.SaveChangesAsync();
 
+        //        result.Result = tflResultType.tflSuccess;
+        //        result.Message = "Data Saved Successfully";
+        //        result.Data = entity;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.Result = tflResultType.tflError;
+        //        result.Message = ex.Message;
+        //        result.Data = null;
+        //    }
+        //    return result;
+        //}
+
+        //public async Task<ResultModel<RegisterModel>> AddUpdateOtp(RegisterModel entity)
+        //{
+        //    var result = new ResultModel<RegisterModel>();
+        //    try
+        //    {
+        //        T_APPROVEDLOAN paObj = new T_APPROVEDLOAN();
+        //        entity.MapToModelObject(paObj);
+        //        _context.T_APPROVEDLOAN.Add(paObj);
+        //        await _context.SaveChangesAsync();
+
+        //        result.Result = tflResultType.tflSuccess;
+        //        result.Message = "Data Saved Successfully";
+        //        result.Data = entity;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.Result = tflResultType.tflError;
+        //        result.Message = ex.Message;
+        //        result.Data = null;
+        //    }
+        //    return result;
+        //}
     }
 }

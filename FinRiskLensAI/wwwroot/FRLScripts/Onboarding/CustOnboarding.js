@@ -138,47 +138,161 @@
                     }, 3200);
 
                 } else {
+
                     const pattern = /^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/;
+
                     if (!pattern.test(val)) {
-                        $('#udyamError').removeClass('d-none').find('span').text('Please enter a valid Udyam number in the format UDYAM-XX-00-0000000.');
+                        $('#udyamError')
+                            .removeClass('d-none')
+                            .find('span')
+                            .text('Please enter a valid Udyam number in the format UDYAM-XX-00-0000000.');
                         return;
                     }
+
                     $('#udyamError').addClass('d-none');
 
-                    // Hide Step 1, show loader
+                    // Hide Step1 & Show Loader
                     $('#step1').addClass('d-none');
-                    $('#ls1, #ls2, #ls3').removeClass('active done');
+
+                    $('#fetchLoader .screen-title').text('Talking to the Udyam registry...');
+
+                    $('#ls1').html('<i class="bi bi-check-circle-fill"></i> Validating Udyam number format');
+                    $('#ls2').html('<i class="bi bi-check-circle-fill"></i> Fetching enterprise & PAN record');
+                    $('#ls3').html('<i class="bi bi-check-circle-fill"></i> Saving MSME information');
+
+                    $('#ls1,#ls2,#ls3').removeClass('active done');
+
                     $('#fetchLoader').show();
+
                     $('html,body').animate({ scrollTop: 0 }, 200);
 
-                    // Step 1 — Validating format (instant)
+                    // Animation
                     setTimeout(function () {
                         $('#ls1').addClass('active');
                     }, 200);
+
                     setTimeout(function () {
                         $('#ls1').removeClass('active').addClass('done');
-                        // Step 2 — Fetching enterprise
                         $('#ls2').addClass('active');
                     }, 900);
+
                     setTimeout(function () {
                         $('#ls2').removeClass('active').addClass('done');
-                        // Step 3 — Sending OTP
                         $('#ls3').addClass('active');
                     }, 1800);
-                    setTimeout(function () {
-                        $('#ls3').removeClass('active').addClass('done');
-                    }, 2700);
 
-                    // After all steps done → show Step 2
-                    setTimeout(function () {
-                        $('#fetchLoader').hide();
-                        $('#step2').removeClass('d-none');
-                        goToRailStep(2);
-                        showToast('Enterprise found. Please review your details.');
-                        $('html,body').animate({ scrollTop: 0 }, 300);
-                    }, 3200);
+                    // Call API
+                    $.ajax({
+
+                        url: "/Onboarding/FetchUdyam",
+                        type: "POST",
+                        data: {
+                            uan: val
+                        },
+
+                        success: function (res) {
+
+                            if (res.status) {
+
+                                $('#ls3').removeClass('active').addClass('done');
+
+                                loadUdyamDetails(res.uan)
+                                    .done(function (response) {
+
+                                        if (!response.status) {
+                                            showToast(response.message);
+                                            return;
+                                        }
+
+                                        var d = response.data;
+
+                                        $("#rv_entName").text(d.enterpriseName);
+                                        $("#rv_orgType").text(d.organizationType);
+                                        $("#rv_dob").text(d.dateOfIncorporation);
+                                        $("#rv_msme").text(d.enterpriseType);
+
+                                        $("#rv_email").val(d.email);
+                                        $("#mobileInput").val(d.mobile);
+
+                                        $("#rv_address").text(d.address);
+
+                                        // Show Step 2 only after data is loaded
+                                        $('#fetchLoader').hide();
+                                        $('#step1').addClass('d-none');
+                                        $('#step2').removeClass('d-none');
+
+                                        goToRailStep(2);
+
+                                        showToast('Enterprise details fetched successfully.');
+
+                                        $('html,body').animate({
+                                            scrollTop: 0
+                                        }, 300);
+                                    })
+                                    .fail(function () {
+
+                                        $('#fetchLoader').hide();
+                                        $('#step1').removeClass('d-none');
+
+                                        showToast("Failed to load enterprise details.");
+                                    });
+                            }
+                            // if (res.status) {
+
+                            //     // Finish last animation
+                            //     $('#ls3').removeClass('active').addClass('done');
+                            //     // Wait until animation completes
+                            //     setTimeout(function () {
+
+                            //         $('#fetchLoader').hide();
+
+                            //         $('#step1').addClass('d-none');
+                            //         $('#step2').removeClass('d-none');
+
+                            //         goToRailStep(2);
+                            //         loadUdyamDetails(res.uan);
+
+                            //         showToast('Enterprise details fetched successfully.');
+
+                            //         $('html,body').animate({
+                            //             scrollTop: 0
+                            //         }, 300);
+
+                            //     }, 1000);
+
+                            // }
+                            else {
+
+                                $('#fetchLoader').hide();
+
+                                $('#step1').removeClass('d-none');
+
+                                showToast(res.message || "Unable to fetch Udyam details.");
+                            }
+                        },
+
+                        error: function () {
+
+                            $('#fetchLoader').hide();
+
+                            $('#step1').removeClass('d-none');
+
+                            showToast("Something went wrong while fetching Udyam details.");
+                        }
+
+                    });
                 }
+
             });
+
+            function loadUdyamDetails(uan) {
+
+                return $.ajax({
+                    url: '/Onboarding/GetUdyamDetails',
+                    type: 'GET',
+                    data: { uan: uan }
+                });
+            }
 
             // ---------- REVIEW STEP: enable Proceed button ----------
             function checkProceedEnabled() {

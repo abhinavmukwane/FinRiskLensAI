@@ -51,5 +51,18 @@ namespace FinRiskLensAI.Services.Implementation.OnBoarding
 
             return result;
         }
+        //public async Task<ResultModel<RegisterModel>> AddUpdateOtp(RegisterModel entity)
+        //{
+        //    var result = _repository.AddUpdate(entity);
+
+        //    return await result;
+        //}
+        //public async Task<ResultModel<RegisterModel>> AddUpdateOtp(RegisterModel entity)
+        //{
+        //    var result = _repository.AddUpdate(entity);
+
+        //    return await result;
+        //}
+
     }
 }
