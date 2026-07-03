@@ -210,10 +210,13 @@
                                         $("#rv_orgType").text(d.organizationType);
                                         $("#rv_dob").text(d.dateOfIncorporation);
                                         $("#rv_msme").text(d.enterpriseType);
+                                        $("#rv_msme").text(d.enterpriseType);
+
+
+                                        $("#rv_udyam_number").text(d.uan);
 
                                         $("#rv_email").val(d.email);
                                         $("#mobileInput").val(d.mobile);
-
                                         $("#rv_address").text(d.address);
 
                                         // Show Step 2 only after data is loaded

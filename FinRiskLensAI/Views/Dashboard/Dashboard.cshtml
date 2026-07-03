@@ -97,8 +97,9 @@
                             <h6 class="mb-1">ITR</h6>
                             <small class="text-muted">Income Tax Return Verification</small>
                         </div>
-
-                        <button class="btn btn-submit">Fetch Details</button>
+                        <button class="btn btn-submit" data-bs-toggle="modal" data-bs-target="#itrModal" data-title="Fetch ITR Details">
+                            Fetch Details
+                        </button>
                     </div>
                 </div>
 
@@ -270,13 +271,76 @@
     </div>
 </div>
 
+<div class="modal fade" id="itrModal" tabindex="-1" aria-labelledby="itrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="itrModalLabel">
+                    <i class="bi bi-file-earmark-text-fill text-warning me-2"></i>
+                    Income Tax Return Verification
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+
+             <div class="modal-body">
+
+                <!-- User ID -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        User ID
+                    </label>
+                    <input type="text" class="form-control custom-input"  placeholder="Enter User ID">
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Password
+                    </label>
+                    <input type="password" class="form-control custom-input" placeholder="Enter Password">
+                </div>
+
+                <!-- Consent -->
+                <div class="consent-box">
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="consentCheck">
+
+                        <label class="form-check-label" for="consentCheck">
+                            I authorize the platform to securely access my
+                            <strong>ITR Registration details</strong> for
+                            verification purposes. I understand that my data
+                            will only be used for verification and handled
+                            securely.
+                        </label>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <  <div class="modal-footer border-0 pt-0">
+                <button class="btn btn-theme w-100"> Fetch Details</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
    <script>
-   const verificationModal = document.getElementById('verificationModal');
-
-    verificationModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const title = button.getAttribute('data-title');
-
-        verificationModal.querySelector('.modal-title').textContent = title;
-    });
-    </script>
+       const verificationModal = document.getElementById('verificationModal');
+       
+        verificationModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const title = button.getAttribute('data-title');
+       
+            verificationModal.querySelector('.modal-title').textContent = title;
+        });
+   </script>
