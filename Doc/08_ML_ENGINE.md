@@ -184,6 +184,15 @@ Re-running `/analyze` after new files land simply recomputes and overwrites
 Storage is behind `IMsmeDataStore`, so swapping Azure for local disk (tests) is a
 DI change, not a code change.
 
+**Who consumes `result.json` (added 2026-07-03):** besides `GET /result`, the
+dashboard now renders it directly — `GET /Dashboard/FinancialHealthCard?uan={UAN}`
+(`DashboardController`) calls `GetStatusAsync`/`GetResultAsync` on
+`IBlobAnalysisService` and draws the full card (gauge, six-dimension bars,
+radar/bar charts, explanations, anomaly box, product recommendations). When no
+result exists yet, the page surfaces the manifest status and a "Run AI Analysis
+Now" button that fires `POST /api/msme-data/{uan}/analyze?force=true` — the
+use-case-4 "dashboard refresh button" is now real.
+
 ---
 
 ## 3. How it works — the pipeline
@@ -458,8 +467,8 @@ Verified end-to-end against the real storage account twice:
 ```powershell
 $request = @{
     udyamJson   = [IO.File]::ReadAllText("$base\UdyamAdharResponce.json")
-    itrJson     = [IO.File]::ReadAllText("$base\Abhinav 3 yr ITR Respopnce.json")
-    aaJson      = [IO.File]::ReadAllText("$base\AA_abhinav.json")
+    itrJson     = [IO.File]::ReadAllText("$base\ITR_Respopnce.json")
+    aaJson      = [IO.File]::ReadAllText("$base\AA.json")
     gstr3bJsons = @( <one JSON string per month> )
 } | ConvertTo-Json -Depth 4
 

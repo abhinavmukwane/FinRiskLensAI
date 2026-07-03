@@ -16,9 +16,17 @@
 > - Also built (not in the original plan): the blob-storage collection flow
 >   with manifest gating (`api/msme-data/{uan}`), which handles payloads too
 >   large for a single request.
-> - **Phases 2, 3, 5, 6, 7** — not started. Home page UI aligned to the
->   product story (partial Phase 5 groundwork). A teammate has started AA
->   connector code (`HttpClientHelper` in Core) and a dashboard controller.
+> - **Phase 5 — substantially done (2026-07-03):** the Financial Health Card
+>   renders at `GET /Dashboard/FinancialHealthCard?uan={UAN}` from the blob
+>   `result.json` — score gauge + band, six-dimension bars with excluded/
+>   neutral-default markers, Chart.js radar + earned-vs-max charts,
+>   strengths/risks, anomaly box, product recommendation cards, and a
+>   "Run AI Analysis Now" action when no result exists yet. Still missing
+>   from the Phase 5 scope: the score trend line (needs `ScoreComputation`
+>   history) and PDF export (Phase 9).
+> - **Phases 2, 3, 6, 7** — not started. Home page UI aligned to the
+>   product story. A teammate has started AA connector code
+>   (`HttpClientHelper` in Core).
 
 Suggested build order, sequenced so there's always something
 demonstrable, and mapped loosely to the IDBI Innovate 2026 timeline

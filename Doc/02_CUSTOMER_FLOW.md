@@ -9,6 +9,12 @@
 > `POST /api/msme-data/{uan}/analyze` recomputes and overwrites `result.json`.
 > The `t_MsmeEnquiry` Udyam cache (see `01_DOMAIN_MODEL.md` status note)
 > gives Step 1 its "second lookup needs no API call" behavior.
+>
+> **Update (2026-07-03):** Step 8 now has a first implementation —
+> `GET /Dashboard/FinancialHealthCard?uan={UAN}` (`DashboardController`)
+> renders the Financial Health Card from the blob-persisted `result.json`
+> (via `IBlobAnalysisService`), reachable from the dashboard sidebar's
+> "Risk Score" link. See the Step 8 note below for what it covers.
 
 This is the MSME's journey from first landing on the platform to a credit
 officer seeing their Financial Health Card in the IDBI LOS. Each step
@@ -178,6 +184,21 @@ background job in Step 10).
   risks sorted by `RelativeWeight`, recommended product cards, and a
   freshness indicator sourced from `DataFreshnessAt`.
 - PDF export (if built) renders from the same view model.
+
+> **Implemented (2026-07-03), with one deviation:** the page exists at
+> `GET /Dashboard/FinancialHealthCard?uan={UAN}` but reads the
+> `RiskAnalysisResult` straight from the MSME's blob-folder `result.json`
+> (`IBlobAnalysisService.GetResultAsync`) rather than from
+> `ScoreComputation` rows, which don't exist yet — so there is no trend
+> line and no PDF export. What it does render: score gauge (0–1000) with
+> band chip, rules-vs-ML composition tiles, six-dimension bars with
+> neutral-default / excluded-dimension markers, Chart.js radar and
+> earned-vs-max bar charts, strengths/risks from `Explanations`, the
+> cross-source anomaly box, and recommended product cards. The enterprise
+> name in the header comes from the stored `udyam.json`. If no result
+> exists yet, the page shows file status (present/missing) and a
+> "Run AI Analysis Now" button that calls
+> `POST /api/msme-data/{uan}/analyze?force=true` and reloads.
 
 ## Step 9 — IDBI LOS integration
 

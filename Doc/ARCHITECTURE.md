@@ -31,9 +31,12 @@ F:\FinRiskLensAI\
 ├── FinRiskLensAI.sln
 │
 ├── FinRiskLensAI\                 → Web / Presentation layer (startup project)
-│   ├── Controllers\HomeController.cs
-│   ├── Models\ErrorViewModel.cs
-│   ├── Views\                     (Razor views + shared layout)
+│   ├── Controllers\               HomeController · DashboardController
+│   │                              OnboardingController · MsmeDataController
+│   │                              ScoringController
+│   ├── Models\                    ErrorViewModel · FinancialHealthCardViewModel
+│   ├── Views\                     (Razor views + shared layout; Dashboard\
+│   │                              FinancialHealthCard.cshtml renders the card)
 │   ├── wwwroot\                   (static assets: bootstrap, jQuery, css, js)
 │   ├── Program.cs                 (host bootstrap, DI, middleware pipeline)
 │   ├── appsettings.json           (DB, JWT, Serilog config)

@@ -13,6 +13,13 @@
 > covers most of "get current score" — §2 should either wrap it or read the
 > persisted `ScoreComputation` rows once those entities exist. §3/§4 remain
 > blocked on the JWT bearer registration (gap 2 in `07_SETUP_GAPS.md`).
+>
+> **Update (2026-07-03):** our own Razor consumer of §2 now exists as an MVC
+> page, not an API: `GET /Dashboard/FinancialHealthCard?uan={UAN}` reads the
+> blob `result.json` server-side via `IBlobAnalysisService` (no HTTP hop) and
+> triggers recomputes through the existing
+> `POST /api/msme-data/{uan}/analyze?force=true`. A JSON §2 endpoint is still
+> unbuilt — external callers should keep using `GET /api/msme-data/{uan}/result`.
 
 This defines the API surface at a contract level — request/response
 shape and purpose. Exact route naming, versioning scheme, and DTO class
