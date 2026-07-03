@@ -1,6 +1,7 @@
 ﻿using FinRiskLensAI.Core.Models.Admin;
 using FinRiskLensAI.Core.Models.Common;
 using FinRiskLensAI.Core.Models.Onboarding;
+using FinRiskLensAI.Core.Models.Universal;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace FinRiskLensAI.Data.DbContextEDMX
         public DbSet<MsmeEnquiry> MsmeEnquiries => Set<MsmeEnquiry>();
         public DbSet<MsmeLocation> MsmeLocations => Set<MsmeLocation>();
         public DbSet<MsmeNicCode> MsmeNicCodes => Set<MsmeNicCode>();
+        public DbSet<StaticResponseModel> StaticResponseModel => Set<StaticResponseModel>();
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
