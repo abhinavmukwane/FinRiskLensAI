@@ -16,24 +16,26 @@
                     <span class="font-data uppercase tracking-wider text-success"
                           style="font-size: 10px; font-weight: 700;">IDBI Innovate 2026 · MSME Financial Health Score</span>
                 </div>
-                <h2 class="display-4 text-primary font-heading fw-bold mb-3" style="line-height: 1.15;">
+              @*   <h2 class="display-4 text-primary font-heading fw-bold mb-3" style="line-height: 1.15;">
                     A financial health score for <br />
                     <span class="text-secondary">credit-invisible MSMEs</span>
+                </h2> *@
+                <h2 class="display-4 text-primary font-heading fw-bold mb-3" style="line-height: 1.15;">
+                    Know Your MSME's <br />
+                    <span class="text-secondary">Financial Health Score</span>
                 </h2>
                 <p class="text-secondary lead mb-4" style="max-width: 500px;">
-                    FinRiskLens AI aggregates alternate data — GST returns, ITR, Account Aggregator bank
-                    statements, UPI patterns, and EPFO payroll — to compute a 6-dimension health score
-                    (0–1000) for New-to-Credit and New-to-Bank enterprises.
+                    Verify your enterprise with Udyam and generate an AI-powered Financial Health Score using GST, Income Tax, Bank Statements, Account Aggregator data, and other trusted financial information to support faster and smarter lending decisions.
                 </p>
                 <div class="d-flex flex-column flex-sm-row gap-3 mb-4">
                     <button class="btn btn-primary-maroon px-4 py-3 rounded-3 d-flex align-items-center justify-content-center gap-2 font-heading"
                             onclick="window.location.href='/Onboarding/CustOnboarding';">
-                        Start with your Udyam number
+                        Start MSME Assessment
                         <i class="bi bi-arrow-right"></i>
                     </button>
                     <button class="btn btn-outline-maroon px-4 py-3 rounded-3 font-heading"
                             onclick="document.getElementById('score-dimensions').scrollIntoView({behavior:'smooth'});">
-                        How the score works
+                        How It Works
                     </button>
                 </div>
             </div>
@@ -132,78 +134,66 @@
     <!-- Six Dimensions Section -->
     <section id="score-dimensions" class="mx-auto px-margin-desktop py-5" style="max-width: 1440px;">
         <div class="text-center mb-5">
-            <h3 class="h2 text-primary font-heading fw-bold mb-2">One score, six dimensions</h3>
+            <h3 class="h2 text-primary font-heading fw-bold mb-2">One Score. Complete MSME Financial Assessment.</h3>
             <p class="text-secondary mx-auto" style="max-width: 600px;">
-                Every Financial Health Score (0–1000) is a weighted blend of six sub-scores, each traceable
-                to the exact data it was computed from — with plain-language reasons, not black-box numbers.
+                Our AI-powered Financial Health Score (0–1000) combines trusted government, financial, and business data to deliver a transparent, explainable assessment for faster MSME credit decisions.
             </p>
         </div>
 
         <div class="row g-4">
+
+            <!-- Business Identity -->
             <div class="col-md-6 col-lg-4">
                 <div class="card-premium p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Revenue Vitality</h4>
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Business Identity & Verification</h4>
+                        <span class="font-data small fw-bold text-secondary">15%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width:15%;"
+                             aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Verify enterprise identity using Udyam, PAN, GSTIN and business registration details to establish a trusted business profile.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Revenue -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Revenue & Tax Compliance</h4>
                         <span class="font-data small fw-bold text-secondary">25%</span>
                     </div>
                     <div class="progress mb-3" style="height: 6px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: 25%;"
+                        <div class="progress-bar bg-primary" role="progressbar" style="width:25%;"
                              aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                     <p class="small text-secondary mb-0">
-                        Real, growing, consistent revenue — GST turnover trends and ITR income
-                        stability, cross-checked against each other.
+                        Evaluate GST returns, turnover trends, Input Tax Credit and Income Tax data to measure revenue consistency and compliance.
                     </p>
                 </div>
             </div>
+
+            <!-- Banking -->
             <div class="col-md-6 col-lg-4">
                 <div class="card-premium p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Cash Flow Health</h4>
-                        <span class="font-data small fw-bold text-secondary">20%</span>
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Banking & Cash Flow Health</h4>
+                        <span class="font-data small fw-bold text-secondary">25%</span>
                     </div>
                     <div class="progress mb-3" style="height: 6px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: 20%;"
-                             aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar bg-primary" role="progressbar" style="width:25%;"
+                             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                     <p class="small text-secondary mb-0">
-                        Cash cushion and inflow predictability from consented Account Aggregator bank
-                        statements — balances, volatility, bounce rates.
+                        Assess Account Aggregator bank statements, cash flow patterns, balances and transaction behaviour to evaluate repayment capacity.
                     </p>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="card-premium p-4 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Transaction Trustworthiness</h4>
-                        <span class="font-data small fw-bold text-secondary">15%</span>
-                    </div>
-                    <div class="progress mb-3" style="height: 6px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: 15%;"
-                             aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="small text-secondary mb-0">
-                        Quality of the customer base from UPI patterns — counterparty diversity,
-                        repeat payers, transaction velocity.
-                    </p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="card-premium p-4 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Compliance Quotient</h4>
-                        <span class="font-data small fw-bold text-secondary">15%</span>
-                    </div>
-                    <div class="progress mb-3" style="height: 6px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: 15%;"
-                             aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="small text-secondary mb-0">
-                        Regulatory discipline — GST and ITR filing regularity plus EPFO contribution
-                        consistency, a strong proxy for repayment discipline.
-                    </p>
-                </div>
-            </div>
+
+            <!-- Business Stability -->
             <div class="col-md-6 col-lg-4">
                 <div class="card-premium p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -211,32 +201,53 @@
                         <span class="font-data small fw-bold text-secondary">15%</span>
                     </div>
                     <div class="progress mb-3" style="height: 6px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: 15%;"
+                        <div class="progress-bar bg-primary" role="progressbar" style="width:15%;"
                              aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                     <p class="small text-secondary mb-0">
-                        A durable, ongoing concern — business vintage from Udyam, employee headcount
-                        trends from EPFO, and sector risk.
+                        Analyze enterprise age, industry, business location and operational history to determine long-term business sustainability.
                     </p>
                 </div>
             </div>
+
+            <!-- Risk Intelligence -->
             <div class="col-md-6 col-lg-4">
                 <div class="card-premium p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Debt Serviceability</h4>
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">Digital & Risk Intelligence</h4>
                         <span class="font-data small fw-bold text-secondary">10%</span>
                     </div>
                     <div class="progress mb-3" style="height: 6px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: 10%;"
+                        <div class="progress-bar bg-primary" role="progressbar" style="width:10%;"
                              aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                     <p class="small text-secondary mb-0">
-                        Existing obligations vs. capacity — EMI-to-inflow ratio and projected DSCR.
-                        No credit history? Scored neutrally, never penalized.
+                        Evaluate IP reputation, geolocation, device intelligence and fraud indicators to strengthen identity and risk assessment.
                     </p>
                 </div>
             </div>
+
+            <!-- AI Score -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="h6 text-primary font-heading fw-bold mb-0">AI Credit Readiness</h4>
+                        <span class="font-data small fw-bold text-secondary">10%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width:10%;"
+                             aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="small text-secondary mb-0">
+                        Generate an explainable Financial Health Score using AI-driven analysis of verified business, financial and compliance data.
+                    </p>
+                </div>
+            </div>
+
         </div>
+
+
+
     </section>
 
     <!-- Features Bento Section -->
