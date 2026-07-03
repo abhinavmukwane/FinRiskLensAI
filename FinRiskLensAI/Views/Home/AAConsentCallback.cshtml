@@ -1,0 +1,310 @@
+@model FinRiskLensAI.Models.AAConsentCallbackViewModel
+@{
+    Layout = null;
+    var ok = Model.IsSuccess;
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@(ok ? "AA Consent Success" : "AA Consent Failed") — FinRiskLensAI</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #fdf4f7 0%, #faf6f7 45%, #f4ebee 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .result-container { width: 100%; max-width: 400px; }
+
+        .result-card {
+            background: #fff;
+            border: 1px solid #ead9df;
+            border-radius: 16px;
+            padding: 18px 16px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(87, 0, 29, .05), 0 20px 40px rgba(87, 0, 29, .08);
+            overflow: hidden;
+        }
+
+        .brand {
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            color: #57001d;
+            margin-bottom: 10px;
+        }
+        .brand span { color: #974354; }
+
+        /* ── icon animation ── */
+        .animation-wrapper { position: relative; width: 140px; height: 140px; margin: 0 auto 15px; }
+
+        .status-icon {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 75px; height: 75px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px;
+            background: #fff;
+            animation: scaleIn .7s ease;
+        }
+        .status-icon::before {
+            content: "";
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            animation: ripple 2s infinite;
+        }
+        .icon-success {
+            border: 3px solid #2e7d4f;
+            color: #2e7d4f;
+            box-shadow: 0 0 0 10px rgba(46, 125, 79, .08), 0 0 25px rgba(46, 125, 79, .18);
+        }
+        .icon-success::before { border: 2px solid rgba(46, 125, 79, .2); }
+        .icon-failure {
+            border: 3px solid #c22f3e;
+            color: #c22f3e;
+            box-shadow: 0 0 0 10px rgba(194, 47, 62, .08), 0 0 25px rgba(194, 47, 62, .18);
+        }
+        .icon-failure::before { border: 2px solid rgba(194, 47, 62, .2); }
+
+        /* floating accents, in brand tones */
+        .shape { position: absolute; animation: float 3s ease-in-out infinite; }
+        .dot { width: 7px; height: 7px; border-radius: 50%; }
+        .circle { width: 10px; height: 10px; border: 2px solid; border-radius: 50%; }
+        .star { color: #e6c34c; font-size: 12px; }
+        .s1 { top: 20px; left: 20px; background: #974354; }
+        .s2 { top: 35px; right: 20px; border-color: #57001d; }
+        .s3 { bottom: 25px; left: 25px; background: #2e7d4f; }
+        .s4 { bottom: 35px; right: 25px; border-color: #e08a3c; }
+        .s5 { top: 65px; left: 5px; }
+        .s6 { top: 70px; right: 8px; }
+
+        /* ── badges + text ── */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 11px; font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .badge-success { background: #e3f4ea; color: #0f5137; }
+        .badge-failure { background: #fbe0e0; color: #8b1020; }
+
+        .title {
+            font-family: 'Sora', sans-serif;
+            font-size: 18px; font-weight: 700;
+            color: #57001d;
+            letter-spacing: .5px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle { color: #974354; font-size: 12px; line-height: 1.6; margin-bottom: 10px; }
+
+        /* ── details card ── */
+        .details-card {
+            background: #faf7f8;
+            border: 1px solid #ead9df;
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        .details-header {
+            padding: 10px 16px;
+            font-size: 13px; font-weight: 600;
+            color: #57001d;
+            border-bottom: 1px solid #ead9df;
+        }
+        .detail-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 16px;
+            border-bottom: 1px solid #f0e2e7;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: #974354; font-weight: 400; font-size: 12px; }
+        .detail-value { font-weight: 500; color: #2b2026; font-size: 11px; }
+
+        .chip-approved { background: #e3f4ea; color: #0f5137; padding: 3px 10px; border-radius: 20px; font-size: 10px; }
+        .chip-rejected { background: #fbe0e0; color: #8b1020; padding: 3px 10px; border-radius: 20px; font-size: 10px; }
+        .value-progress { color: #7a5b00; }
+        .value-failed { color: #8b1020; font-weight: 600; }
+
+        /* ── message + button ── */
+        .next-step { color: #974354; font-size: 11px; margin-bottom: 8px; }
+        .next-step i { margin-right: 5px; }
+
+        .btn-action {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, #974354, #57001d);
+            color: #fff;
+            text-decoration: none;
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-weight: 500; font-size: 12px;
+            transition: .3s;
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(87, 0, 29, .25); }
+
+        .footer { margin-top: 12px; color: #b79aa3; font-size: 10px; }
+
+        /* ── animations ── */
+        @@keyframes scaleIn {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
+            70% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        @@keyframes ripple {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.6); opacity: 0; }
+        }
+        @@keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @@media (max-width: 480px) {
+            .detail-row { flex-direction: column; align-items: flex-start; gap: 5px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="result-container">
+
+        <div class="result-card">
+
+            <div class="brand">FinRiskLens<span>AI</span></div>
+
+            <div class="animation-wrapper">
+                <div class="shape dot s1"></div>
+                <div class="shape circle s2"></div>
+                <div class="shape dot s3"></div>
+                <div class="shape circle s4"></div>
+                <div class="shape star s5"><i class="fa-solid fa-star"></i></div>
+                <div class="shape star s6"><i class="fa-solid fa-star"></i></div>
+
+                @if (ok)
+                {
+                    <div class="status-icon icon-success"><i class="fa-solid fa-check"></i></div>
+                }
+                else
+                {
+                    <div class="status-icon icon-failure"><i class="fa-solid fa-xmark"></i></div>
+                }
+            </div>
+
+            @if (ok)
+            {
+                <div class="status-badge badge-success">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Successfully Verified
+                </div>
+
+                <div class="title">CONSENT COMPLETE</div>
+
+                <div class="subtitle">
+                    Your Account Aggregator consent has been successfully submitted
+                    and approved. Your financial data verification will continue
+                    automatically for your credit health assessment.
+                </div>
+            }
+            else
+            {
+                <div class="status-badge badge-failure">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    Verification Failed
+                </div>
+
+                <div class="title">CONSENT FAILED</div>
+
+                <div class="subtitle">
+                    We were unable to complete your Account Aggregator consent
+                    verification. Please try again or contact support if the issue
+                    persists.
+                </div>
+            }
+
+            <div class="details-card">
+                <div class="details-header">Application Details</div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Application ID</div>
+                    <div class="detail-value">@(Model.ApplicationId ?? "—")</div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ConsentHandle))
+                {
+                    <div class="detail-row">
+                        <div class="detail-label">Consent Handle</div>
+                        <div class="detail-value">@Model.ConsentHandle</div>
+                    </div>
+                }
+
+                <div class="detail-row">
+                    <div class="detail-label">Consent Status</div>
+                    <div class="detail-value @(ok ? "chip-approved" : "chip-rejected")">
+                        @(ok ? "Approved" : "Failed")
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Verification Status</div>
+                    <div class="detail-value @(ok ? "value-progress" : "value-failed")">
+                        @(ok ? "In Progress" : "Unsuccessful")
+                    </div>
+                </div>
+            </div>
+
+            @if (ok)
+            {
+                <div class="next-step">
+                    <i class="fa-solid fa-clock"></i>
+                    Verification usually completes within a few minutes.
+                </div>
+
+                <a href="@Url.Action("Dashboard", "Dashboard")" class="btn-action">
+                    <i class="fa-solid fa-house"></i>
+                    Return To Dashboard
+                </a>
+            }
+            else
+            {
+                <div class="next-step">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Please retry the consent process to continue your credit assessment.
+                </div>
+
+                <a href="@Url.Action("CustOnboarding", "Onboarding")" class="btn-action">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    Try Again
+                </a>
+            }
+
+            <div class="footer">
+                FinRiskLensAI &middot; Account Aggregator Consent
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
