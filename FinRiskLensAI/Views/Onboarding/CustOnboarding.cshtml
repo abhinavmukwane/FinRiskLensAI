@@ -3,6 +3,9 @@
     Layout = "~/Views/Shared/_CustOnboardingLayout.cshtml";
 }
 
+@* Added By Sourabh 2026-07-03 YMD *@
+<script src="~/frlscripts/onboarding/custonboarding.js"></script>
+
     <div class="container py-4 py-md-1">
         <div id="onboardingFlow">
 
@@ -71,26 +74,33 @@
                     </div>
                 </div>
 
-                <!-- ============ FETCH LOADER ============ -->
-                <div id="fetchLoader">
-                    <div class="spinner-cv"></div>
-                    <div class="screen-title"
-                         style="font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--maroon-deep);">
-                        Talking to the Udyam registry…
+
+            <!-- ============ FETCH LOADER ============ -->
+            <div id="fetchLoader">
+                <div class="spinner-cv"></div>
+
+                <div class="screen-title"
+                     style="font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--maroon-deep);">
+                    Verifying Udyam details...
+                </div>
+
+                <div class="loading-steps">
+                    <div class="li" id="ls1">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Validating Udyam number
                     </div>
-                    <div class="loading-steps">
-                        <div class="li" id="ls1">
-                            <i class="bi bi-check-circle-fill"></i> Validating Udyam number format
-                        </div>
-                        <div class="li" id="ls2">
-                            <i class="bi bi-check-circle-fill"></i> Fetching enterprise &amp; PAN
-                            record
-                        </div>
-                        <div class="li" id="ls3">
-                            <i class="bi bi-check-circle-fill"></i> Sending OTP to registered email
-                        </div>
+
+                    <div class="li" id="ls2">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Fetching enterprise information
+                    </div>
+
+                    <div class="li" id="ls3">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Preparing verification details
                     </div>
                 </div>
+            </div>
 
                 <!-- ============ STEP 2 : REVIEW & PROCEED ============ -->
                 <div class="fade-step d-none" id="step2">
@@ -297,7 +307,6 @@
     </div>
 
     <script>
-
         $(function () {
 
             // ---------- HELPERS ----------
@@ -436,126 +445,47 @@
                         $('html,body').animate({ scrollTop: 0 }, 300);
                     }, 3200);
 
-                    } else {
+                } else {
+                    const pattern = /^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/;
+                    if (!pattern.test(val)) {
+                        $('#udyamError').removeClass('d-none').find('span').text('Please enter a valid Udyam number in the format UDYAM-XX-00-0000000.');
+                        return;
+                    }
+                    $('#udyamError').addClass('d-none');
 
-               const pattern = /^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/;
-            
-               if (!pattern.test(val)) {
-                   $('#udyamError')
-                       .removeClass('d-none')
-                       .find('span')
-                       .text('Please enter a valid Udyam number in the format UDYAM-XX-00-0000000.');
-                   return;
-               }
-            
-               $('#udyamError').addClass('d-none');
-            
-               // Hide Step1 & Show Loader
-               $('#step1').addClass('d-none');
-            
-               $('#fetchLoader .screen-title').text('Talking to the Udyam registry...');
-            
-               $('#ls1').html('<i class="bi bi-check-circle-fill"></i> Validating Udyam number format');
-               $('#ls2').html('<i class="bi bi-check-circle-fill"></i> Fetching enterprise & PAN record');
-               $('#ls3').html('<i class="bi bi-check-circle-fill"></i> Saving MSME information');
-            
-               $('#ls1,#ls2,#ls3').removeClass('active done');
-            
-               $('#fetchLoader').show();
-            
-               $('html,body').animate({ scrollTop: 0 }, 200);
-            
-               setTimeout(function () {
-                   $('#ls1').addClass('active');
-               }, 200);
-            
-               setTimeout(function () {
-                   $('#ls1').removeClass('active').addClass('done');
-                   $('#ls2').addClass('active');
-               }, 900);
-            
-               setTimeout(function () {
-                   $('#ls2').removeClass('active').addClass('done');
-                   $('#ls3').addClass('active');
-               }, 1800);
-            
-               // Call API
-               $.ajax({
-            
-                   url: "/Onboarding/FetchUdyam",
-                   type: "POST",
-                   data: {
-                       uan: val
-                   },
-            
-                   success: function (res) {
+                    // Hide Step 1, show loader
+                    $('#step1').addClass('d-none');
+                    $('#ls1, #ls2, #ls3').removeClass('active done');
+                    $('#fetchLoader').show();
+                    $('html,body').animate({ scrollTop: 0 }, 200);
 
-                           if (res.status) {
+                    // Step 1 — Validating format (instant)
+                    setTimeout(function () {
+                        $('#ls1').addClass('active');
+                    }, 200);
+                    setTimeout(function () {
+                        $('#ls1').removeClass('active').addClass('done');
+                        // Step 2 — Fetching enterprise
+                        $('#ls2').addClass('active');
+                    }, 900);
+                    setTimeout(function () {
+                        $('#ls2').removeClass('active').addClass('done');
+                        // Step 3 — Sending OTP
+                        $('#ls3').addClass('active');
+                    }, 1800);
+                    setTimeout(function () {
+                        $('#ls3').removeClass('active').addClass('done');
+                    }, 2700);
 
-                          $('#ls3').removeClass('active').addClass('done');
-
-                        loadUdyamDetails(res.uan)
-                          .done(function (response) {
-                      
-                              if (!response.status) {
-                                  showToast(response.message);
-                                  return;
-                              }
-                      
-                              var d = response.data;
-                      
-                              $("#rv_entName").text(d.enterpriseName);
-                              $("#rv_orgType").text(d.organizationType);
-                              $("#rv_dob").text(d.dateOfIncorporation);
-                              $("#rv_msme").text(d.enterpriseType);
-                      
-                              $("#rv_email").text(d.email);
-                              $("#mobileInput").val(d.mobile);
-                      
-                              $("#rv_address").text(d.address);
-                      
-                              $('#fetchLoader').hide();
-                              $('#step1').addClass('d-none');
-                              $('#step2').removeClass('d-none');
-                      
-                              goToRailStep(2);
-                      
-                              showToast('Enterprise details fetched successfully.');
-                      
-                              $('html,body').animate({
-                                  scrollTop: 0
-                              }, 300);
-                          })
-                          .fail(function () {
-                      
-                              $('#fetchLoader').hide();
-                              $('#step1').removeClass('d-none');
-                      
-                              showToast("Failed to load enterprise details.");
-                          });
-                   }
-                       else {
-            
-                           $('#fetchLoader').hide();
-            
-                           $('#step1').removeClass('d-none');
-            
-                           showToast(res.message || "Unable to fetch Udyam details.");
-                       }
-                   },
-            
-                   error: function () {
-            
-                       $('#fetchLoader').hide();
-            
-                       $('#step1').removeClass('d-none');
-            
-                       showToast("Something went wrong while fetching Udyam details.");
-                   }
-            
-               });
-            }
-            
+                    // After all steps done → show Step 2
+                    setTimeout(function () {
+                        $('#fetchLoader').hide();
+                        $('#step2').removeClass('d-none');
+                        goToRailStep(2);
+                        showToast('Enterprise found. Please review your details.');
+                        $('html,body').animate({ scrollTop: 0 }, 300);
+                    }, 3200);
+                }
             });
 
             // ---------- REVIEW STEP: enable Proceed button ----------
@@ -643,6 +573,18 @@
                 showToast('A new OTP has been sent.');
             });
 
+            // Back: Step 3 → Step 2 / Step 1
+            $('#btnBackStep2').on('click', function () {
+                clearInterval(otpTimerInterval);
+                $('#step3').addClass('d-none');
+                if (isLoginMode) {
+                    $('#step1').removeClass('d-none');
+                } else {
+                    $('#step2').removeClass('d-none');
+                    goToRailStep(2);
+                }
+            });
+
             // ---------- STEP 3 → STEP 4 (verify OTP) ----------
             $('#btnVerifyOtp').on('click', function () {
                 const code = $('.otp-input').map(function () { return this.value; }).get().join('');
@@ -683,18 +625,13 @@
                 }, 1200);
             });
 
-           
+            // ---------- Dashboard button ----------
+            $('#btnGoToDashboard').on('click', function () {
+                showToast('Welcome to your Credit Risk Intelligence Dashboard.');
+                $('#onboardingFlow').addClass('d-none');
+                $('#dashboardView').removeClass('d-none');
+                $('html,body').animate({ scrollTop: 0 }, 300);
+            });
 
         });
-
-     function loadUdyamDetails(uan) {
-
-        return $.ajax({
-            url: '/Onboarding/GetUdyamDetails',
-            type: 'GET',
-            data: { uan: uan }
-        });
-    }
-
-                    
     </script>
