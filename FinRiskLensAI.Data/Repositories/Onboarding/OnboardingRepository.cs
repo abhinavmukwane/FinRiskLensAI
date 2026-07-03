@@ -56,7 +56,87 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
 
             return result;
         }
-        public async  Task SaveMsmeData(string json)
+
+        //public async Task<MsmeEnquiry> SaveMsmeData(string json)
+        //{
+        //    var model = JsonConvert.DeserializeObject<UdyamResponseModel>(json);
+        //    if (model == null)
+        //        throw new ArgumentException("Invalid or empty JSON payload.", nameof(json));
+
+        //    if (string.IsNullOrWhiteSpace(model.uan))
+        //        throw new ArgumentException("UAN is required to save or update MSME data.");
+
+        //    var excluded = new List<string> { "MsmeEnquiryID", "CreatedAt", "Uan" };
+
+        //    await using var transaction = await _context.Database.BeginTransactionAsync();
+        //    try
+        //    {
+        //        var enquiry = await _context.MsmeEnquiries
+        //            .Include(x => x.Locations)
+        //            .Include(x => x.NicCodes)
+        //            .FirstOrDefaultAsync(x => x.Uan == model.uan);
+
+        //        bool isNew = enquiry == null;
+
+        //        if (isNew)
+        //        {
+        //            enquiry = new MsmeEnquiry
+        //            {
+        //                Uan = model.uan
+        //            };
+        //            _context.MsmeEnquiries.Add(enquiry);
+        //        }
+        //        else
+        //        {
+        //            _context.MsmeLocations.RemoveRange(enquiry.Locations);
+        //            _context.MsmeNicCodes.RemoveRange(enquiry.NicCodes);
+        //        }
+
+        //        model.MapToModelObject(enquiry, excluded);
+        //        model.main_details?.MapToModelObject(enquiry, excluded);
+        //        enquiry.Payload = JsonConvert.SerializeObject(model);
+
+        //        await _context.SaveChangesAsync();
+
+        //        if (model.location_of_plant_details != null)
+        //        {
+        //            foreach (var item in model.location_of_plant_details)
+        //            {
+        //                var location = new MsmeLocation
+        //                {
+        //                    MsmeEnquiryID = enquiry.MsmeEnquiryID
+        //                };
+        //                item.MapToModelObject(location, new List<string> { "MsmeEnquiryID", "CreatedAt" });
+        //                _context.MsmeLocations.Add(location);
+        //            }
+        //        }
+
+        //        if (model.nic_code != null)
+        //        {
+        //            foreach (var item in model.nic_code)
+        //            {
+        //                var nic = new MsmeNicCode
+        //                {
+        //                    MsmeEnquiryID = enquiry.MsmeEnquiryID
+        //                };
+        //                item.MapToModelObject(nic, new List<string> { "MsmeEnquiryID", "CreatedAt" });
+        //                _context.MsmeNicCodes.Add(nic);
+        //            }
+        //        }
+
+        //        await _context.SaveChangesAsync();
+        //        await transaction.CommitAsync();
+
+        //        return enquiry;
+        //    }
+        //    catch
+        //    {
+        //        await transaction.RollbackAsync();
+        //        throw;
+        //    }
+        //}
+
+        public async Task SaveMsmeData(string json)
         {
             var model = JsonConvert.DeserializeObject<UdyamResponseModel>(json);
 
@@ -189,28 +269,28 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                 PinCode = data.Pin
             };
         }
-        //public async Task<ResultModel<RegisterModel>> AddUpdateConsentRegister(RegisterModel entity)
-        //{
-        //    var result = new ResultModel<RegisterModel>();
-        //    try
-        //    {
-        //        T_APPROVEDLOAN paObj = new T_APPROVEDLOAN();
-        //        entity.MapToModelObject(paObj);
-        //        _context.T_APPROVEDLOAN.Add(paObj);
-        //        await _context.SaveChangesAsync();
+        public async Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(UserRegistrationModel entity)
+        {
+            var result = new ResultModel<UserRegistrationModel>();
+            try
+            {
+                UserRegistrationModel paObj = new UserRegistrationModel();
+                entity.MapToModelObject(paObj);
+                _context.UserRegistration.Add(paObj);
+                await _context.SaveChangesAsync();
 
-        //        result.Result = tflResultType.tflSuccess;
-        //        result.Message = "Data Saved Successfully";
-        //        result.Data = entity;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        result.Result = tflResultType.tflError;
-        //        result.Message = ex.Message;
-        //        result.Data = null;
-        //    }
-        //    return result;
-        //}
+                result.Result = tflResultType.tflSuccess;
+                result.Message = "Data Saved Successfully";
+                result.Data = entity;
+            }
+            catch (Exception ex)
+            {
+                result.Result = tflResultType.tflError;
+                result.Message = ex.Message;
+                result.Data = null;
+            }
+            return result;
+        }
 
         //public async Task<ResultModel<RegisterModel>> AddUpdateOtp(RegisterModel entity)
         //{

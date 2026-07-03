@@ -1,5 +1,6 @@
 ﻿using FinRiskLensAI.Core.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.OnBoarding;
+using FinRiskLensAI.Core.Models.Onboarding;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinRiskLensAI.Controllers
@@ -61,5 +62,28 @@ namespace FinRiskLensAI.Controllers
                 });
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterUser(UserRegistrationModel model)
+        {
+            if (model == null)
+            {
+                return Json(new {status = false,message = "Invalid request." });
+            }
+
+            var result = await _onboardingService.AddUpdateUserRegst(model);
+
+            if (result == null)
+            {
+                return Json(new{ status = false, message = "Something went wrong." });
+            }
+
+            return Json(new
+            {
+                status = true,
+                message = "User registered successfully."
+            });
+        }
+
     }
 }

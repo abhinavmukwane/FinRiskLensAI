@@ -21,6 +21,7 @@ namespace FinRiskLensAI.Data.DbContextEDMX
         public DbSet<MsmeLocation> MsmeLocations => Set<MsmeLocation>();
         public DbSet<MsmeNicCode> MsmeNicCodes => Set<MsmeNicCode>();
         public DbSet<StaticResponseModel> StaticResponseModel => Set<StaticResponseModel>();
+        public DbSet<UserRegistrationModel> UserRegistration => Set<UserRegistrationModel>();
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {

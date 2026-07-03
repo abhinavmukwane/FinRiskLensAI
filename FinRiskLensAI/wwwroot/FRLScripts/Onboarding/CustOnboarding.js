@@ -237,30 +237,7 @@
                                         showToast("Failed to load enterprise details.");
                                     });
                             }
-                            // if (res.status) {
-
-                            //     // Finish last animation
-                            //     $('#ls3').removeClass('active').addClass('done');
-                            //     // Wait until animation completes
-                            //     setTimeout(function () {
-
-                            //         $('#fetchLoader').hide();
-
-                            //         $('#step1').addClass('d-none');
-                            //         $('#step2').removeClass('d-none');
-
-                            //         goToRailStep(2);
-                            //         loadUdyamDetails(res.uan);
-
-                            //         showToast('Enterprise details fetched successfully.');
-
-                            //         $('html,body').animate({
-                            //             scrollTop: 0
-                            //         }, 300);
-
-                            //     }, 1000);
-
-                            // }
+                            
                             else {
 
                                 $('#fetchLoader').hide();
@@ -313,22 +290,87 @@
                 goToRailStep(1);
             });
 
+
             // ---------- STEP 2 → STEP 3 (send OTP) ----------
             $('#btnProceedToOtp').on('click', function () {
+
+                var model = {
+                    UdyamNumber: $('#rv_udyam_number').val(),   
+                    MobileNumber: $('#mobileInput').val(),
+                    Email: $('#rv_email').val(),
+                    GstinNumber: $('#rv_gstnNumber').val(),     
+                    PanNumber: $('#rv_panNo').val()             
+                };
+
                 const $btn = $(this);
-                $btn.prop('disabled', true).html('<span class="spin-loader"></span> Sending OTP…');
-                setTimeout(function () {
-                    $btn.prop('disabled', false).html('<i class="bi bi-send me-1"></i> Proceed &amp; Send OTP');
-                    $('#step2').addClass('d-none');
-                    $('#step3').removeClass('d-none');
-                    $('#otpEmailTarget').text('co****ct@sharmaprecision.in');
-                    goToRailStep(3);
-                    startOtpTimer();
-                    $('.otp-input').first().focus();
-                    showToast('OTP sent to your registered email & mobile.');
-                    $('html,body').animate({ scrollTop: 0 }, 300);
-                }, 1200);
+
+                $btn.prop('disabled', true)
+                    .html('<span class="spin-loader"></span> Registering...');
+
+                $.ajax({
+                    url: '/Onboarding/RegisterUser',
+                    type: 'POST',
+                    data: model,
+
+                    success: function (response) {
+
+                        if (response.status) {
+
+                            $btn.prop('disabled', false)
+                                .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');
+
+                            $('#step2').addClass('d-none');
+                            $('#step3').removeClass('d-none');
+
+                            $('#otpEmailTarget').text(model.Email);
+
+                            goToRailStep(3);
+                            startOtpTimer();
+
+                            $('.otp-input').first().focus();
+
+                            showToast(response.message);
+
+                            $('html,body').animate({ scrollTop: 0 }, 300);
+                        }
+                        else {
+                            $('#reviewError').removeClass('d-none');
+                            $('#reviewError span').text(response.message);
+
+                            $btn.prop('disabled', false)
+                                .html('<i class="bi bi-send me-1"></i> Register');
+                        }
+                    },
+
+                    error: function () {
+
+                        $('#reviewError').removeClass('d-none');
+                        $('#reviewError span').text('Something went wrong.');
+
+                        $btn.prop('disabled', false)
+                            .html('<i class="bi bi-send me-1"></i> Register');
+                    }
+                });
+
             });
+
+
+
+            // $('#btnProceedToOtp').on('click', function () {
+            //     const $btn = $(this);
+            //     $btn.prop('disabled', true).html('<span class="spin-loader"></span> Sending OTP…');
+            //     setTimeout(function () {
+            //         $btn.prop('disabled', false).html('<i class="bi bi-send me-1"></i> Proceed &amp; Send OTP');
+            //         $('#step2').addClass('d-none');
+            //         $('#step3').removeClass('d-none');
+            //         $('#otpEmailTarget').text('co****ct@sharmaprecision.in');
+            //         goToRailStep(3);
+            //         startOtpTimer();
+            //         $('.otp-input').first().focus();
+            //         showToast('OTP sent to your registered email & mobile.');
+            //         $('html,body').animate({ scrollTop: 0 }, 300);
+            //     }, 1200);
+            // });
 
             // ---------- OTP BOX BEHAVIOUR ----------
             $('.otp-input').on('input', function () {
