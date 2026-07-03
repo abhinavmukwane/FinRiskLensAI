@@ -21,6 +21,11 @@ builder.Host.ConfigureContainer<ContainerBuilder>(container =>
     container.RegisterModule(new DataModule());
     container.RegisterModule(new ServicesModule());
     container.RegisterModule(new MLModule());
+
+    // Settings POCOs bound from configuration (EmailService and friends take these directly)
+    container.RegisterInstance(
+        builder.Configuration.GetSection("Smtp").Get<FinRiskLensAI.Core.Models.Common.SmtpSettings>()
+        ?? new FinRiskLensAI.Core.Models.Common.SmtpSettings());
 });
 
 // Add services to the container.
