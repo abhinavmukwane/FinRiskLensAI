@@ -41,7 +41,7 @@
             </div>
 
             <!-- Hero Mockups (Bento Cluster) -->
-            <div class="col-lg-6 position-relative d-none d-lg-block" style="height: 520px;">
+            <div class="col-lg-6 position-relative d-none d-lg-block hero-cluster" style="height: 520px;">
                 <!-- Main Preview Panel -->
                 <div class="position-absolute top-50 start-50 translate-middle w-100 card-premium overflow-hidden"
                      style="max-width: 440px; z-index: 10;">
@@ -66,12 +66,12 @@
                                 <div class="position-relative d-flex align-items-center justify-content-center rounded-circle risk-gauge-gradient p-1"
                                      style="width: 100px; height: 100px;">
                                     <div class="w-100 h-100 rounded-circle bg-white d-flex flex-column align-items-center justify-content-center">
-                                        <span class="h4 text-primary font-heading mb-0 fw-bold">842</span>
-                                        <span class="font-data text-secondary uppercase"
+                                        <span id="heroScore" class="h4 text-primary font-heading mb-0 fw-bold">842</span>
+                                        <span id="heroBand" class="font-data text-secondary uppercase"
                                               style="font-size: 6px; letter-spacing: 1px;">EXCELLENT</span>
                                     </div>
-                                    <div class="position-absolute top-50 start-50 translate-middle w-100 h-100"
-                                         style="transform: rotate(120deg);">
+                                    <div id="heroNeedle" class="position-absolute top-50 start-50 translate-middle w-100 h-100"
+                                         style="transform: rotate(82deg); transition: transform 1.4s cubic-bezier(.34,1.56,.64,1);">
                                         <div class="bg-primary rounded-circle mx-auto"
                                              style="width: 3px; height: 8px; margin-top: -3px;"></div>
                                     </div>
@@ -84,10 +84,10 @@
                             <div class="bg-light rounded w-50" style="height: 8px;"></div>
                             <div class="row g-2 pt-3">
                                 <div class="col-6">
-                                    <div class="bg-primary bg-opacity-10 rounded" style="height: 36px;"></div>
+                                    <div class="bg-primary bg-opacity-10 rounded hero-pulse" style="height: 36px;"></div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="bg-success bg-opacity-10 rounded" style="height: 36px;"></div>
+                                    <div class="bg-success bg-opacity-10 rounded hero-pulse" style="height: 36px; animation-delay: .8s;"></div>
                                 </div>
                             </div>
                         </div>
@@ -95,7 +95,7 @@
                 </div>
 
                 <!-- Floating identity card -->
-                <div class="position-absolute top-0 end-0 glass-card-float p-3 rounded-3"
+                <div class="position-absolute top-0 end-0 glass-card-float p-3 rounded-3 hero-float hero-float-id"
                      style="width: 180px; z-index: 20;">
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <i class="bi bi-shield-check text-primary" style="font-size:1.25rem;"></i>
@@ -109,7 +109,7 @@
                 </div>
 
                 <!-- Floating chart card -->
-                <div class="position-absolute bottom-0 start-0 glass-card-float p-3 rounded-3"
+                <div class="position-absolute bottom-0 start-0 glass-card-float p-3 rounded-3 hero-float hero-float-chart"
                      style="width:220px; z-index: 20;">
                     <div class="d-flex align-items-center gap-2 mb-3">
                         <i class="bi bi-graph-up-arrow text-secondary" style="font-size:1.25rem;"></i>
@@ -119,15 +119,85 @@
                             SCORE TREND
                         </span>
                     </div>
-                    <div class="d-flex align-items-end gap-1.5" style="height: 60px;">
-                        <div class="bg-secondary bg-opacity-25 rounded-top" style="height: 40%; flex: 1;"></div>
-                        <div class="bg-secondary bg-opacity-50 rounded-top" style="height: 70%; flex: 1;"></div>
-                        <div class="bg-secondary bg-opacity-25 rounded-top" style="height: 55%; flex: 1;"></div>
-                        <div class="bg-secondary bg-opacity-75 rounded-top" style="height: 85%; flex: 1;"></div>
-                        <div class="bg-secondary rounded-top" style="height: 100%; flex: 1;"></div>
+                    <div id="heroBars" class="d-flex align-items-end gap-1.5" style="height: 60px;">
+                        <div class="bg-secondary bg-opacity-25 rounded-top hero-bar" style="flex: 1;"></div>
+                        <div class="bg-secondary bg-opacity-50 rounded-top hero-bar" style="flex: 1;"></div>
+                        <div class="bg-secondary bg-opacity-25 rounded-top hero-bar" style="flex: 1;"></div>
+                        <div class="bg-secondary bg-opacity-75 rounded-top hero-bar" style="flex: 1;"></div>
+                        <div class="bg-secondary rounded-top hero-bar" style="flex: 1;"></div>
                     </div>
                 </div>
             </div>
+
+            @* Hero animation styles + live-score/chart script *@
+            <style>
+                @@keyframes heroFloatCorner {
+                    0%, 100% { transform: translateY(0); }
+                    50%      { transform: translateY(-14px); }
+                }
+                .hero-float-id { animation: heroFloatCorner 5s ease-in-out infinite; will-change: transform; }
+                .hero-float-chart { animation: heroFloatCorner 7s ease-in-out infinite .5s; will-change: transform; }
+
+                @@keyframes heroPulse {
+                    0%, 100% { opacity: .5; }
+                    50%      { opacity: 1; }
+                }
+                .hero-pulse { animation: heroPulse 2.4s ease-in-out infinite; }
+
+                .hero-bar { height: 20%; transition: height .9s cubic-bezier(.34,1.56,.64,1); }
+
+                @@media (prefers-reduced-motion: reduce) {
+                    .hero-float-id, .hero-float-chart, .hero-pulse { animation: none; }
+                }
+            </style>
+            <script>
+                (function () {
+                    var scoreEl = document.getElementById('heroScore');
+                    var bandEl = document.getElementById('heroBand');
+                    var needleEl = document.getElementById('heroNeedle');
+                    var barsWrap = document.getElementById('heroBars');
+                    if (!scoreEl) return;
+
+                    var bars = barsWrap ? Array.prototype.slice.call(barsWrap.querySelectorAll('.hero-bar')) : [];
+                    var scenarios = [842, 806, 731, 878, 795];   // cycles through realistic scores
+                    var idx = 0, current = 842;
+
+                    function bandFor(s) {
+                        if (s >= 800) return 'EXCELLENT';
+                        if (s >= 650) return 'GOOD';
+                        if (s >= 500) return 'FAIR';
+                        if (s >= 350) return 'AT RISK';
+                        return 'HIGH RISK';
+                    }
+
+                    function tweenTo(target) {
+                        var start = current, startT = performance.now(), dur = 1200;
+                        function step(now) {
+                            var p = Math.min(1, (now - startT) / dur);
+                            var eased = 1 - Math.pow(1 - p, 3);
+                            var val = Math.round(start + (target - start) * eased);
+                            scoreEl.textContent = val;
+                            bandEl.textContent = bandFor(val);
+                            if (p < 1) requestAnimationFrame(step); else current = target;
+                        }
+                        requestAnimationFrame(step);
+                        if (needleEl) needleEl.style.transform = 'rotate(' + (-40 + (target / 1000) * 260) + 'deg)';
+                        randomizeBars();
+                    }
+
+                    function randomizeBars() {
+                        bars.forEach(function (b, i) {
+                            setTimeout(function () { b.style.height = (30 + Math.random() * 70) + '%'; }, i * 90);
+                        });
+                    }
+
+                    randomizeBars();
+                    setInterval(function () {
+                        idx = (idx + 1) % scenarios.length;
+                        tweenTo(scenarios[idx]);
+                    }, 3200);
+                })();
+            </script>
         </div>
     </section>
 
