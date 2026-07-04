@@ -199,7 +199,7 @@
                                 showToast(res.message);
 
                                 setTimeout(function () {
-                                    window.location.href = "/Auth/Login";
+                                    window.location.href = "/Auth/CustLogin";
                                 }, 1500);
 
                                 return;
