@@ -279,10 +279,11 @@
                     Verification usually completes within a few minutes.
                 </div>
 
-                <a href="@Url.Action("Dashboard", "Dashboard")" class="btn-action">
+                <button type="button" class="btn-action" onclick="window.close();">
                     <i class="fa-solid fa-house"></i>
                     Return To Dashboard
-                </a>
+                </button>
+
             }
             else
             {
@@ -291,10 +292,10 @@
                     Please retry the consent process to continue your credit assessment.
                 </div>
 
-                <a href="@Url.Action("CustOnboarding", "Onboarding")" class="btn-action">
+                <button type="button" class="btn-action" onclick="window.close();">
                     <i class="fa-solid fa-rotate-right"></i>
                     Try Again
-                </a>
+                </button>
             }
 
             <div class="footer">
