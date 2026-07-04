@@ -292,7 +292,24 @@
     </div>
 </div>
 
+<!-- Toast -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+    <div class="toast align-items-center text-bg-danger border-0" id="liveToast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-info-circle-fill me-2"></i><span id="toastMsg">Done</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
 <script>
+
+ function showToast(msg) {
+     $('#toastMsg').text(msg);
+     new bootstrap.Toast(document.getElementById('liveToast'), { delay: 2600 }).show();
+ }
 
  $(document).ready(function() {
 
@@ -359,7 +376,14 @@
                  }
                  else {
 
-                    // showToast(res.message);
+                     showToast(res.message);
+
+                     // Email not registered → send the user to onboarding to register.
+                     if (res.redirectUrl) {
+                         setTimeout(function () {
+                             window.location.href = res.redirectUrl;
+                         }, 1800);
+                     }
                  }
              },
 
@@ -384,30 +408,23 @@
         };
 
         $.ajax({
-
-                url: "/Auth/ValidateUserOtp",
+            url: "/Auth/ValidateUserOtp",
             type: "POST",
             data: model,
-
             beforeSend: function () {
-
                 $("#submitBtn").prop("disabled", true);
                 $("#submitLabel").text("Validating...");
             },
-
             success: function (res) {
-
                 $("#submitBtn").prop("disabled", false);
                 $("#submitLabel").text("Login to Portal");
 
                 if (res.status) {
 
-                        window.location.href = "/Dashboard/CustDashboard";
+                        window.location.href = res.redirectUrl;
                 }
                 else {
-
-                    alert(res.message);
-
+                    showToast(res.message);
                     $("#otp").val("");
                     $("#otp").focus();
                 }

@@ -449,10 +449,8 @@
                             .html('<i class="bi bi-check-circle me-1"></i> Verify & Continue');
 
                         if (res.status) {
-
                             showToast(res.message);
-
-                            window.location.href = "/Dashboard/CustDashboard";
+                            window.location.href = res.redirectUrl;
                         }
                         else {
 

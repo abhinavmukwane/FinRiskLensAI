@@ -40,10 +40,12 @@ namespace FinRiskLensAI.Controllers
 
                 if (check.Result != tflResultType.tflSuccess)
                 {
+                    // Email isn't registered — send them to onboarding to register first.
                     return Json(new
                     {
                         status = false,
-                        message = check.Message
+                        message = check.Message,
+                        redirectUrl = Url.Action("CustOnboarding", "Onboarding")
                     });
                 }
                 var otp = Random.Shared.Next(100000, 999999).ToString();
@@ -114,7 +116,8 @@ namespace FinRiskLensAI.Controllers
                 return Json(new
                 {
                     status = true,
-                    message = "Login successful."
+                    message = "Login successful.",
+                    redirectUrl = Url.Action("CustDashboard", "Dashboard")
                 });
             }
 

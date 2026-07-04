@@ -168,14 +168,13 @@ namespace FinRiskLensAI.Controllers
 
             if (result.Result == tflResultType.tflSuccess)
             {
-                //HttpContext.Session.SetInt32("MsmeEnquiryID", (int)result.Data.MsmeEnquiryID);
-                //HttpContext.Session.SetString("Email", result.Data.Email);
                 HttpContext.Session.SetCurrentUser(result.Data);
 
                 return Json(new
                 {
                     status = true,
-                    message = "OTP validated successfully."
+                    message = "OTP validated successfully.",
+                    redirectUrl = Url.Action("CustDashboard", "Dashboard")
                 });
             }
 
