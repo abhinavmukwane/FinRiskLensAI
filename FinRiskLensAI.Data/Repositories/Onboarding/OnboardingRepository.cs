@@ -274,9 +274,9 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
 
             return result;
         }
-        public async Task<ResultModel<UserOtpModel>> FetchUserOTPDet(UserOtpModel model)
+        public async Task<ResultModel<UserSessionModel>> FetchUserOTPDet(UserOtpModel model)
         {
-            var result = new ResultModel<UserOtpModel>();
+            var result = new ResultModel<UserSessionModel>();
 
             try
             {
@@ -302,15 +302,33 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                     return result;
                 }
 
-                var otpModel = new UserOtpModel();
-                entity.MapToModelObject(otpModel);
+                // OTP is valid — pull the registration record for the fields we
+                // want to keep in session (Udyam / GSTIN / PAN / Mobile).
+                var registration = await _context.UserRegistration
+                    .FirstOrDefaultAsync(x => x.Email == entity.Email);
+
+                var enquiryId = registration?.MsmeEnquiryID ?? entity.MsmeEnquiryID;
+
+                // Enterprise name for the dashboard welcome greeting.
+                var enterpriseName = enquiryId.HasValue
+                    ? await _context.MsmeEnquiries
+                        .Where(x => x.MsmeEnquiryID == enquiryId.Value)
+                        .Select(x => x.NameOfEnterprise)
+                        .FirstOrDefaultAsync()
+                    : null;
 
                 result.Result = tflResultType.tflSuccess;
                 result.Message = "OTP validated successfully.";
-                result.Data = new UserOtpModel
+                result.Data = new UserSessionModel
                 {
-                    MsmeEnquiryID = entity.MsmeEnquiryID,
-                    Email = entity.Email
+                    UserRegistrationID = registration?.UserRegistrationID ?? entity.UserRegistrationID,
+                    MsmeEnquiryID = enquiryId,
+                    NameOfEnterprise = enterpriseName,
+                    Email = entity.Email,
+                    MobileNumber = registration?.MobileNumber ?? entity.MobileNumber,
+                    UdyamNumber = registration?.UdyamNumber,
+                    GstinNumber = registration?.GstinNumber,
+                    PanNumber = registration?.PanNumber
                 };
             }
             catch (Exception ex)

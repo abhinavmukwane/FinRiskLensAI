@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FinRiskLensAI.Common;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace FinRiskLensAI.Utility
@@ -7,16 +8,13 @@ namespace FinRiskLensAI.Utility
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var session = context.HttpContext.Session;
+            var user = context.HttpContext.Session.GetCurrentUser();
 
-            var msmeEnquiryId = session.GetInt32("MsmeEnquiryID");
-            var email = session.GetString("Email");
-
-            if (msmeEnquiryId == null || string.IsNullOrEmpty(email))
+            if (user == null || user.MsmeEnquiryID == null || string.IsNullOrEmpty(user.Email))
             {
                 context.Result = new RedirectToActionResult(
-                    "CustOnboarding",
-                    "Onboarding",
+                    "CustLogin",
+                    "Auth",
                     null);
             }
         }

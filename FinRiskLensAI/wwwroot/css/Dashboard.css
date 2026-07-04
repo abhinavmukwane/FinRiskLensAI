@@ -1290,3 +1290,496 @@ img {
         background: #8b1538;
         color: #fff;
     }
+
+
+
+
+
+/* =====================================================================
+   Business Identity & Trust Analysis Dashboard (UdyamDetails.cshtml) — v2
+   Replace the previous ".udyam-dashboard" block you appended to
+   wwwroot/css/Dashboard.css with this one (v2 supersedes it — a few
+   classes from v1 were dropped since the bar-chart timeline and the
+   old "employee strength" card were replaced).
+   ===================================================================== */
+
+.udyam-dashboard {
+    --theme-maroon: #8b1538;
+    --theme-maroon-dark: #74112f;
+    --theme-maroon-soft: #faf7f8;
+    --success-green: #2e7d32;
+    --success-green-soft: #e6f4ea;
+    --warning-orange: #b26a00;
+    --warning-orange-soft: #fff3e0;
+    --danger-red: #b3261e;
+    --danger-red-soft: #fdecea;
+    --card-border: #ead9df;
+    --text-muted-2: #767683;
+}
+
+    /* Verified tag */
+    .udyam-dashboard .verified-tag {
+        color: var(--success-green);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .udyam-dashboard .dashboard-title {
+        font-weight: 700;
+        color: var(--theme-maroon);
+    }
+
+    /* Buttons */
+    .udyam-dashboard .btn-theme {
+        background: var(--theme-maroon);
+        color: #fff;
+        border: 1px solid var(--theme-maroon);
+        border-radius: 10px;
+        padding: 9px 18px;
+        font-weight: 600;
+        transition: background-color .15s ease;
+    }
+
+        .udyam-dashboard .btn-theme:hover {
+            background: var(--theme-maroon-dark);
+            border-color: var(--theme-maroon-dark);
+            color: #fff;
+        }
+
+    .udyam-dashboard .btn-outline-theme {
+        background: #fff;
+        color: var(--theme-maroon);
+        border: 1px solid var(--theme-maroon);
+        border-radius: 10px;
+        padding: 9px 18px;
+        font-weight: 600;
+        transition: background-color .15s ease;
+    }
+
+        .udyam-dashboard .btn-outline-theme:hover {
+            background: var(--theme-maroon-soft);
+            color: var(--theme-maroon-dark);
+            border-color: var(--theme-maroon-dark);
+        }
+
+    /* Card shell */
+    .udyam-dashboard .dash-card {
+        background: #fff;
+        border: 1px solid #e6e6e6;
+        border-radius: 16px;
+        padding: 22px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .04);
+    }
+
+    .udyam-dashboard .glass-card {
+        background: rgba(255, 255, 255, .85);
+        backdrop-filter: blur(10px);
+    }
+
+    .udyam-dashboard .info-icon {
+        color: #c8c8c8;
+        cursor: help;
+    }
+
+    .udyam-dashboard .card-subtitle {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-muted-2);
+        margin: 0;
+    }
+
+    .udyam-dashboard .card-heading {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--theme-maroon);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Business Identity Score gauge */
+    .udyam-dashboard .score-gauge {
+        position: relative;
+        width: 180px;
+        height: 180px;
+    }
+
+        .udyam-dashboard .score-gauge svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+    .udyam-dashboard .gauge-track {
+        fill: none;
+        stroke: #eef0f1;
+        stroke-width: 12;
+    }
+
+    .udyam-dashboard .gauge-progress {
+        fill: none;
+        stroke: var(--success-green);
+        stroke-width: 12;
+        stroke-linecap: round;
+    }
+
+    .udyam-dashboard .score-value {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .udyam-dashboard .score-value span {
+            font-size: 44px;
+            font-weight: 700;
+            color: var(--theme-maroon);
+            line-height: 1;
+        }
+
+        .udyam-dashboard .score-value small {
+            color: var(--text-muted-2);
+            font-size: 13px;
+        }
+
+    /* Risk badge (color varies by classification) */
+    .udyam-dashboard .risk-badge {
+        display: inline-block;
+        font-weight: 700;
+        font-size: 13px;
+        padding: 6px 18px;
+        border-radius: 999px;
+    }
+
+    .udyam-dashboard .risk-verylow {
+        background: var(--success-green-soft);
+        color: var(--success-green);
+    }
+
+    .udyam-dashboard .risk-low {
+        background: var(--success-green-soft);
+        color: var(--success-green);
+    }
+
+    .udyam-dashboard .risk-medium {
+        background: var(--warning-orange-soft);
+        color: var(--warning-orange);
+    }
+
+    .udyam-dashboard .risk-high {
+        background: var(--danger-red-soft);
+        color: var(--danger-red);
+    }
+
+    .udyam-dashboard .risk-veryhigh {
+        background: var(--danger-red-soft);
+        color: var(--danger-red);
+    }
+
+    .udyam-dashboard .classification-tag {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted-2);
+    }
+
+    /* Business Identity / mini profile list */
+    .udyam-dashboard .profile-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+        color: var(--text-muted-2);
+        font-size: 14px;
+    }
+
+        .udyam-dashboard .profile-list li.no-border {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+    .udyam-dashboard .profile-list strong {
+        color: var(--theme-maroon);
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .udyam-dashboard .status-active {
+        color: var(--success-green) !important;
+        display: flex;
+        align-items: center;
+    }
+
+        .udyam-dashboard .status-active i {
+            font-size: 20px;
+            line-height: 0;
+        }
+
+    /* Strengths list (reuses old .signal-list) */
+    .udyam-dashboard .signal-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        background: #faf9fb;
+        border-left: 4px solid var(--success-green);
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+    }
+
+        .udyam-dashboard .signal-list li:last-child {
+            margin-bottom: 0;
+        }
+
+    .udyam-dashboard .signal-list i {
+        color: var(--success-green);
+        font-size: 18px;
+        margin-top: 2px;
+    }
+
+    .udyam-dashboard .signal-title {
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--theme-maroon);
+        margin: 0;
+    }
+
+    /* Enterprise Classification Timeline */
+    .udyam-dashboard .legend {
+        font-size: 12px;
+        color: var(--text-muted-2);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .udyam-dashboard .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--success-green);
+        display: inline-block;
+    }
+
+    .udyam-dashboard .classification-timeline {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        overflow-x: auto;
+        padding: 20px 4px 4px;
+    }
+
+    .udyam-dashboard .timeline-step {
+        flex: 1 1 0;
+        min-width: 100px;
+        position: relative;
+        text-align: center;
+        padding-top: 18px;
+    }
+
+        .udyam-dashboard .timeline-step::before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: -50%;
+            width: 100%;
+            height: 2px;
+            background: var(--success-green-soft);
+            z-index: 0;
+        }
+
+        .udyam-dashboard .timeline-step:first-child::before {
+            display: none;
+        }
+
+    .udyam-dashboard .timeline-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--success-green);
+        margin: 0 auto 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .udyam-dashboard .timeline-year {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--theme-maroon);
+    }
+
+    .udyam-dashboard .timeline-type {
+        font-size: 11px;
+        color: var(--text-muted-2);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    /* Location Summary / Compliance Summary mini lists */
+    .udyam-dashboard .card-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        opacity: .8;
+        margin-bottom: 12px;
+    }
+
+    .udyam-dashboard .mini-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+        .udyam-dashboard .mini-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+            font-size: 13px;
+        }
+
+            .udyam-dashboard .mini-list li:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+    .udyam-dashboard .location-card {
+        background: #1a1147;
+        color: #fff;
+    }
+
+        .udyam-dashboard .location-card .mini-list li {
+            border-bottom-color: rgba(255, 255, 255, .12);
+        }
+
+        .udyam-dashboard .location-card .mini-list span {
+            opacity: .75;
+        }
+
+    .udyam-dashboard .compliance-card {
+        background: #f9eef3;
+        color: var(--theme-maroon);
+    }
+
+        .udyam-dashboard .compliance-card .mini-list li {
+            border-bottom-color: rgba(139, 21, 56, .1);
+        }
+
+        .udyam-dashboard .compliance-card .mini-list span {
+            color: var(--text-muted-2);
+        }
+
+    /* Plant Location / NIC Activities tables */
+    .udyam-dashboard .dash-table {
+        font-size: 13px;
+        margin-bottom: 0;
+    }
+
+        .udyam-dashboard .dash-table thead th {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text-muted-2);
+            border-bottom-width: 1px;
+            font-weight: 700;
+        }
+
+        .udyam-dashboard .dash-table td {
+            color: var(--theme-maroon);
+            vertical-align: middle;
+        }
+
+    .udyam-dashboard .pill-type {
+        display: inline-block;
+        background: var(--success-green-soft);
+        color: var(--success-green);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 999px;
+    }
+
+    /* Observations panel */
+    .udyam-dashboard .observations-card {
+        background: linear-gradient(135deg, var(--theme-maroon-soft), #fff);
+        border-left: 4px solid var(--theme-maroon);
+    }
+
+    .udyam-dashboard .observations-text {
+        font-size: 14px;
+        line-height: 1.7;
+        color: #3a3a3a;
+    }
+
+/* Existing modal styles (kept from previous UdyamDetails.cshtml <style> block) */
+.verification-modal {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
+}
+
+.modal-header {
+    background: #faf7f8;
+}
+
+.custom-input {
+    border-radius: 10px;
+    height: 48px;
+    border: 1px solid #d8d8d8;
+}
+
+    .custom-input:focus {
+        border-color: #8b1538;
+        box-shadow: 0 0 0 .15rem rgba(139, 21, 56, .15);
+    }
+
+.consent-box {
+    background: #faf7f8;
+    border: 1px solid #ead9df;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.form-check-input:checked {
+    background: #8b1538;
+    border-color: #8b1538;
+}
+
+/* Responsive tweaks */
+@media (max-width: 991.98px) {
+    .udyam-dashboard .classification-timeline {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .udyam-dashboard .score-gauge {
+        width: 150px;
+        height: 150px;
+    }
+
+    .udyam-dashboard .score-value span {
+        font-size: 36px;
+    }
+
+    .udyam-dashboard .profile-list strong {
+        text-align: left;
+    }
+
+    .udyam-dashboard .profile-list li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+}

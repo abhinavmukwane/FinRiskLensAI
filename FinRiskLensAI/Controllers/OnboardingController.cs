@@ -1,4 +1,5 @@
-﻿using FinRiskLensAI.Core.Common;
+﻿using FinRiskLensAI.Common;
+using FinRiskLensAI.Core.Common;
 using FinRiskLensAI.Core.Interfaces.ICommon;
 using FinRiskLensAI.Core.Interfaces.IServices.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.OnBoarding;
@@ -167,13 +168,13 @@ namespace FinRiskLensAI.Controllers
 
             if (result.Result == tflResultType.tflSuccess)
             {
-                HttpContext.Session.SetInt32("MsmeEnquiryID", (int)result.Data.MsmeEnquiryID);
-                HttpContext.Session.SetString("Email", result.Data.Email);
+                HttpContext.Session.SetCurrentUser(result.Data);
 
                 return Json(new
                 {
                     status = true,
-                    message = "OTP validated successfully."
+                    message = "OTP validated successfully.",
+                    redirectUrl = Url.Action("CustDashboard", "Dashboard")
                 });
             }
 
