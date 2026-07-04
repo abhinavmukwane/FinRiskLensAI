@@ -1,122 +1,104 @@
 # FinRiskLensAI — Architecture
 
+*(updated 2026-07-04 — reflects the implemented state: ML engine, Azure Blob data
+flow, int-identity entity convention, remote SQL Server)*
+
 ## 1. Overview
 
 **FinRiskLensAI** is an ASP.NET Core 8 (MVC) application organized as a layered
-solution. The codebase is currently a scaffold for a **Credit Rule Engine**
-(the runtime configuration, connection strings, and JWT audience all reference
-`CreditRuleEngine`) built on a clean, dependency-inverted layering with
-**Autofac** for composition, **Entity Framework Core** for persistence, and
-**Serilog** for structured logging.
+solution: an MSME Financial Health Score platform (IDBI Innovate 2026) that
+aggregates alternate data (Udyam, GST, ITR, AA bank statements; EPFO later),
+computes a six-dimension 0–1000 score with **ML.NET**, derives the bank-decision
+ratios and indicative loan eligibility, and renders a Financial Health Card
+dashboard. Composition via **Autofac**, persistence via **EF Core 8**, raw
+payload storage via **Azure Blob Storage**, logging via **Serilog**.
 
-| Property            | Value                                             |
-| ------------------- | ------------------------------------------------- |
-| Target framework    | `net8.0`                                          |
-| Language features   | Nullable reference types, implicit usings enabled |
-| Web stack           | ASP.NET Core MVC (Controllers + Views)            |
-| DI container        | Autofac (via `AutofacServiceProviderFactory`)     |
-| ORM                 | EF Core 8 (SQL Server provider; PostgreSQL-ready) |
-| Logging             | Serilog (Console + rolling File sinks)            |
-| Auth                | JWT Bearer (configured, pipeline wired)           |
+| Property            | Value                                                  |
+| ------------------- | ------------------------------------------------------ |
+| Target framework    | `net8.0`                                               |
+| Web stack           | ASP.NET Core MVC (Controllers + Views + API endpoints) |
+| DI container        | Autofac (via `AutofacServiceProviderFactory`)          |
+| ORM                 | EF Core 8 — SQL Server (remote), Npgsql branch unused  |
+| ML                  | ML.NET 3 (LightGBM, SSA time-series, RandomizedPca)    |
+| Payload storage     | Azure Blob Storage (container `msme-data`)             |
+| Logging             | Serilog (Console + rolling File sinks)                 |
+| Auth                | JWT config present; bearer handler **not yet wired**   |
 
 ---
 
 ## 2. Solution Structure
 
-The solution file `FinRiskLensAI.sln` sits at the repository root, with each
-project in a sibling folder beneath it:
-
 ```
-F:\FinRiskLensAI\
+F:\FinRiskLensAI_Git\
 ├── FinRiskLensAI.sln
 │
 ├── FinRiskLensAI\                 → Web / Presentation layer (startup project)
-│   ├── Controllers\               HomeController · DashboardController
-│   │                              OnboardingController · MsmeDataController
-│   │                              ScoringController
+│   ├── Controllers\               HomeController · OnboardingController
+│   │                              DashboardController   (Financial Health Card UI)
+│   │                              MsmeDataController    (blob upload/status/analyze API)
+│   │                              ScoringController     (direct analyze API — dev/test)
 │   ├── Models\                    ErrorViewModel · FinancialHealthCardViewModel
-│   ├── Views\                     (Razor views + shared layout; Dashboard\
-│   │                              FinancialHealthCard.cshtml renders the card)
-│   ├── wwwroot\                   (static assets: bootstrap, jQuery, css, js)
-│   ├── Program.cs                 (host bootstrap, DI, middleware pipeline)
-│   ├── appsettings.json           (DB, JWT, Serilog config)
-│   └── FinRiskLensAI.csproj
+│   ├── Views\                     Home · Onboarding · Dashboard\FinancialHealthCard.cshtml
+│   ├── wwwroot\                   static assets (bootstrap, css, js)
+│   ├── Program.cs                 host bootstrap, DI, middleware pipeline
+│   └── appsettings.json           DB, AzureBlob, JWT, Serilog config
 │
-├── FinRiskLensAI.Services\        → Application / Business logic layer
-│   ├── DI\ServicesModule.cs       (Autofac module — auto-registers *Service)
-│   └── FinRiskLensAI.Services.csproj
+├── FinRiskLensAI.Core\            → Domain layer (contracts + models, no infra deps)
+│   ├── Interfaces\                IRepository<T> · IRiskScoringService (+ RiskAnalysisRequest)
+│   │                              IBlobAnalysisService (+ MsmeDataStatusReport) · IMsmeDataStore
+│   ├── Models\Common\             AuditableEntity (audit fields only — no base Id)
+│   ├── Models\Admin\              AdmLogin
+│   ├── Models\Onboarding\         MsmeEnquiry · MsmeLocation · MsmeNicCode
+│   ├── Models\Scoring\            RiskAnalysisResult (+ ScoreBandType, ImpactDirection)
+│   │                              MsmeFeatureSet · LendingAssessment (+ RatioStatus)
+│   ├── Models\Storage\            MsmeDataManifest (+ MsmeDataStatus) · MsmeDataFiles
+│   └── DI\CoreModule.cs
 │
-├── FinRiskLensAI.Core\            → Domain layer (no infra dependencies)
-│   ├── Interfaces\IRepository.cs  (repository contract)
-│   ├── Models\Common\BaseEntity.cs
-│   ├── Models\Common\AuditableEntity.cs
-│   ├── DI\CoreModule.cs
-│   └── FinRiskLensAI.Core.csproj
+├── FinRiskLensAI.ML\              → AI/ML engine (implementations only; contracts in Core)
+│   ├── Features\                  Udyam/Gst/Itr/Aa feature extractors · TrendMath
+│   ├── MachineLearning\           ScoreCalibrationModel (LightGBM + PFI)
+│   │                              CashflowTrendAnalyzer (SSA) · IncomeAnomalyDetector (PCA)
+│   │                              ScoreFeatureVector · SyntheticProfileGenerator
+│   ├── Services\                  RiskScoringService · BlobAnalysisService · LendingCalculator
+│   ├── Storage\                   AzureBlobDataStore
+│   └── DI\MLModule.cs
 │
-└── FinRiskLensAI.Data\           → Infrastructure / Persistence layer
-    ├── DbContextEDMX\ApplicationDbContext.cs
+├── FinRiskLensAI.Services\        → Application layer (business services; DI scaffold)
+│   └── DI\ServicesModule.cs
+│
+└── FinRiskLensAI.Data\            → Infrastructure / Persistence layer
+    ├── DbContextEDMX\             ApplicationDbContext · ApplicationDbContextFactory
+    ├── Configurations\            IEntityTypeConfiguration<T> per entity
+    ├── Migrations\SqlServer\      single InitialCreate baseline (int identity PKs)
     ├── Repositories\RepositoryBase.cs
-    ├── DI\DataModule.cs           (Autofac module — auto-registers *Repository)
-    └── FinRiskLensAI.Data.csproj
+    └── DI\DataModule.cs
 ```
 
 ---
 
 ## 3. Layered Architecture
 
-The solution follows a **Clean / Onion architecture**: dependencies point
-*inward* toward the domain (`Core`). `Core` has no project dependencies of its
-own; every other layer references it.
+Clean/Onion layering — dependencies point inward to `Core`, which holds all
+**contracts** (interfaces) and **models** (including the scoring/lending/storage
+shapes). The ML project is an infrastructure-style implementation layer, like
+`Data`: it implements Core interfaces and is only reachable elsewhere through
+them.
 
-```
-        ┌─────────────────────────────────────────────┐
-        │            FinRiskLensAI (Web / MVC)          │
-        │   Controllers · Views · Program.cs · config   │
-        └───────────────┬───────────────┬───────────────┘
-                        │ references     │ references
-                        ▼                ▼
-        ┌───────────────────────┐   ┌───────────────────────┐
-        │  FinRiskLensAI.Services │   │   (Core, transitively) │
-        │   business logic        │   └───────────────────────┘
-        └───────────┬─────────────┘
-                    │ references
-        ┌───────────▼───────────┐        ┌───────────────────────┐
-        │  FinRiskLensAI.Data     │───────▶│   FinRiskLensAI.Core    │
-        │  EF Core · Repositories │ refs   │  entities · interfaces  │
-        └─────────────────────────┘        └───────────────────────┘
-                    ▲                                   ▲
-                    └────────────── references ─────────┘
-```
+| Project        | References           | Role                                        |
+| -------------- | -------------------- | ------------------------------------------- |
+| **Web**        | `Core`, `Services`, `ML` (for DI module + implementations resolution) | controllers, views, composition root |
+| **Services**   | `Core`, `Data`       | business/use-case services                  |
+| **Data**       | `Core`               | EF Core persistence                         |
+| **ML**         | `Core`               | scoring engine, blob store, ML.NET models   |
+| **Core**       | *(none)*             | entities, contracts, result models, enums   |
 
-### Project reference graph
-
-| Project        | References                     |
-| -------------- | ------------------------------ |
-| **Web**        | `Core`, `Services`             |
-| **Services**   | `Core`, `Data`                 |
-| **Data**       | `Core`                         |
-| **Core**       | *(none — pure domain)*         |
-
-### Layer responsibilities
-
-- **Core (Domain)** — Framework-agnostic domain model and contracts. Holds
-  base entity types (`BaseEntity`, `AuditableEntity`) and the persistence
-  abstraction `IRepository<T>`. Depends on nothing but the BCL.
-- **Data (Infrastructure)** — EF Core implementation of persistence:
-  `ApplicationDbContext` and the generic `RepositoryBase<T>` that satisfies
-  `IRepository<T>`. Knows about the database; the domain does not.
-- **Services (Application)** — Home for business logic / use-case orchestration.
-  Consumes repository abstractions from `Core` and persistence from `Data`.
-  Currently a DI scaffold awaiting concrete `*Service` classes.
-- **Web (Presentation)** — ASP.NET Core MVC host. Owns the composition root
-  (`Program.cs`), the HTTP pipeline, controllers, Razor views, and configuration.
+Rule of thumb: **anything two layers need to agree on lives in `Core`**
+(e.g. `RiskAnalysisResult`, `IMsmeDataStore`); anything that needs a package
+(EF, ML.NET, Azure SDK) lives in the implementing layer.
 
 ---
 
 ## 4. Dependency Injection (Autofac)
-
-Composition is centralized in `Program.cs`, which swaps the default container
-for Autofac and registers one module per layer:
 
 ```csharp
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
@@ -125,171 +107,152 @@ builder.Host.ConfigureContainer<ContainerBuilder>(container =>
     container.RegisterModule(new CoreModule());
     container.RegisterModule(new DataModule());
     container.RegisterModule(new ServicesModule());
+    container.RegisterModule(new MLModule());
 });
 ```
 
-Each layer owns its own registrations via an Autofac `Module`:
+| Module           | Registration strategy                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| `CoreModule`     | placeholder (empty)                                                                                        |
+| `DataModule`     | assembly scan `*Repository` → interfaces; generic `RepositoryBase<>` → `IRepository<>`                     |
+| `ServicesModule` | assembly scan `*Service` → interfaces                                                                      |
+| `MLModule`       | extractors + ML models as **singletons** (models train lazily, once per process); scan `*Service`; `AzureBlobDataStore` → `IMsmeDataStore` |
 
-| Module           | Layer    | Registration strategy                                                                 |
-| ---------------- | -------- | ------------------------------------------------------------------------------------- |
-| `CoreModule`     | Core     | Placeholder for validators / mappers (currently empty).                               |
-| `DataModule`     | Data     | Assembly scan — every type whose name ends in **`Repository`** → its interfaces, `InstancePerLifetimeScope`. |
-| `ServicesModule` | Services | Assembly scan — every type whose name ends in **`Service`** → its interfaces, `InstancePerLifetimeScope`.    |
-
-> **Convention:** New repositories/services are wired automatically as long as
-> they follow the `*Repository` / `*Service` naming convention and implement an
-> interface. No manual registration needed.
+> Convention: `*Repository` / `*Service` naming + an interface = automatic
+> registration. ML model singletons matter — LightGBM/PCA training (~1–2 s)
+> happens once on first use.
 
 ---
 
-## 5. Domain Model
+## 5. Domain Model Conventions
 
-All entities derive from a common base that provides identity and soft-delete:
+**Changed 2026-07-03** — the earlier `BaseEntity` (Guid `Id` + `IsDeleted`) was
+removed. Current rules:
 
 ```csharp
-public abstract class BaseEntity
+public abstract class AuditableEntity        // audit fields only
 {
-    public Guid Id { get; protected set; } = Guid.NewGuid();
-    public bool IsDeleted { get; protected set; }
-    public void SoftDelete() => IsDeleted = true;
-}
-
-public abstract class AuditableEntity : BaseEntity
-{
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
     public string? CreatedBy { get; set; }
     public string? UpdatedBy { get; set; }
 }
 ```
 
-- **`BaseEntity`** — `Guid` primary key generated in-memory; soft-delete flag.
-- **`AuditableEntity`** — adds created/updated timestamps and user stamps.
+- Every entity declares its own **int identity primary key named
+  `<EntityName>ID`** — `AdmLoginID`, `MsmeEnquiryID`, `MsmeLocationID`,
+  `MsmeNicCodeID` (`UseIdentityColumn()` in its configuration).
+- No Guid keys, no shared `Id`, no soft-delete flag.
+- Audit timestamps are stamped automatically in
+  `ApplicationDbContext.SaveChangesAsync`.
 
-Audit timestamps are populated automatically on save (see §6).
+Implemented tables: `ADM_Login` (seeded admin), `t_MsmeEnquiry` (Udyam response
+cache, unique per UAN, raw JSON in `Payload`), `t_MsmeLocations`,
+`t_MsmeNicCodes`. The core scoring entities from `01_DOMAIN_MODEL.md`
+(`Msme`, `ScoreComputation`, …) are still pending.
 
 ---
 
 ## 6. Persistence
 
-### ApplicationDbContext
+- `ApplicationDbContext` — decimal `precision(18,4)` convention,
+  `ApplyConfigurationsFromAssembly`, automatic audit stamping.
+- `RepositoryBase<T> : IRepository<T> where T : class` — async CRUD;
+  `GetByIdAsync(int id)` uses `FindAsync`, so it works with any single int key
+  regardless of the property name. No internal `SaveChanges` (unit-of-work by
+  the caller).
+- Migrations: one clean `InitialCreate` baseline under
+  `Data/Migrations/SqlServer/`; history table `cre.__EFMigrationsHistory`.
+  Commands are documented in `HANDOFF.md`. Runtime connection comes from
+  `appsettings.json`, design-time from `ApplicationDbContextFactory` — keep in
+  sync.
 
-`ApplicationDbContext` (in `Data/DbContextEDMX/`) centralizes EF Core config:
+---
 
-- **Decimal precision convention** — all `decimal` properties default to
-  `precision(18, 4)`, chosen to be portable across SQL Server and PostgreSQL.
-- **Configuration discovery** — `ApplyConfigurationsFromAssembly` auto-loads any
-  `IEntityTypeConfiguration<T>` in the Data assembly, keeping mapping code
-  modular.
-- **Automatic auditing** — overrides `SaveChangesAsync` to stamp `CreatedAt` on
-  add and `UpdatedAt` on add/modify for every tracked `AuditableEntity`.
+## 7. The ML Engine & Data Flow (summary — details in `08_ML_ENGINE.md`)
 
-### Generic repository
-
-`RepositoryBase<T>` implements `IRepository<T>` over `DbSet<T>` with async CRUD,
-predicate-based `FindAsync`, range insert, and `CountAsync`. All members are
-`virtual` so specific repositories can override behavior. Note the repository
-does **not** call `SaveChanges` — persistence is expected to be committed by a
-higher layer (unit-of-work style), keeping write batching under caller control.
-
-### Repository contract (`Core.Interfaces.IRepository<T>`)
-
-```csharp
-Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default);
-Task<IReadOnlyList<T>> GetAllAsync(CancellationToken ct = default);
-Task<IReadOnlyList<T>> FindAsync(Expression<Func<T,bool>> predicate, CancellationToken ct = default);
-Task<T>  AddAsync(T entity, CancellationToken ct = default);
-Task     AddRangeAsync(IEnumerable<T> entities, CancellationToken ct = default);
-void     Update(T entity);
-void     Remove(T entity);
-Task<int> CountAsync(CancellationToken ct = default);
+```
+data pulls (Udyam/GST/ITR/AA APIs)                    credit officer / MSME
+        │  raw JSON per response                                ▲
+        ▼                                                       │
+Azure Blob  msme-data/{UAN}/…  ──►  BlobAnalysisService  ──►  result.json
+   (manifest gates completeness)          │                     │
+                                          ▼                     ▼
+                              RiskScoringService        Dashboard/FinancialHealthCard
+                       extractors → 6 dimensions →      (gauge, radar, bars, ratios,
+                       LightGBM blend → anomaly →        lending assessment, Chart.js)
+                       explanations → recommendations →
+                       LendingCalculator (ratios + eligibility)
 ```
 
----
-
-## 7. Configuration
-
-`appsettings.json` drives the runtime. Key sections:
-
-- **`Database`** — a `DbType` selector (`SqlServer` by default) plus named
-  connection strings for both **SqlServer** (LocalDB) and **PostgreSQL**. The
-  design anticipates a provider switch based on `DbType`.
-- **`Jwt`** — signing key, issuer (`CreditRuleEngine`), audience (`CREClients`),
-  and token expiry. The dev signing key is a placeholder and **must be replaced**
-  for any non-dev environment.
-- **`Serilog`** — minimum levels with per-namespace overrides, Console + daily
-  rolling File sink (`logs/cre-.log`), enriched with machine name and thread id.
-
-> ⚠️ **Secrets note:** the JWT key and DB credentials are checked into
-> `appsettings.json` for local convenience. Move these to user-secrets /
-> environment variables / a secret store before deploying.
+- **Two API entry paths:** `POST /api/scoring/analyze` (payloads in body —
+  dev/test) and `api/msme-data/{uan}` (blob flow — production path, handles any
+  payload size; one file per request, one file in memory at a time).
+- **Output** (`RiskAnalysisResult` in Core): overall score + band, six
+  `DimensionScore`s, PFI-template explanations, product recommendations,
+  cross-source anomaly check, and the **`LendingAssessment`** — DSCR, FOIR,
+  banking penetration, gross margin, liquidity ratios with banking benchmarks,
+  plus indicative working-capital (turnover method) and term-loan (EMI annuity)
+  eligibility scaled by score band.
 
 ---
 
-## 8. Request Pipeline & Hosting
+## 8. Configuration
 
-`Program.cs` configures a standard MVC pipeline:
+- **`Database`** — `DbType` switch; SQL Server connection to the remote shared
+  instance (login `FinRiskLensAI`; tables land in that login's default schema).
+  PostgreSQL string retained but unused.
+- **`AzureBlob`** — connection string + container (`msme-data`) for the per-UAN
+  payload folders.
+- **`Jwt`** — issuer `FinRiskLensAI`, audience `MsmeClients`; **handler not yet
+  registered** (`AddAuthentication().AddJwtBearer` absent) — required before the
+  external APIs in `04_API_CONTRACTS.md` ship.
+- **`Serilog`** — console + daily rolling file, per-namespace overrides.
 
-1. **Serilog** installed as the host logger (reads config from `appsettings`).
-2. **Autofac** container factory + per-layer modules.
-3. `AddControllersWithViews()`.
-4. Middleware order: exception handler + HSTS (non-dev) → HTTPS redirect →
-   static files → routing → **authentication** → **authorization** → endpoints.
-5. Routing: attribute routes (`MapControllers`) plus the conventional
-   `{controller=Home}/{action=Index}/{id?}` default route.
-
-### Local endpoints (from `launchSettings.json`)
-
-| Profile     | URL(s)                                          |
-| ----------- | ----------------------------------------------- |
-| http        | `http://localhost:5086`                         |
-| https       | `https://localhost:7052`, `http://localhost:5086` |
-| IIS Express | `http://localhost:2276` (SSL `44395`)           |
+> ⚠️ **Secrets:** DB credentials and the storage account key are checked into
+> `appsettings.json` as a hackathon trade-off. Rotate and move to a secret store
+> before anything public.
 
 ---
 
 ## 9. Key NuGet Dependencies
 
-| Package                                            | Used in            | Purpose                         |
-| -------------------------------------------------- | ------------------ | ------------------------------- |
-| `Autofac`, `Autofac.Extensions.DependencyInjection`| all                | IoC container + host integration|
-| `Microsoft.EntityFrameworkCore` (+ SqlServer, Design) | Data            | ORM, SQL Server provider, tooling |
-| `Microsoft.AspNetCore.Authentication.JwtBearer`    | Web, Services      | JWT bearer authentication       |
-| `Serilog` (+ AspNetCore, File, Enrichers.Thread)   | all                | Structured logging              |
-| `Newtonsoft.Json`                                  | all                | JSON serialization              |
-| `Microsoft.Bcl.AsyncInterfaces`                    | all                | async abstractions              |
+| Package                                              | Project | Purpose                                  |
+| ---------------------------------------------------- | ------- | ---------------------------------------- |
+| `Autofac` (+ DI extensions)                          | all     | IoC container                            |
+| `Microsoft.EntityFrameworkCore` (+ SqlServer, Design)| Data, Web | ORM + tooling                          |
+| `Microsoft.ML` / `.LightGbm` / `.TimeSeries`         | ML      | scoring model, SSA trend, PCA anomaly    |
+| `Azure.Storage.Blobs`                                | ML      | per-UAN payload folders                  |
+| `Microsoft.AspNetCore.Authentication.JwtBearer`      | Web     | JWT bearer (pending wiring)              |
+| `Serilog` (+ sinks/enrichers)                        | all     | structured logging                       |
+| `Newtonsoft.Json`                                    | ML, Data| tolerant payload parsing, result persist |
 
 ---
 
 ## 10. Extending the Application
 
-To add a new feature end-to-end, follow the layer conventions:
-
-1. **Domain** — add an entity in `Core/Models` deriving from `BaseEntity` /
-   `AuditableEntity`; declare any needed abstraction in `Core/Interfaces`.
-2. **Persistence** — add an `IEntityTypeConfiguration<T>` and (if needed) a
-   `FooRepository : RepositoryBase<Foo>` in `Data`. It auto-registers via
-   `DataModule`. Expose a `DbSet<Foo>` on `ApplicationDbContext` (or rely on
-   `Set<T>()`).
-3. **Application** — add `IFooService` + `FooService` in `Services`. It
-   auto-registers via `ServicesModule`.
-4. **Presentation** — add a controller in the Web project that depends on the
-   service interface; add Razor views as needed.
-
-Because registration is convention-based, adhering to the `*Repository` /
-`*Service` naming keeps DI wiring automatic.
+1. **Domain** — entity in `Core/Models/...` deriving from `AuditableEntity`,
+   with its own `<EntityName>ID` int key; contracts in `Core/Interfaces`;
+   shared result/DTO shapes in `Core/Models/...`.
+2. **Persistence** — `IEntityTypeConfiguration<T>` (+ `UseIdentityColumn()` on
+   the key) in `Data/Configurations`; `DbSet` on the context; migration via the
+   commands in `HANDOFF.md`.
+3. **Application/ML** — `IFooService` in Core, `FooService` in `Services` (or
+   `ML` if it needs ML/storage packages); auto-registers by naming convention.
+4. **Presentation** — controller depends on the Core interface; Razor views;
+   API endpoints follow the existing `api/...` attribute-routing style.
 
 ---
 
-## 11. Notes & Observations
+## 11. Known Gaps / Notes
 
-- The `ApplicationDbContext` is defined but **not yet registered** with a
-  provider in `Program.cs` (no `AddDbContext` call). Wire it using the
-  `Database:DbType` + connection string before repositories can resolve.
-- JWT authentication middleware is in the pipeline, but the JWT bearer
-  **handler is not yet registered** (`AddAuthentication().AddJwtBearer(...)` is
-  absent). Add it to activate the configured `Jwt` settings.
-- `Services` and `Core` DI modules are scaffolds — no concrete services or
-  domain services exist yet.
-- The folder name `DbContextEDMX` is legacy-flavored; the context is a modern
-  code-first EF Core `DbContext`, not an EDMX designer model.
+- **JWT bearer handler still unregistered** — the one remaining item from
+  `07_SETUP_GAPS.md`.
+- `Services` project is still a scaffold — onboarding/consent services from
+  `02_CUSTOMER_FLOW.md` Steps 1–6 are unbuilt.
+- Scoring output is persisted as `result.json` in the blob folder, not yet
+  mapped to `ScoreComputation`/`ScoreExplanation` entities.
+- `m_StaticResponces` exists in the DB but its entity code was never pushed —
+  re-add under the new convention (`StaticResponcesID`).
+- The folder name `DbContextEDMX` is legacy-flavored; the context is code-first
+  EF Core, not an EDMX model.

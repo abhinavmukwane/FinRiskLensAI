@@ -1,0 +1,126 @@
+using FinRiskLensAI.Core.Models.Scoring;
+using FinRiskLensAI.ML.Features;
+
+namespace FinRiskLensAI.ML.Services
+{
+    /// <summary>
+    /// Computes the bank-decision view: standard credit-appraisal ratios (DSCR, FOIR,
+    /// banking penetration, gross margin, liquidity) and indicative loan eligibility —
+    /// working capital via the turnover (Nayak committee) method (WC requirement 25%
+    /// of annual turnover; bank finances 20%, borrower margins 5%) and term capacity
+    /// from EMI headroom annuitized over 5 years @ 11% p.a. Everything is indicative,
+    /// scaled by the score band — not a sanctioned limit.
+    /// </summary>
+    public static class LendingCalculator
+    {
+        private const double AnnualRate = 0.11;
+        private const int TenureMonths = 60;
+        private const double FoirCap = 0.50;             // max share of inflows serviceable as EMI
+
+        public static LendingAssessment Compute(MsmeFeatureSet f, ScoreBandType band)
+        {
+            var a = new LendingAssessment
+            {
+                AnnualTurnover = f.GstAnnualisedTurnover,
+                MonthlySales = f.GstMonthlyAvgTurnover,
+                MonthlyPurchases = f.GstMonthlyAvgPurchases,
+                MonthlyBankInflow = f.AaAvgMonthlyCredit,
+                MonthlyBankOutflow = f.AaMonthlyDebits.Count > 0 ? f.AaMonthlyDebits.Values.Average() : 0,
+                ExistingMonthlyEmi = f.AaEmiMonthlyOutflow,
+                BandAdjustmentFactor = band switch
+                {
+                    ScoreBandType.Excellent => 1.00,
+                    ScoreBandType.Good => 0.85,
+                    ScoreBandType.Fair => 0.60,
+                    ScoreBandType.AtRisk => 0.35,
+                    _ => 0
+                }
+            };
+            a.MonthlySurplus = a.MonthlyBankInflow - a.MonthlyBankOutflow;
+
+            // Fall back to bank inflows when GST is unavailable (thin-file case)
+            if (a.AnnualTurnover <= 0 && f.HasAa)
+                a.AnnualTurnover = a.MonthlyBankInflow * 12;
+
+            // ── Eligibility: turnover method (working capital)
+            a.WorkingCapitalLimit = Round10k(0.20 * a.AnnualTurnover * a.BandAdjustmentFactor);
+            a.MarginMoneyRequired = Round10k(0.05 * a.AnnualTurnover);
+
+            // ── Eligibility: EMI capacity → term loan (annuity PV)
+            var foirHeadroom = Math.Max(0, FoirCap * a.MonthlyBankInflow - a.ExistingMonthlyEmi);
+            var surplusHeadroom = Math.Max(0, a.MonthlySurplus * 0.8);
+            a.AffordableMonthlyEmi = Math.Round(Math.Min(foirHeadroom, surplusHeadroom));
+
+            var i = AnnualRate / 12;
+            var annuityFactor = (1 - Math.Pow(1 + i, -TenureMonths)) / i;   // ≈ 45.99 for 60m @ 11%
+            a.TermLoanCapacity = Round10k(a.AffordableMonthlyEmi * annuityFactor * a.BandAdjustmentFactor);
+
+            a.TotalIndicativeEligibility = a.WorkingCapitalLimit + a.TermLoanCapacity;
+
+            // ── Ratios with banking benchmarks
+            var dscr = a.ExistingMonthlyEmi > 0
+                ? Math.Min(10, (a.MonthlySurplus + a.ExistingMonthlyEmi) / a.ExistingMonthlyEmi)
+                : (a.MonthlySurplus > 0 ? 10 : 0);
+            var foir = f.AaEmiToInflowRatio;
+            var penetration = a.MonthlySales > 0 && f.HasAa ? a.MonthlyBankInflow / a.MonthlySales : 0;
+            var grossMargin = a.MonthlySales > 0 && a.MonthlyPurchases > 0
+                ? (a.MonthlySales - a.MonthlyPurchases) / a.MonthlySales : 0;
+
+            void Add(string name, double value, string display, string benchmark,
+                     RatioStatus status, string description)
+                => a.Ratios.Add(new LendingRatio
+                {
+                    Name = name, Value = Math.Round(value, 3), Display = display,
+                    Benchmark = benchmark, Status = status, Description = description
+                });
+
+            Add("DSCR (Debt Service Coverage)", dscr,
+                f.HasAa ? $"{dscr:0.00}x" : "N/A", "≥ 1.50x",
+                !f.HasAa ? RatioStatus.NotAvailable : dscr >= 1.5 ? RatioStatus.Strong : dscr >= 1.25 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "Cash available for debt service vs existing obligations — the primary repayment-capacity test");
+
+            Add("FOIR (Obligations / Inflows)", foir,
+                f.HasAa ? $"{foir:P0}" : "N/A", "≤ 40%",
+                !f.HasAa ? RatioStatus.NotAvailable : foir <= 0.40 ? RatioStatus.Strong : foir <= 0.55 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "Share of monthly inflows already committed to EMIs — headroom for a new loan");
+
+            Add("Banking Penetration", penetration,
+                penetration > 0 ? $"{penetration:P0}" : "N/A", "≥ 60%",
+                penetration <= 0 ? RatioStatus.NotAvailable : penetration >= 0.60 ? RatioStatus.Strong : penetration >= 0.30 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "GST-declared sales actually routed through the bank account — cash-sales businesses score low");
+
+            Add("Gross Margin (GST sales vs purchases)", grossMargin,
+                grossMargin != 0 ? $"{grossMargin:P0}" : "N/A", "≥ 15%",
+                a.MonthlyPurchases <= 0 ? RatioStatus.NotAvailable : grossMargin >= 0.15 ? RatioStatus.Strong : grossMargin >= 0.05 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "Trading margin implied by GSTR-1 outward vs GSTR-2A inward values");
+
+            Add("Days Cash on Hand", f.AaDaysCashOnHand,
+                f.HasAa ? $"{Math.Min(365, f.AaDaysCashOnHand):0} days" : "N/A", "≥ 60 days",
+                !f.HasAa ? RatioStatus.NotAvailable : f.AaDaysCashOnHand >= 60 ? RatioStatus.Strong : f.AaDaysCashOnHand >= 30 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "How long current balances cover average outflows if inflows stopped");
+
+            Add("Inflow Volatility (CV)", f.AaInflowVolatility,
+                f.HasAa ? $"{f.AaInflowVolatility:0.00}" : "N/A", "≤ 0.30",
+                !f.HasAa ? RatioStatus.NotAvailable : f.AaInflowVolatility <= 0.30 ? RatioStatus.Strong : f.AaInflowVolatility <= 0.60 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "Month-to-month steadiness of bank inflows — volatile inflows need conservative limits");
+
+            Add("Credit Note Ratio", f.GstCreditNoteRatio,
+                f.HasGst ? $"{f.GstCreditNoteRatio:P1}" : "N/A", "≤ 5%",
+                !f.HasGst ? RatioStatus.NotAvailable : f.GstCreditNoteRatio <= 0.05 ? RatioStatus.Strong : f.GstCreditNoteRatio <= 0.15 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "Share of invoiced revenue reversed via credit notes — high values inflate headline turnover");
+
+            // ── Transparency notes
+            a.Notes.Add("Working capital via turnover method: requirement 25% of annual turnover, bank finance 20%, borrower margin 5% (Nayak norms for MSME limits up to ₹5 Cr).");
+            a.Notes.Add($"Term capacity assumes {TenureMonths / 12} year tenure @ {AnnualRate:P0} p.a., EMI capped at {FoirCap:P0} FOIR and 80% of observed monthly surplus.");
+            a.Notes.Add($"All amounts scaled by score-band factor {a.BandAdjustmentFactor:0.00} ({band}); indicative only — not a sanction.");
+            if (f.HasAa && f.HasGst && penetration < 0.30 && penetration > 0)
+                a.Notes.Add("Banking penetration is very low relative to GST sales — verify whether the consented account is the business's primary operating account.");
+            if (!f.HasAa)
+                a.Notes.Add("No AA bank data — cashflow-based ratios unavailable; eligibility derives from GST turnover only.");
+
+            return a;
+        }
+
+        private static double Round10k(double v) => Math.Round(v / 10_000) * 10_000;
+    }
+}

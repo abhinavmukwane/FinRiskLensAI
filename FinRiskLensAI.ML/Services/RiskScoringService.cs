@@ -106,6 +106,9 @@ namespace FinRiskLensAI.ML.Services
 
             // ── 7. Product recommendations by band
             result.Recommendations = Recommend(result.ScoreBand, features, result);
+
+            // ── 8. Bank-decision ratios + indicative loan eligibility
+            result.Lending = LendingCalculator.Compute(features, result.ScoreBand);
             return result;
         }
 

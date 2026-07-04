@@ -93,6 +93,23 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   Compliance 150/150). Known gap: that folder's aa.json is demo data mismatched
   to the business; anomaly score 0.426 sat just under the 0.5 flag threshold —
   tune thresholds when real paired AA data exists.
+- **Clean layering (2026-07-04):** all interfaces/models/enums moved to Core —
+  `Core/Interfaces` (IRiskScoringService, IBlobAnalysisService, IMsmeDataStore),
+  `Core/Models/Scoring` (RiskAnalysisResult, MsmeFeatureSet, LendingAssessment),
+  `Core/Models/Storage` (MsmeDataManifest, MsmeDataFiles). ML project holds
+  implementations only (ScoreFeatureVector stays in ML — it carries an ML.NET
+  attribute).
+- **Lending assessment (stage 8, `LendingCalculator`):** 7 bank ratios (DSCR,
+  FOIR, banking penetration, gross margin, days-cash, inflow CV, credit-note
+  ratio) with benchmarks + Strong/Adequate/Weak status, and indicative
+  eligibility — WC via turnover/Nayak method (20% of turnover × band factor),
+  term loan via EMI-headroom annuity (5y @ 11%). Formulas in
+  `Doc/08_ML_ENGINE.md` Stage 8.
+- **Financial Health Card dashboard built:**
+  `/Dashboard/FinancialHealthCard?uan=…` (DashboardController + Chart.js) —
+  score gauge with needle, dimension radar/bars, strengths/risks, anomaly box,
+  Bank Lending Assessment section (eligibility tiles, ratio table, cashflow/EMI
+  chart, methodology notes), run-analysis button for folders without a result.
 
 ### 3. Two API entry paths
 - `POST /api/scoring/analyze` (`ScoringController`) — payloads in the body. Kept
@@ -162,8 +179,8 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 3. `UdyamLookupService` with the t_MsmeEnquiry cache-or-API flow.
 4. EPFO extractor when the data source arrives (slot exists: `EpfoJson`,
    `epfo.json`, `HasEpfo`).
-5. Financial Health Card dashboard rendering from `RiskAnalysisResult` / `result.json`
-   (teammate started a dashboard controller).
+5. ~~Financial Health Card dashboard~~ — DONE (see ML engine section above);
+   remaining UI work: score trend line once historical computations exist.
 6. Map `RiskAnalysisResult` onto `ScoreComputation`/`ScoreExplanation`/
    `CreditProductRecommendation` entities (not created yet) per `Doc/01_DOMAIN_MODEL.md`.
 7. Swap synthetic training data for IDBI sandbox data when it opens **July 22**.

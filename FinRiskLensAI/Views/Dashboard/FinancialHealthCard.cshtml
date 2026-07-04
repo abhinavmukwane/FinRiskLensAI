@@ -47,6 +47,14 @@
     .fhc-search .form-control { height: 48px; border-radius: 12px 0 0 12px; border: 1px solid #d8c3ca; }
     .fhc-search .btn { border-radius: 0 12px 12px 0; background: #57001d; color: #fff; font-weight: 600; padding: 0 22px; }
 
+    .lending-notes { background: #faf7f8; border: 1px solid #ead9df; border-radius: 12px; padding: 14px 16px; }
+    .lending-notes-head { font-size: .72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #974354; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .lending-note { display: flex; gap: 10px; align-items: flex-start; font-size: .8rem; line-height: 1.55; color: #5c4a50; padding: 7px 0; border-top: 1px dashed #ecdce2; }
+    .lending-note:first-of-type { border-top: none; padding-top: 0; }
+    .lending-note .bi { color: #2e7d4f; font-size: .85rem; margin-top: 2px; flex-shrink: 0; }
+    .lending-note.warn { color: #7a4a12; }
+    .lending-note.warn .bi { color: #c98a2b; }
+
     .anomaly-box { border: 1px solid #f3d19c; background: #fff8ec; border-radius: 12px; padding: 14px 16px; font-size: .88rem; }
     .anomaly-box.flagged { border-color: #e79b9b; background: #fdf0f0; }
     canvas { max-width: 100%; }
@@ -188,7 +196,99 @@
             </div>
         </div>
 
-        <!-- ===================== Row 3: Strengths / Risks ===================== -->
+        <!-- ===================== Row 3: Bank Lending Assessment ===================== -->
+        @if (r.Lending != null)
+        {
+            var l = r.Lending;
+            <div class="fhc-card mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    <div class="fhc-section-label mb-0"><i class="bi bi-bank me-1"></i>Bank Lending Assessment</div>
+                    <span class="fhc-sub">band factor ×@l.BandAdjustmentFactor.ToString("0.00") (@r.ScoreBand)</span>
+                </div>
+
+                <!-- Eligibility headline tiles -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-tile" style="border-left:4px solid #57001d;">
+                            <div class="v">₹@FormatInr(l.WorkingCapitalLimit)</div>
+                            <div class="k">Working Capital Limit</div>
+                            <div class="fhc-sub" style="font-size:.7rem;">turnover method (20%)</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-tile" style="border-left:4px solid #974354;">
+                            <div class="v">₹@FormatInr(l.TermLoanCapacity)</div>
+                            <div class="k">Term Loan Capacity</div>
+                            <div class="fhc-sub" style="font-size:.7rem;">5 yr @@ 11% on EMI headroom</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-tile" style="border-left:4px solid #0f5137;">
+                            <div class="v">₹@FormatInr(l.TotalIndicativeEligibility)</div>
+                            <div class="k">Total Indicative Eligibility</div>
+                            <div class="fhc-sub" style="font-size:.7rem;">WC + term combined</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-tile" style="border-left:4px solid #8a6d00;">
+                            <div class="v">₹@FormatInr(l.MarginMoneyRequired)</div>
+                            <div class="k">Borrower Margin Required</div>
+                            <div class="fhc-sub" style="font-size:.7rem;">5% of turnover (Nayak)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Ratio table -->
+                    <div class="col-lg-7">
+                        <div class="fhc-section-label">Credit Appraisal Ratios</div>
+                        @foreach (var ratio in l.Ratios)
+                        {
+                            var chip = ratio.Status switch
+                            {
+                                FinRiskLensAI.Core.Models.Scoring.RatioStatus.Strong => ("Strong", "#e3f4ea", "#0f5137"),
+                                FinRiskLensAI.Core.Models.Scoring.RatioStatus.Adequate => ("Adequate", "#fdf3d7", "#8a6d00"),
+                                FinRiskLensAI.Core.Models.Scoring.RatioStatus.Weak => ("Weak", "#fbe0e0", "#8b1020"),
+                                _ => ("No data", "#efefef", "#777")
+                            };
+                            <div class="d-flex align-items-center gap-3 py-2" style="border-bottom:1px dashed #f0e2e7;">
+                                <div style="flex:1;">
+                                    <div style="font-size:.88rem;font-weight:600;color:#2b2026;">@ratio.Name</div>
+                                    <div class="fhc-sub" style="font-size:.74rem;">@ratio.Description</div>
+                                </div>
+                                <div class="text-end" style="flex:0 0 90px;">
+                                    <div style="font-weight:700;color:#57001d;">@ratio.Display</div>
+                                    <div class="fhc-sub" style="font-size:.7rem;">norm @ratio.Benchmark</div>
+                                </div>
+                                <span class="badge" style="flex:0 0 84px;background:@chip.Item2;color:@chip.Item3;">@chip.Item1</span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Cashflow vs debt capacity chart -->
+                    <div class="col-lg-5">
+                        <div class="fhc-section-label">Monthly Cashflow &amp; EMI Capacity</div>
+                        <canvas id="lendingChart" height="260"></canvas>
+                        <div class="lending-notes mt-3">
+                            <div class="lending-notes-head">
+                                <i class="bi bi-journal-text"></i> How this was calculated
+                            </div>
+                            @foreach (var note in l.Notes)
+                            {
+                                var isWarning = note.Contains("verify", StringComparison.OrdinalIgnoreCase)
+                                             || note.Contains("No AA", StringComparison.OrdinalIgnoreCase);
+                                <div class="lending-note @(isWarning ? "warn" : "")">
+                                    <i class="bi @(isWarning ? "bi-exclamation-triangle-fill" : "bi-check2-circle")"></i>
+                                    <span>@note</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- ===================== Row 4: Strengths / Risks ===================== -->
         <div class="row g-4 mb-4">
             <div class="col-lg-6">
                 <div class="fhc-card">
@@ -318,6 +418,38 @@
                     plugins: { legend: { display: false } }
                 }
             });
+
+            // ── Lending: monthly cashflow vs EMI capacity
+            const lendingEl = document.getElementById('lendingChart');
+            if (lendingEl) {
+                const lend = @Html.Raw(Json.Serialize(r.Lending == null ? null : new {
+                    inflow = r.Lending.MonthlyBankInflow,
+                    outflow = r.Lending.MonthlyBankOutflow,
+                    surplus = Math.Max(0, r.Lending.MonthlySurplus),
+                    existingEmi = r.Lending.ExistingMonthlyEmi,
+                    affordableEmi = r.Lending.AffordableMonthlyEmi
+                }));
+                if (lend) {
+                    new Chart(lendingEl, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Bank Inflow', 'Bank Outflow', 'Surplus', 'Existing EMI', 'EMI Headroom'],
+                            datasets: [{
+                                data: [lend.inflow, lend.outflow, lend.surplus, lend.existingEmi, lend.affordableEmi],
+                                backgroundColor: ['#2e7d4f', '#c22f3e', '#7fae5e', '#e08a3c', maroon],
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { callbacks: { label: c => '₹' + new Intl.NumberFormat('en-IN').format(Math.round(c.parsed.y)) + '/mo' } }
+                            },
+                            scales: { y: { beginAtZero: true, ticks: { callback: v => '₹' + new Intl.NumberFormat('en-IN', { notation: 'compact' }).format(v) } } }
+                        }
+                    });
+                }
+            }
 
             // ── Horizontal bars: earned vs max
             new Chart(document.getElementById('barChart'), {

@@ -197,7 +197,7 @@ use-case-4 "dashboard refresh button" is now real.
 
 ## 3. How it works — the pipeline
 
-`RiskScoringService.Analyze()` runs seven stages:
+`RiskScoringService.Analyze()` runs eight stages:
 
 ```
 raw JSON payloads
@@ -222,6 +222,9 @@ raw JSON payloads
       │
       ▼
 [7] Recommendations           band → scheme lookup
+      │
+      ▼
+[8] Lending assessment        bank ratios + indicative eligibility (LendingCalculator)
 ```
 
 ### Stage 1 — Feature extraction
@@ -377,6 +380,53 @@ dimensions are the actionable output instead.
 | Fair | CGTMSE-backed Working Capital |
 | At Risk | MUDRA (Shishu/Kishor) |
 | High Risk | none — surface weak dimensions |
+
+### Stage 8 — Lending ratios & indicative eligibility
+
+`LendingCalculator` (ML project; result shape `LendingAssessment` in
+`Core/Models/Scoring`) produces the loan-decision view a credit officer needs.
+It rides on the same `MsmeFeatureSet` — no extra data pulls.
+
+**Indicative eligibility — how the amounts are calculated:**
+
+| Amount | Formula | Basis |
+|---|---|---|
+| Working Capital Limit | `20% × annual GST turnover × band factor` | Turnover (Nayak committee) method: WC requirement = 25% of turnover; bank finances 20%, borrower margins 5%. RBI norm for MSME limits up to ₹5 Cr |
+| Borrower Margin | `5% × annual turnover` | the borrower's contribution under the same method |
+| Affordable EMI | `min(50% × monthly bank inflow − existing EMI,  80% × monthly surplus)` | FOIR cap and observed cash surplus, whichever is tighter |
+| Term Loan Capacity | `Affordable EMI × annuity factor(11% p.a., 60 months) × band factor` | present value of the EMI stream (factor ≈ 46.0) |
+| Total Indicative Eligibility | `WC limit + term capacity` | combined headline |
+
+Band factor scales everything by score band — Excellent ×1.00, Good ×0.85,
+Fair ×0.60, At Risk ×0.35, High Risk ×0. When GST is missing (thin file),
+annual turnover falls back to `bank inflows × 12`. All figures are rounded to
+₹10k and labelled indicative — never a sanction.
+
+**The seven credit-appraisal ratios** (each carries value, banking benchmark,
+and a Strong/Adequate/Weak status; missing sources report `NotAvailable`, never
+a fake number):
+
+| Ratio | Formula | Benchmark (Strong) | What it tells the bank |
+|---|---|---|---|
+| DSCR | `(monthly surplus + existing EMI) / existing EMI` (capped 10x) | ≥ 1.50x | repayment capacity vs current obligations |
+| FOIR | `existing EMI / monthly bank inflow` | ≤ 40% | how much income is already committed |
+| Banking Penetration | `monthly bank credits / monthly GST sales` | ≥ 60% | do declared sales actually route through the bank — cash businesses score low |
+| Gross Margin | `(GSTR-1 sales − GSTR-2A purchases) / sales` | ≥ 15% | trading margin implied by the GST trail |
+| Days Cash on Hand | `current balances / avg daily outflow` | ≥ 60 days | liquidity runway |
+| Inflow Volatility | coefficient of variation of monthly credits | ≤ 0.30 | earnings steadiness |
+| Credit Note Ratio | `CDNR note value / total turnover` | ≤ 5% | how much headline revenue gets reversed |
+
+Adequate thresholds sit between Strong and Weak (e.g. DSCR 1.25–1.5, FOIR
+40–55%, penetration 30–60%). The calculator also emits `Notes` — methodology
+lines plus auto-generated warnings (e.g. "banking penetration very low relative
+to GST sales — verify the consented account is the primary operating account").
+
+**Dashboard:** the Financial Health Card
+(`/Dashboard/FinancialHealthCard?uan=…`) renders the whole result — score
+gauge with needle, dimension radar + bar charts, strengths/risks, and the Bank
+Lending Assessment section: four eligibility tiles, the ratio table with status
+chips, a Chart.js "Monthly Cashflow & EMI Capacity" bar chart, and the
+"How this was calculated" notes panel.
 
 ### SSA trend (used inside Stage 2)
 
