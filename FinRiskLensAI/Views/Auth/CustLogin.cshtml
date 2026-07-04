@@ -1,193 +1,145 @@
 ﻿@{
-    ViewBag.Title = "CustOnboarding";
+    ViewBag.Title = "CustLogin";
     Layout = "~/Views/Shared/_CustOnboardingLayout.cshtml";
 }
-
+<link href="~/css/custlogin.css" rel="stylesheet" />
+<script src="~/frlscripts/custlogin/custlogin.js"></script>
 
 <style>
+
+    
     :root {
-        --primary: #5e0023;
-        --primary-container: #801538;
-        --on-primary: #ffffff;
-        --secondary: #725c1e;
-        --secondary-container: #fcdd91;
-        --background: #fbf9f6;
-        --surface-lowest: #ffffff;
-        --surface-low: #f5f3f0;
-        --on-surface: #1b1c1a;
-        --on-surface-variant: #564145;
-        --outline-variant: #dcbfc3;
+    --primary: #5e0023;
+    --primary-container: #801538;
+    --on-primary: #ffffff;
+    --secondary: #725c1e;
+    --secondary-container: #fcdd91;
+    --background: #fbf9f6;
+    --surface-lowest: #ffffff;
+    --surface-low: #f5f3f0;
+    --on-surface: #1b1c1a;
+    --on-surface-variant: #564145;
+    --outline-variant: #dcbfc3;
+    --danger: #b3392c;
+    --success: #2f7d5c;
     }
 
-    body {
-        font-family: 'Manrope', sans-serif;
-        background-color: var(--background);
-        background-image: radial-gradient(at 0% 0%, rgba(128,21,56,0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(230,200,127,0.10) 0px, transparent 50%);
-        color: var(--on-surface);
-        min-height: 100vh;
+    #otpDisplayModal .modal-content {
+    border: none !important;
+    border-radius: .9rem !important;
+    overflow: hidden !important;
+    box-shadow: 0 24px 60px -20px rgba(94,0,35,.45) !important;
     }
 
-    .navbar-brand-mark {
-        width: 40px;
-        height: 40px;
-        background-color: var(--secondary-container);
-        color: var(--primary);
-        border-radius: .5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 800;
-        font-size: .85rem;
+    #otpDisplayModal .modal-header {
+    background: linear-gradient(120deg, var(--primary) 0%, var(--primary-container) 100%) !important;
+    border-bottom: none !important;
+    padding: 1.25rem 1.5rem !important;
     }
 
-    .text-primary-brand {
-        color: var(--primary) !important;
+    #otpDisplayModal .modal-title {
+    color: var(--on-primary) !important;
+    font-weight: 800;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
     }
 
-    .text-secondary-brand {
-        color: var(--secondary) !important;
+    #otpDisplayModal .modal-title i {
+    font-size: 1.1rem;
+    color: var(--secondary-container);
     }
 
-    .eyebrow {
-        font-size: .7rem;
-        font-weight: 700;
-        letter-spacing: .2em;
-        text-transform: uppercase;
-        color: var(--on-surface-variant);
+    #otpDisplayModal .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: .85;
     }
 
-    .login-card {
-        background: var(--surface-lowest);
-        border: 1px solid rgba(220,191,195,.35);
-        border-radius: .75rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,.04), 0 12px 40px rgba(128,21,56,.03);
+    #otpDisplayModal .btn-close:hover {
+    opacity: 1;
     }
 
-    .card-header-custom {
-        border-bottom: 1px solid rgba(220,191,195,.4);
+    #otpDisplayModal .modal-body {
+    padding: 2rem 1.5rem 1.5rem;
+    background-color: var(--surface-lowest);
     }
 
-    .icon-tile {
-        width: 48px;
-        height: 48px;
-        border-radius: .5rem;
-        background-color: rgba(252,221,145,.20);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--secondary);
-        font-size: 1.4rem;
+    #otpDisplayModal .modal-body p {
+    font-size: .85rem;
+    color: var(--on-surface-variant);
     }
 
-    .form-label-custom {
-        font-size: .85rem;
-        font-weight: 600;
-        color: var(--on-surface-variant);
+    #otpDisplayModal .otp-display-box {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background-color: var(--surface-low);
+    border: 1.5px dashed var(--outline-variant);
+    border-radius: .6rem;
+    padding: .85rem 1.5rem;
+    margin: .25rem 0 .5rem;
     }
 
-    .form-control-custom {
-        height: 56px;
-        background-color: var(--surface-low);
-        border: 1px solid var(--outline-variant);
-        border-radius: .5rem;
-        padding-left: 2.75rem;
+    #otpDisplayModal #otpDisplayValue {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    letter-spacing: .35rem;
+    color: var(--primary);
+    margin: 0;
     }
 
-        .form-control-custom:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 .2rem rgba(94,0,35,.15);
-        }
-
-    .input-icon {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--on-surface-variant);
-        pointer-events: none;
+    #otpDisplayModal .otp-copy-btn {
+    background: none;
+    border: none;
+    color: var(--secondary);
+    font-size: 1.1rem;
+    padding: .25rem;
+    line-height: 1;
+    transition: color .15s ease, transform .1s ease;
     }
 
-    .toggle-visibility {
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: var(--on-surface-variant);
-        cursor: pointer;
+    #otpDisplayModal .otp-copy-btn:hover {
+    color: var(--primary);
     }
 
-        .toggle-visibility:hover {
-            color: var(--primary);
-        }
-
-    .btn-brand {
-        background-color: var(--primary-container);
-        color: var(--on-primary);
-        border: none;
-        height: 56px;
-        border-radius: .5rem;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: .6rem;
-        transition: all .15s ease;
+    #otpDisplayModal .otp-copy-btn:active {
+    transform: scale(.9);
     }
 
-        .btn-brand:hover {
-            background-color: var(--primary);
-            color: var(--on-primary);
-            box-shadow: 0 8px 20px rgba(94,0,35,.20);
-        }
-
-        .btn-brand:active {
-            transform: scale(.98);
-        }
-
-    .btn-outline-brand {
-        border: 1px solid var(--primary-container);
-        color: var(--primary-container);
-        border-radius: .5rem;
-        height: 48px;
-        font-weight: 600;
-        font-size: .85rem;
+    #otpDisplayModal .otp-dev-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    background-color: rgba(114,92,30,.08);
+    border: 1px solid rgba(252,221,145,.4);
+    border-radius: .5rem;
+    padding: .6rem .8rem;
+    font-size: .75rem;
+    color: var(--on-surface-variant);
+    text-align: left;
+    margin-top: 1rem;
     }
 
-        .btn-outline-brand:hover {
-            background-color: rgba(128,21,56,.05);
-            color: var(--primary-container);
-        }
-
-    .trust-box {
-        background-color: rgba(114,92,30,.06);
-        border: 1px solid rgba(252,221,145,.25);
-        border-radius: .5rem;
+    #otpDisplayModal .otp-dev-note i {
+    color: var(--secondary);
+    margin-top: .1rem;
     }
 
-    .step-badge {
-        width: 32px;
-        height: 32px;
-        border: 2px solid var(--primary-container);
-        color: var(--primary);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: .7rem;
-        font-weight: 700;
+    #otpDisplayModal .modal-footer {
+    background-color: var(--surface-low) !important;
+    border-top: 1px solid rgba(220,191,195,.4) !important;
+    padding: 1rem 1.5rem !important;
     }
 
-    footer a {
-        color: var(--on-surface-variant);
-        text-decoration: none;
-        font-size: .85rem;
+    #otpDisplayModal .modal-footer .btn-maroon {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
     }
-
-        footer a:hover {
-            color: var(--primary);
-        }
 </style>
 
 <!-- Main -->
@@ -222,15 +174,15 @@
                                    placeholder="Enter your registered email">
                         </div>
 
-                        <div class="help-text mb-3">
+                        <div class="help-text mb-3" id="emailHelpText">
                             <i class="bi bi-info-circle-fill"></i>
-                            We'll send a 6-digit OTP to your registered email.
+                            <span>We'll send a 6-digit OTP to your registered email.</span>
                         </div>
 
                         <div class="text-end">
-                            <button class="btn btn-maroon btn-sm px-4" id="generateOtpBtn">
+                            <button class="btn btn-maroon btn-sm px-4" id="generateOtpBtn" type="button">
                                 <i class="bi bi-send me-1"></i>
-                                Generate OTP
+                                <span>Generate OTP</span>
                             </button>
                         </div>
 
@@ -238,31 +190,35 @@
 
                     <!-- BOX 2 -->
                     <div class="box-2 mt-4 d-none" id="box2">
-
                         <hr />
-
                         <label class="form-label">Enter OTP</label>
 
-                        <div class="input-group input-group-lg mb-2">
-                            <span class="input-group-text bg-white">
-                                <i class="bi bi-shield-lock"></i>
-                            </span>
-
-                            <input type="text"
-                                   id="otp"
-                                   maxlength="6"
-                                   class="form-control"
-                                   placeholder="Enter 6-digit OTP">
+                        <div class="otp-row mb-1" id="otpRow">
+                            <input type="text" inputmode="numeric" maxlength="1" class="otp-box otp-input">
+                            <input type="text" inputmode="numeric" maxlength="1" class="otp-box otp-input">
+                            <input type="text" inputmode="numeric" maxlength="1" class="otp-box otp-input">
+                            <input type="text" inputmode="numeric" maxlength="1" class="otp-box otp-input">
+                            <input type="text" inputmode="numeric" maxlength="1" class="otp-box otp-input">
+                            <input type="text" inputmode="numeric" maxlength="1" class="otp-box otp-input">
                         </div>
 
-                        <div class="help-text mb-3">
-                            OTP has been sent to your email.
+                        @* <div class="otp-progress"><div class="otp-progress-fill" id="otpProgress"></div></div> *@
+
+                        <div class="otp-meta">
+                            <span class="help-text status-sent mb-0">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>OTP sent to your email.</span>
+                            </span>
+                            <button class="btn-link-resend" id="resendBtn" type="button" disabled>
+                                Resend in <span id="resendTimer">30</span>s
+                            </button>
                         </div>
 
                         <div class="text-end">
                             <button type="button"
                                     class="btn btn-brand"
-                                    id="submitBtn">
+                                    id="submitBtn"
+                                    disabled>
 
                                 <i class="bi bi-box-arrow-in-right"></i>
                                 <span id="submitLabel">Login to Portal</span>
@@ -277,158 +233,39 @@
         </div>
     </div>
 </div>
+
+
 <div class="modal fade" id="otpDisplayModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Your OTP</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    Your one-time password
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <p class="mb-1">Use this OTP to continue:</p>
-                <h2 id="otpDisplayValue" class="fw-bold"></h2>
+                <p class="mb-2">Use this OTP to continue:</p>
+
+                <div class="otp-display-box">
+                    <h2 id="otpDisplayValue" class="fw-bold"></h2>
+                    <button type="button" class="otp-copy-btn" id="copyOtpBtn" title="Copy OTP" aria-label="Copy OTP">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+
+                <div class="otp-dev-note">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>This OTP is shown here for development purposes only and won't appear once email delivery is live.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-maroon" data-bs-dismiss="modal">
+                    <i class="bi bi-check2"></i>
+                    <span>Got it</span>
+                </button>
             </div>
         </div>
     </div>
-</div>
-
-<script>
-
- $(document).ready(function() {
-
-     $("#generateOtpBtn").click(function () {
-
-         var email = $("#email").val().trim();
-
-         if (email == "") {
-             $("#email").addClass("is-invalid");
-             return;
-         }
-
-         $("#email").removeClass("is-invalid");
-
-         var model = {
-             Email: email
-         };
-
-         var $btn = $("#generateOtpBtn");
-         var originalHtml = $btn.html();
-
-         $.ajax({
-
-             url: "/Auth/GenCustomerOtp",
-             type: "POST",
-             data: model,
-
-             beforeSend: function () {
-
-                 $btn.prop("disabled", true);
-                 $btn.html('<i class="bi bi-arrow-repeat"></i> <span>Sending OTP...</span>');
-             },
-
-             success: function (res) {
-
-                 $btn.prop("disabled", false);
-                 $btn.html(originalHtml);
-
-                 if (res.status) {
-
-                      // Show OTP in modal (Development only)
-                     $("#otpDisplayValue").text(res.otp);
-
-                     var otpModal = new bootstrap.Modal(document.getElementById("otpDisplayModal"));
-                     otpModal.show();
-
-
-                     // Hide Generate OTP button
-                     $("#generateOtpBtn").addClass("d-none");
-                     
-                     // Lock Email textbox
-                     $("#email").prop("readonly", true);
-                     
-                     // Show OTP Box
-                     $("#box2").removeClass("d-none");
-                     
-                     // Smooth scroll to OTP section
-                     $('html, body').animate({
-                         scrollTop: $("#box2").offset().top - 80
-                     }, 300);
-                     
-                     // Focus OTP input
-                     $("#otp").focus();
-                 }
-                 else {
-
-                    // showToast(res.message);
-                 }
-             },
-
-             error: function () {
-
-                 $btn.prop("disabled", false);
-                 $btn.html(originalHtml);
-
-                 showToast("Something went wrong while sending OTP.");
-             }
-
-         });
-
-      });
-
-
-     $("#submitBtn").click(function () {
-
-        var model = {
-            Email: $("#email").val(),
-            OTP: $("#otp").val()
-        };
-
-        $.ajax({
-
-                url: "/Auth/ValidateUserOtp",
-            type: "POST",
-            data: model,
-
-            beforeSend: function () {
-
-                $("#submitBtn").prop("disabled", true);
-                $("#submitLabel").text("Validating...");
-            },
-
-            success: function (res) {
-
-                $("#submitBtn").prop("disabled", false);
-                $("#submitLabel").text("Login to Portal");
-
-                if (res.status) {
-
-                    window.location.href = "/Dashboard/Dashboard";
-                }
-                else {
-
-                    alert(res.message);
-
-                    $("#otp").val("");
-                    $("#otp").focus();
-                }
-            },
-
-            error: function () {
-
-                $("#submitBtn").prop("disabled", false);
-                $("#submitLabel").text("Login to Portal");
-
-                alert("Something went wrong.");
-            }
-
-        });
-
-    });
-
-});
-
-
-     
-
-</script>
 

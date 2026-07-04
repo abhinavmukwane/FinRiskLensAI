@@ -764,18 +764,183 @@ footer.brand-footer {
     color: var(--slate);
     font-style: italic;
 }
+.rv-card .form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    padding-left: 0;
+}
 
+.rv-card .form-check-input.rv-checkbox {
+    width: 1.2em;
+    height: 1.2em;
+    margin-left: 0;
+    margin-top: .15rem;
+    border: 2px solid var(--maroon) !important;
+    border-radius: .3rem;
+    cursor: pointer;
+    background-color: #fff;
+    background-image: none !important;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    transition: all .15s ease;
+}
+
+    .rv-card .form-check-input.rv-checkbox:checked {
+        background-color: var(--maroon) !important;
+        border-color: var(--maroon) !important;
+    }
+
+        .rv-card .form-check-input.rv-checkbox:checked::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            width: 30%;
+            height: 55%;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+    .rv-card .form-check-input.rv-checkbox:focus {
+        box-shadow: 0 0 0 .2rem rgba(122, 18, 48, .15) !important;
+    }
+
+    .rv-card .form-check-input.rv-checkbox:hover {
+        border-color: var(--maroon-dark) !important;
+    }
+
+.rv-card .form-check-label {
+    margin-bottom: 0;
+    cursor: pointer;
+    line-height: 1.5;
+}
 @media (max-width: 767px) {
     .rv-border-end {
         border-right: none;
         border-bottom: 1px solid var(--line);
     }
 }
-.custom-checkbox {
-    border: 2px solid #0d6efd; /* Bootstrap primary */
+
+
+/* ---------- OTP display modal ---------- */
+/*#otpDisplayModal .modal-content {
+    border: none;
+    border-radius: .9rem;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -20px rgba(94,0,35,.45);
 }
 
-    .custom-checkbox:checked {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
+#otpDisplayModal .modal-header {
+    background: linear-gradient(120deg, var(--primary) 0%, var(--primary-container) 100%);
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+}
+
+#otpDisplayModal .modal-title {
+    color: var(--on-primary);
+    font-weight: 800;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+    #otpDisplayModal .modal-title i {
+        font-size: 1.1rem;
+        color: var(--secondary-container);
     }
+
+#otpDisplayModal .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: .85;
+}
+
+    #otpDisplayModal .btn-close:hover {
+        opacity: 1;
+    }
+
+#otpDisplayModal .modal-body {
+    padding: 2rem 1.5rem 1.5rem;
+    background-color: var(--surface-lowest);
+}
+
+    #otpDisplayModal .modal-body p {
+        font-size: .85rem;
+        color: var(--on-surface-variant);
+    }
+
+.otp-display-box {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background-color: var(--surface-low);
+    border: 1.5px dashed var(--outline-variant);
+    border-radius: .6rem;
+    padding: .85rem 1.5rem;
+    margin: .25rem 0 .5rem;
+}
+
+#otpDisplayValue {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    letter-spacing: .35rem;
+    color: var(--primary);
+    margin: 0;
+}
+
+.otp-copy-btn {
+    background: none;
+    border: none;
+    color: var(--secondary);
+    font-size: 1.1rem;
+    padding: .25rem;
+    line-height: 1;
+    transition: color .15s ease, transform .1s ease;
+}
+
+    .otp-copy-btn:hover {
+        color: var(--primary);
+    }
+
+    .otp-copy-btn:active {
+        transform: scale(.9);
+    }
+
+.otp-dev-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    background-color: rgba(114,92,30,.08);
+    border: 1px solid rgba(252,221,145,.4);
+    border-radius: .5rem;
+    padding: .6rem .8rem;
+    font-size: .75rem;
+    color: var(--on-surface-variant);
+    text-align: left;
+    margin-top: 1rem;
+}
+
+    .otp-dev-note i {
+        color: var(--secondary);
+        margin-top: .1rem;
+    }
+
+#otpDisplayModal .modal-footer {
+    background-color: var(--surface-low);
+    border-top: 1px solid rgba(220,191,195,.4);
+    padding: 1rem 1.5rem;
+}
+
+    #otpDisplayModal .modal-footer .btn-maroon {
+        width: 100%;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+    }*/

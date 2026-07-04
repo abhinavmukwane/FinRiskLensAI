@@ -409,6 +409,22 @@
                 showToast('A new OTP has been sent.');
             });
 
+            // ---------- Copy OTP (dev modal) ----------
+            $("#copyOtpBtn").on("click", function () {
+                var $btn = $(this);
+                var otp = $("#otpDisplayValue").text().trim();
+
+                if (!otp) return;
+
+                navigator.clipboard.writeText(otp).then(function () {
+                    var original = $btn.html();
+                    $btn.html('<i class="bi bi-check2"></i>');
+                    setTimeout(function () {
+                        $btn.html(original);
+                    }, 1200);
+                });
+            });
+
             // ---------- STEP 3 → STEP 4 (verify OTP) ----------
 
             $('#btnVerifyOtp').on('click', function () {

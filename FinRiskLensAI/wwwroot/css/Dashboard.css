@@ -514,7 +514,7 @@ img {
     .topbar-icon-btn:hover {
         background: var(--color-surface-container-high);
     }
-
+/*
 .topbar-avatar {
     width: 32px;
     height: 32px;
@@ -531,6 +531,21 @@ img {
         object-fit: cover;
     }
 
+*/
+    .topbar-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--secondary-container, #fcdd91);
+    color: var(--primary, #5e0023);
+    font-size: 1.6rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    overflow: hidden;
+}
 /* backdrop for mobile drawer */
 .sidebar-backdrop {
     display: none;
