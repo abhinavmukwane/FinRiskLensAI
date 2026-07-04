@@ -1,4 +1,4 @@
-namespace FinRiskLensAI.ML.Models
+namespace FinRiskLensAI.Core.Models.Scoring
 {
     public enum ScoreBandType { Excellent, Good, Fair, AtRisk, HighRisk }
 

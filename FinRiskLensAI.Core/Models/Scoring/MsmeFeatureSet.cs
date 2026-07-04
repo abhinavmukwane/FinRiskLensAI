@@ -1,4 +1,4 @@
-namespace FinRiskLensAI.ML.Models
+namespace FinRiskLensAI.Core.Models.Scoring
 {
     /// <summary>
     /// All engineered features for one MSME, extracted from the raw source payloads

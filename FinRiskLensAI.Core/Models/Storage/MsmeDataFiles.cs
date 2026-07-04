@@ -1,4 +1,4 @@
-namespace FinRiskLensAI.ML.Storage
+namespace FinRiskLensAI.Core.Models.Storage
 {
     /// <summary>
     /// Naming convention for files inside an MSME's blob folder. Deterministic names

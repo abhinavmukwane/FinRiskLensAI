@@ -1,5 +1,5 @@
 using System.Globalization;
-using FinRiskLensAI.ML.Models;
+using FinRiskLensAI.Core.Models.Scoring;
 using Newtonsoft.Json.Linq;
 
 namespace FinRiskLensAI.ML.Features

@@ -1,4 +1,6 @@
-using FinRiskLensAI.ML.Models;
+using FinRiskLensAI.Core.Interfaces;
+using FinRiskLensAI.Core.Models.Storage;
+using FinRiskLensAI.Core.Models.Scoring;
 using FinRiskLensAI.ML.Storage;
 using Newtonsoft.Json;
 

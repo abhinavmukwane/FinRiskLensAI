@@ -1,5 +1,5 @@
-using FinRiskLensAI.ML.Models;
-using FinRiskLensAI.ML.Services;
+using FinRiskLensAI.Core.Models.Scoring;
+using FinRiskLensAI.Core.Interfaces;
 
 namespace FinRiskLensAI.Models
 {

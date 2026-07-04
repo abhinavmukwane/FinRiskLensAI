@@ -1,4 +1,4 @@
-using FinRiskLensAI.ML.Models;
+using FinRiskLensAI.Core.Models.Scoring;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 

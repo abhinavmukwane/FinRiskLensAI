@@ -1,6 +1,7 @@
+using FinRiskLensAI.Core.Interfaces;
 using FinRiskLensAI.ML.Features;
 using FinRiskLensAI.ML.MachineLearning;
-using FinRiskLensAI.ML.Models;
+using FinRiskLensAI.Core.Models.Scoring;
 
 namespace FinRiskLensAI.ML.Services
 {

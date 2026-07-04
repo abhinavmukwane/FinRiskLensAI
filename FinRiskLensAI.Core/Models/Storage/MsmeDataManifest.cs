@@ -1,4 +1,4 @@
-namespace FinRiskLensAI.ML.Storage
+namespace FinRiskLensAI.Core.Models.Storage
 {
     public enum MsmeDataStatus { Collecting, Ready, Processing, Completed, Failed }
 

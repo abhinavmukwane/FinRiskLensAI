@@ -1,5 +1,5 @@
-using FinRiskLensAI.ML.Services;
-using FinRiskLensAI.ML.Storage;
+using FinRiskLensAI.Core.Interfaces;
+using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;

@@ -1,3 +1,4 @@
+using FinRiskLensAI.Core.Interfaces;
 using Autofac;
 using FinRiskLensAI.ML.Features;
 using FinRiskLensAI.ML.MachineLearning;

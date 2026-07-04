@@ -1,6 +1,6 @@
-using FinRiskLensAI.ML.Models;
+using FinRiskLensAI.Core.Models.Scoring;
 
-namespace FinRiskLensAI.ML.Services
+namespace FinRiskLensAI.Core.Interfaces
 {
     /// <summary>Raw source payloads for one MSME, exactly as returned by the upstream APIs.</summary>
     public class RiskAnalysisRequest

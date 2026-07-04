@@ -1,4 +1,4 @@
-namespace FinRiskLensAI.ML.Storage
+namespace FinRiskLensAI.Core.Interfaces
 {
     /// <summary>
     /// Storage abstraction for the per-MSME data folder (folder name = Udyam number).

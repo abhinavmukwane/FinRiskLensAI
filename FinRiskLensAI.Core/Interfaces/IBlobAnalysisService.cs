@@ -1,7 +1,7 @@
-using FinRiskLensAI.ML.Models;
-using FinRiskLensAI.ML.Storage;
+using FinRiskLensAI.Core.Models.Scoring;
+using FinRiskLensAI.Core.Models.Storage;
 
-namespace FinRiskLensAI.ML.Services
+namespace FinRiskLensAI.Core.Interfaces
 {
     public class MsmeDataStatusReport
     {

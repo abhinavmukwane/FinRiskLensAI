@@ -193,7 +193,7 @@
             <div class="col-lg-6">
                 <div class="fhc-card">
                     <div class="fhc-section-label"><i class="bi bi-arrow-up-circle-fill me-1" style="color:#0f5137;"></i>Key Strengths</div>
-                    @foreach (var e in r.Explanations.Where(x => x.Impact == FinRiskLensAI.ML.Models.ImpactDirection.Positive).OrderByDescending(x => x.RelativeWeight))
+                    @foreach (var e in r.Explanations.Where(x => x.Impact == FinRiskLensAI.Core.Models.Scoring.ImpactDirection.Positive).OrderByDescending(x => x.RelativeWeight))
                     {
                         <div class="expl-item">
                             <i class="bi bi-check-circle-fill" style="color:#0f5137;"></i>
@@ -205,7 +205,7 @@
             <div class="col-lg-6">
                 <div class="fhc-card">
                     <div class="fhc-section-label"><i class="bi bi-arrow-down-circle-fill me-1" style="color:#8b1020;"></i>Risk Factors</div>
-                    @{ var risks = r.Explanations.Where(x => x.Impact == FinRiskLensAI.ML.Models.ImpactDirection.Negative).OrderByDescending(x => x.RelativeWeight).ToList(); }
+                    @{ var risks = r.Explanations.Where(x => x.Impact == FinRiskLensAI.Core.Models.Scoring.ImpactDirection.Negative).OrderByDescending(x => x.RelativeWeight).ToList(); }
                     @if (risks.Count == 0)
                     {
                         <div class="fhc-sub py-3"><i class="bi bi-emoji-smile me-1"></i>No material risk factors surfaced by the model.</div>
