@@ -56,5 +56,10 @@ namespace FinRiskLensAI.Controllers
 
             return View(model);
         }
+
+        public IActionResult UdyamDetails()
+        {
+            return View();
+        }
     }
 }
