@@ -214,7 +214,7 @@
 
                     if (res.status) {
 
-                        window.location.href = "/Dashboard/Dashboard";
+                        window.location.href = "/Dashboard/CustDashboard";
                     }
                     else {
 

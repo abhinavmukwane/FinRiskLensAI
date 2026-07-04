@@ -3,7 +3,7 @@
     Layout = "~/Views/Shared/_CustOnboardingLayout.cshtml";
 }
 <link href="~/css/custlogin.css" rel="stylesheet" />
-<script src="~/frlscripts/custlogin/custlogin.js"></script>
+ <script src="~/frlscripts/custlogin/custlogin.js"></script> 
 
 <style>
 
@@ -234,7 +234,6 @@
     </div>
 </div>
 
-
 <div class="modal fade" id="otpDisplayModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -246,150 +245,26 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <p class="mb-1">Use this OTP to continue:</p>
-                <h2 id="otpDisplayValue" class="fw-bold"></h2>
+                <p class="mb-2">Use this OTP to continue:</p>
+
+                <div class="otp-display-box">
+                    <h2 id="otpDisplayValue" class="fw-bold"></h2>
+                    <button type="button" class="otp-copy-btn" id="copyOtpBtn" title="Copy OTP" aria-label="Copy OTP">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+
+                <div class="otp-dev-note">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>This OTP is shown here for development purposes only and won't appear once email delivery is live.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-maroon" data-bs-dismiss="modal">
+                    <i class="bi bi-check2"></i>
+                    <span>Got it</span>
+                </button>
             </div>
         </div>
     </div>
-</div>
-
-<script>
-
- $(document).ready(function() {
-
-     $("#generateOtpBtn").click(function () {
-
-         var email = $("#email").val().trim();
-
-         if (email == "") {
-             $("#email").addClass("is-invalid");
-             return;
-         }
-
-         $("#email").removeClass("is-invalid");
-
-         var model = {
-             Email: email
-         };
-
-         var $btn = $("#generateOtpBtn");
-         var originalHtml = $btn.html();
-
-         $.ajax({
-
-             url: "/Auth/GenCustomerOtp",
-             type: "POST",
-             data: model,
-
-             beforeSend: function () {
-
-                 $btn.prop("disabled", true);
-                 $btn.html('<i class="bi bi-arrow-repeat"></i> <span>Sending OTP...</span>');
-             },
-
-             success: function (res) {
-
-                 $btn.prop("disabled", false);
-                 $btn.html(originalHtml);
-
-                 if (res.status) {
-
-                      // Show OTP in modal (Development only)
-                     $("#otpDisplayValue").text(res.otp);
-
-                     var otpModal = new bootstrap.Modal(document.getElementById("otpDisplayModal"));
-                     otpModal.show();
-
-
-                     // Hide Generate OTP button
-                     $("#generateOtpBtn").addClass("d-none");
-                     
-                     // Lock Email textbox
-                     $("#email").prop("readonly", true);
-                     
-                     // Show OTP Box
-                     $("#box2").removeClass("d-none");
-                     
-                     // Smooth scroll to OTP section
-                     $('html, body').animate({
-                         scrollTop: $("#box2").offset().top - 80
-                     }, 300);
-                     
-                     // Focus OTP input
-                     $("#otp").focus();
-                 }
-                 else {
-
-                    // showToast(res.message);
-                 }
-             },
-
-             error: function () {
-
-                 $btn.prop("disabled", false);
-                 $btn.html(originalHtml);
-
-                 showToast("Something went wrong while sending OTP.");
-             }
-
-         });
-
-      });
-
-
-     $("#submitBtn").click(function () {
-
-        var model = {
-            Email: $("#email").val(),
-            OTP: $("#otp").val()
-        };
-
-        $.ajax({
-
-                url: "/Auth/ValidateUserOtp",
-            type: "POST",
-            data: model,
-
-            beforeSend: function () {
-
-                $("#submitBtn").prop("disabled", true);
-                $("#submitLabel").text("Validating...");
-            },
-
-            success: function (res) {
-
-                $("#submitBtn").prop("disabled", false);
-                $("#submitLabel").text("Login to Portal");
-
-                if (res.status) {
-
-                    window.location.href = "/Dashboard/Dashboard";
-                }
-                else {
-
-                    alert(res.message);
-
-                    $("#otp").val("");
-                    $("#otp").focus();
-                }
-            },
-
-            error: function () {
-
-                $("#submitBtn").prop("disabled", false);
-                $("#submitLabel").text("Login to Portal");
-
-                alert("Something went wrong.");
-            }
-
-        });
-
-    });
-
-});
-
-
-     
-
-</script>
-
+    </div>
