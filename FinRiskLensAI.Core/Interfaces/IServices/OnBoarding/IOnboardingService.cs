@@ -19,5 +19,6 @@ namespace FinRiskLensAI.Core.Interfaces.IServices.OnBoarding
         Task<ResultModel<UdyamDetailsModel>> GetUdyamDetails(string uan);
         Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(UserRegistrationModel entity);
         Task<ResultModel<UserOtpModel>> AddUpdateUserOtp(UserOtpModel entity);
+        Task<ResultModel<UserOtpModel>> FetchUserOTPDet(UserOtpModel model);
     }
 }

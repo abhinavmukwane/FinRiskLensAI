@@ -1,11 +1,13 @@
 using FinRiskLensAI.Core.Interfaces;
 using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Models;
+using FinRiskLensAI.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
 namespace FinRiskLensAI.Controllers
 {
+    [CustDashboardAuthorize]
     public class DashboardController : Controller
     {
         private readonly IBlobAnalysisService _analysis;

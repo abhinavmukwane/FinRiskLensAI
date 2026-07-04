@@ -345,71 +345,6 @@
             });
 
 
-
-
-
-            //$('#btnProceedToOtp').on('click', function () {
-
-            //    var model = {
-            //        UdyamNumber: $('#rv_udyam_number').val(),   
-            //        MobileNumber: $('#mobileInput').val(),
-            //        Email: $('#rv_email').val(),
-            //        GstinNumber: $('#rv_gstnNumber').val(),     
-            //        PanNumber: $('#rv_panNo').val()             
-            //    };
-
-            //    const $btn = $(this);
-
-            //    $btn.prop('disabled', true)
-            //        .html('<span class="spin-loader"></span> Registering...');
-
-            //    $.ajax({
-            //        url: '/Onboarding/RegisterUser',
-            //        type: 'POST',
-            //        data: model,
-
-            //        success: function (response) {
-
-            //            if (response.status) {
-
-            //                $btn.prop('disabled', false)
-            //                    .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');
-
-            //                $('#step2').addClass('d-none');
-            //                $('#step3').removeClass('d-none');
-
-            //                $('#otpEmailTarget').text(model.Email);
-
-            //                goToRailStep(3);
-            //                startOtpTimer();
-
-            //                $('.otp-input').first().focus();
-
-            //                showToast(response.message);
-
-            //                $('html,body').animate({ scrollTop: 0 }, 300);
-            //            }
-            //            else {
-            //                $('#reviewError').removeClass('d-none');
-            //                $('#reviewError span').text(response.message);
-
-            //                $btn.prop('disabled', false)
-            //                    .html('<i class="bi bi-send me-1"></i> Register');
-            //            }
-            //        },
-
-            //        error: function () {
-
-            //            $('#reviewError').removeClass('d-none');
-            //            $('#reviewError span').text('Something went wrong.');
-
-            //            $btn.prop('disabled', false)
-            //                .html('<i class="bi bi-send me-1"></i> Register');
-            //        }
-            //    });
-
-            //});
-
             // ---------- OTP BOX BEHAVIOUR ----------
             $('.otp-input').on('input', function () {
                 this.value = this.value.replace(/[^0-9]/g, '');
@@ -459,47 +394,113 @@
                 showToast('A new OTP has been sent.');
             });
 
-          
 
             // ---------- STEP 3 → STEP 4 (verify OTP) ----------
+
             $('#btnVerifyOtp').on('click', function () {
-                const code = $('.otp-input').map(function () { return this.value; }).get().join('');
-                if (code.length < 6) {
-                    $('#otpError').removeClass('d-none').html('<i class="bi bi-exclamation-triangle-fill me-1"></i> Please enter all 6 digits.');
-                    $('.otp-input').filter(function () { return this.value === ''; }).addClass('is-invalid');
+
+                const code = $('.otp-input').map(function () {
+                    return this.value;
+                }).get().join('');
+
+                if (code.length != 6) {
+
+                    $('#otpError')
+                        .removeClass('d-none')
+                        .html('<i class="bi bi-exclamation-triangle-fill me-1"></i> Please enter all 6 digits.');
+
                     return;
                 }
-                const $btn = $(this);
-                $btn.prop('disabled', true).html('<span class="spin-loader"></span> Verifying…');
-                setTimeout(function () {
-                    $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i> Verify &amp; Continue');
-                    clearInterval(otpTimerInterval);
-                    $('#step3').addClass('d-none');
-                    $('#step4').removeClass('d-none');
 
-                    if (isLoginMode) {
-                        const val = $('#udyamInput').val().trim();
-                        if (/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(val)) {
-                            $('#entUdyam').text(val);
-                            $('#dash_entUdyam').text(val);
-                        } else {
-                            $('#entUdyam').text('UDYAM-MH-20-0012345');
-                            $('#dash_entUdyam').text('UDYAM-MH-20-0012345');
+                var model = {
+                    Email: $("#rv_email").val(),
+                    MobileNumber: $("#mobileInput").val(),
+                    OTP: code
+                };
+
+                var $btn = $(this);
+
+                $btn.prop("disabled", true)
+                    .html('<span class="spin-loader"></span> Verifying...');
+
+                $.ajax({
+
+                    url: "/Onboarding/FetchUserOTPDet",
+                    type: "POST",
+                    data: model,
+
+                    success: function (res) {
+
+                        $btn.prop("disabled", false)
+                            .html('<i class="bi bi-check-circle me-1"></i> Verify & Continue');
+
+                        if (res.status) {
+
+                            showToast(res.message);
+
+                            window.location.href = "/Dashboard/Dashboard";
                         }
-                        $('#entName').text('Sharma Precision Engineering Works');
-                        $('#dash_entName').text('Sharma Precision Engineering Works');
-                    } else {
-                        $('#entName').text($('#rv_entName').text());
-                        $('#dash_entName').text($('#rv_entName').text());
-                        $('#entUdyam').text($('#udyamInput').val());
-                        $('#dash_entUdyam').text($('#udyamInput').val());
-                        goToRailStep(4);
+                        else {
+
+                            $('#otpError')
+                                .removeClass('d-none')
+                                .html('<i class="bi bi-exclamation-triangle-fill me-1"></i> ' + res.message);
+
+                            $('.otp-input').val('');
+                            $('.otp-input').first().focus();
+                        }
+                    },
+
+                    error: function () {
+
+                        $btn.prop("disabled", false)
+                            .html('<i class="bi bi-check-circle me-1"></i> Verify & Continue');
+
+                        alert("Something went wrong.");
                     }
 
-                    showToast('Identity verified successfully.');
-                    $('html,body').animate({ scrollTop: 0 }, 300);
-                }, 1200);
+                });
+
             });
+
+            //$('#btnVerifyOtp').on('click', function () {
+            //    const code = $('.otp-input').map(function () { return this.value; }).get().join('');
+            //    if (code.length < 6) {
+            //        $('#otpError').removeClass('d-none').html('<i class="bi bi-exclamation-triangle-fill me-1"></i> Please enter all 6 digits.');
+            //        $('.otp-input').filter(function () { return this.value === ''; }).addClass('is-invalid');
+            //        return;
+            //    }
+            //    const $btn = $(this);
+            //    $btn.prop('disabled', true).html('<span class="spin-loader"></span> Verifying…');
+            //    setTimeout(function () {
+            //        $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i> Verify &amp; Continue');
+            //        clearInterval(otpTimerInterval);
+            //        $('#step3').addClass('d-none');
+            //        $('#step4').removeClass('d-none');
+
+            //        if (isLoginMode) {
+            //            const val = $('#udyamInput').val().trim();
+            //            if (/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(val)) {
+            //                $('#entUdyam').text(val);
+            //                $('#dash_entUdyam').text(val);
+            //            } else {
+            //                $('#entUdyam').text('UDYAM-MH-20-0012345');
+            //                $('#dash_entUdyam').text('UDYAM-MH-20-0012345');
+            //            }
+            //            $('#entName').text('Sharma Precision Engineering Works');
+            //            $('#dash_entName').text('Sharma Precision Engineering Works');
+            //        } else {
+            //            $('#entName').text($('#rv_entName').text());
+            //            $('#dash_entName').text($('#rv_entName').text());
+            //            $('#entUdyam').text($('#udyamInput').val());
+            //            $('#dash_entUdyam').text($('#udyamInput').val());
+            //            goToRailStep(4);
+            //        }
+
+            //        showToast('Identity verified successfully.');
+            //        $('html,body').animate({ scrollTop: 0 }, 300);
+            //    }, 1200);
+            //});
 
             // ---------- Dashboard button ----------
             $('#btnGoToDashboard').on('click', function () {

@@ -21,7 +21,7 @@ namespace FinRiskLensAI.Core.Models.User_Activity
 
         public string? Email { get; set; }
 
-        public int OTP { get; set; }
+        public string? OTP { get; set; }
 
         public virtual UserRegistrationModel UserRegistration { get; set; }
 

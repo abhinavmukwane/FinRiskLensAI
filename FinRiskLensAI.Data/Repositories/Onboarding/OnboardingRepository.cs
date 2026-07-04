@@ -1,4 +1,5 @@
 ﻿using FinRiskLensAI.Core.Common;
+using FinRiskLensAI.Core.Interfaces.ICommon;
 using FinRiskLensAI.Core.Interfaces.IRepositories.AccountAggregator;
 using FinRiskLensAI.Core.Interfaces.IRepositories.OnBoarding;
 using FinRiskLensAI.Core.Models;
@@ -18,9 +19,12 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
     public class OnboardingRepository : IOnboardingRepository
     {
         private readonly DbContextEDMX.ApplicationDbContext _context;
-        public OnboardingRepository(DbContextEDMX.ApplicationDbContext context)
+        private readonly IEncryption _encryption;
+
+
+        public OnboardingRepository(DbContextEDMX.ApplicationDbContext context, IEncryption encryption)
         {
-            _context = context;
+            _context = context; _encryption = encryption;
         }
         public async Task<ResultModel<StaticResponseModel>> FetchUdyam(string uan)
         {
@@ -324,5 +328,56 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             }
             return result;
         }
+
+        public async Task<ResultModel<UserOtpModel>> FetchUserOTPDet(UserOtpModel model)
+        {
+            var result = new ResultModel<UserOtpModel>();
+
+            try
+            {
+                var entity = await _context.UserOtpModel
+                    .FirstOrDefaultAsync(x =>
+                        x.Email == model.Email &&
+                        x.MobileNumber == model.MobileNumber);
+
+                if (entity == null)
+                {
+                    result.Result = tflResultType.tflNoRecordFound;
+                    result.Message = "OTP record not found.";
+                    result.Data = null;
+                    return result;
+                }
+
+                var decryptedOtp = _encryption.DecryptString(entity.OTP);
+
+                if (decryptedOtp != model.OTP)
+                {
+                    result.Result = tflResultType.tflError;
+                    result.Message = "Invalid OTP.";
+                    result.Data = null;
+                    return result;
+                }
+
+                var otpModel = new UserOtpModel();
+                entity.MapToModelObject(otpModel);
+
+                result.Result = tflResultType.tflSuccess;
+                result.Message = "OTP validated successfully.";
+                result.Data = new UserOtpModel
+                {
+                    MsmeEnquiryID = entity.MsmeEnquiryID,
+                    Email = entity.Email
+                };
+            }
+            catch (Exception ex)
+            {
+                result.Result = tflResultType.tflError;
+                result.Message = ex.Message;
+                result.Data = null;
+            }
+
+            return result;
+        }
+
     }
 }

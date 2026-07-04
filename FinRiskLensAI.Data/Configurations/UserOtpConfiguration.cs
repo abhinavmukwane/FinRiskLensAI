@@ -27,7 +27,8 @@ namespace FinRiskLensAI.Data.Configurations
             builder.Property(x => x.Email)
                    .HasMaxLength(100);
 
-            builder.Property(x => x.OTP);
+            builder.Property(x => x.OTP)
+                   .HasMaxLength(500);
 
             builder.HasOne(x => x.UserRegistration)
                    .WithMany()

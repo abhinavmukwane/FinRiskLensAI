@@ -1,9 +1,11 @@
 ﻿using FinRiskLensAI.Core.Common;
+using FinRiskLensAI.Core.Interfaces.ICommon;
 using FinRiskLensAI.Core.Interfaces.IServices.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.OnBoarding;
 using FinRiskLensAI.Core.Models;
 using FinRiskLensAI.Core.Models.Onboarding;
 using FinRiskLensAI.Core.Models.User_Activity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinRiskLensAI.Controllers
@@ -12,11 +14,13 @@ namespace FinRiskLensAI.Controllers
     {
         private readonly IOnboardingService _onboardingService;
         private readonly IEmailService _emailService;
+        private readonly IEncryption _encryption;
 
-        public OnboardingController(IOnboardingService onboardingService, IEmailService emailService)
+        public OnboardingController(IOnboardingService onboardingService, IEmailService emailService, IEncryption encryption)
         {
             _onboardingService = onboardingService;
             _emailService = emailService;
+            _encryption = encryption;
         }
         public IActionResult CustOnboarding()
         {
@@ -147,7 +151,7 @@ namespace FinRiskLensAI.Controllers
                 MsmeEnquiryID = result.Data.MsmeEnquiryID,
                 Email = model.Email,
                 MobileNumber = model.MobileNumber,
-                OTP = Convert.ToInt32(otp)
+                OTP = _encryption.EncryptString(otp)
             };
 
             var otpResult = await _onboardingService.AddUpdateUserOtp(otpModel);
@@ -164,50 +168,29 @@ namespace FinRiskLensAI.Controllers
             });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> FetchUserOTPDet(UserOtpModel model)
+        {
+            var result = await _onboardingService.FetchUserOTPDet(model);
 
-        //[HttpPost]
-        //public async Task<IActionResult> RegisterUser(UserRegistrationModel model)
-        //{
-        //    if (model == null)
-        //    {
-        //        return Json(new {status = false,message = "Invalid request." });
-        //    }
+            if (result.Result == tflResultType.tflSuccess)
+            {
+                HttpContext.Session.SetInt32("MsmeEnquiryID", (int)result.Data.MsmeEnquiryID);
+                HttpContext.Session.SetString("Email", result.Data.Email);
 
-        //    var result = await _onboardingService.AddUpdateUserRegst(model);
+                return Json(new
+                {
+                    status = true,
+                    message = "OTP validated successfully."
+                });
+            }
 
-        //    if (result == null)
-        //    {
-        //        return Json(new{ status = false, message = "Something went wrong." });
-        //    }
-
-        //    return Json(new
-        //    {
-        //        status = true,
-        //        message = "User registered successfully."
-        //    });
-        //}
-
-        //[HttpPost]
-        //public async Task<IActionResult> AddUpdateUserOtp(UserOtpModel model)
-        //{
-        //    if (model == null)
-        //    {
-        //        return Json(new { status = false, message = "Invalid request." });
-        //    }
-
-        //    var result = await _onboardingService.AddUpdateUserOtp(model);
-
-        //    if (result == null)
-        //    {
-        //        return Json(new { status = false, message = "Something went wrong." });
-        //    }
-
-        //    return Json(new
-        //    {
-        //        status = true,
-        //        message = "OTP send successfully."
-        //    });
-        //}
+            return Json(new
+            {
+                status = false,
+                message = result.Message
+            });
+        }
 
     }
 }

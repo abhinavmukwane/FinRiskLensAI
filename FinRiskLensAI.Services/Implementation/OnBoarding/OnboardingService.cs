@@ -64,6 +64,9 @@ namespace FinRiskLensAI.Services.Implementation.OnBoarding
 
             return await result;
         }
-
+        public async Task<ResultModel<UserOtpModel>> FetchUserOTPDet(UserOtpModel model)
+        {
+            return await _repository.FetchUserOTPDet(model);
+        }
     }
 }
