@@ -41,6 +41,9 @@ namespace FinRiskLensAI.Core.Models.Onboarding
         public string? MsmeDfo { get; set; }
         public DateTime? RegistrationDate { get; set; }
 
+        public string? GstinNumber { get; set; }
+        public string? PanNumber { get; set; }
+
         /// <summary>The complete Udyam API response JSON, stored as-is.</summary>
         public string Payload { get; set; } = string.Empty;
 

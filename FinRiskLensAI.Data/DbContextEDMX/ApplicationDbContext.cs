@@ -2,6 +2,7 @@
 using FinRiskLensAI.Core.Models.Common;
 using FinRiskLensAI.Core.Models.Onboarding;
 using FinRiskLensAI.Core.Models.Universal;
+using FinRiskLensAI.Core.Models.User_Activity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace FinRiskLensAI.Data.DbContextEDMX
         public DbSet<MsmeNicCode> MsmeNicCodes => Set<MsmeNicCode>();
         public DbSet<StaticResponseModel> StaticResponseModel => Set<StaticResponseModel>();
         public DbSet<UserRegistrationModel> UserRegistration => Set<UserRegistrationModel>();
+        public DbSet<UserOtpModel> UserOtpModel => Set<UserOtpModel>();
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {

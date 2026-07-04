@@ -4,6 +4,7 @@ using FinRiskLensAI.Core.Interfaces.IServices.OnBoarding;
 using FinRiskLensAI.Core.Models;
 using FinRiskLensAI.Core.Models.Onboarding;
 using FinRiskLensAI.Core.Models.Universal;
+using FinRiskLensAI.Core.Models.User_Activity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -57,12 +58,12 @@ namespace FinRiskLensAI.Services.Implementation.OnBoarding
 
             return await result;
         }
-        //public async Task<ResultModel<RegisterModel>> AddUpdateOtp(RegisterModel entity)
-        //{
-        //    var result = _repository.AddUpdate(entity);
+        public async Task<ResultModel<UserOtpModel>> AddUpdateUserOtp(UserOtpModel entity)
+        {
+            var result = _repository.AddUpdateUserOtp(entity);
 
-        //    return await result;
-        //}
+            return await result;
+        }
 
     }
 }

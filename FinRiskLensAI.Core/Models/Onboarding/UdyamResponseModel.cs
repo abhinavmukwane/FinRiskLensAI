@@ -43,6 +43,8 @@ namespace FinRiskLensAI.Core.Models.Onboarding
             public DateTime? date_of_incorporation { get; set; }
             public string msme_dfo { get; set; }
             public DateTime? registration_date { get; set; }
+            public string gstin { get; set; }
+            public string Pan { get; set; }
         }
 
         public class EnterpriseTypeModel

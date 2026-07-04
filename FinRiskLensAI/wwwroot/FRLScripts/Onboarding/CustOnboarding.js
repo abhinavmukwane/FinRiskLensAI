@@ -205,7 +205,7 @@
                                         }
 
                                         var d = response.data;
-
+                                        console.log(d);
                                         $("#rv_entName").text(d.enterpriseName);
                                         $("#rv_orgType").text(d.organizationType);
                                         $("#rv_dob").text(d.dateOfIncorporation);
@@ -213,7 +213,10 @@
                                         $("#rv_msme").text(d.enterpriseType);
 
 
-                                        $("#rv_udyam_number").text(d.uan);
+                                        $("#rv_udyam_number").text(d.udyamNumber);
+                                        $("#rv_gstnNumber").text(d.gstin);
+                                        $("#rv_panNo").text(d.pan);
+                                        $("#hdnMsmeEnquiryID").val(d.msmeEnquiryID);
 
                                         $("#rv_email").val(d.email);
                                         $("#mobileInput").val(d.mobile);
@@ -286,27 +289,19 @@
             });
             $('#consentCheck').on('change', checkProceedEnabled);
 
-            // Back: Step 2 → Step 1
-            $('#btnBackStep1').on('click', function () {
-                $('#step2').addClass('d-none');
-                $('#step1').removeClass('d-none');
-                goToRailStep(1);
-            });
-
 
             // ---------- STEP 2 → STEP 3 (send OTP) ----------
-            $('#btnProceedToOtp').on('click', function () {
 
+            $('#btnProceedToOtp').on('click', function () {
                 var model = {
-                    UdyamNumber: $('#rv_udyam_number').val(),   
+                    MsmeEnquiryID: $('#hdnMsmeEnquiryID').val(), 
+                    UdyamNumber: $('#rv_udyam_number').text().trim(),
                     MobileNumber: $('#mobileInput').val(),
                     Email: $('#rv_email').val(),
-                    GstinNumber: $('#rv_gstnNumber').val(),     
-                    PanNumber: $('#rv_panNo').val()             
+                    GstinNumber: $('#rv_gstnNumber').text().trim(),
+                    PanNumber: $('#rv_panNo').text().trim()
                 };
-
                 const $btn = $(this);
-
                 $btn.prop('disabled', true)
                     .html('<span class="spin-loader"></span> Registering...');
 
@@ -314,66 +309,106 @@
                     url: '/Onboarding/RegisterUser',
                     type: 'POST',
                     data: model,
-
                     success: function (response) {
+                        $btn.prop('disabled', false)
+                            .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');
 
                         if (response.status) {
-
-                            $btn.prop('disabled', false)
-                                .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');
-
                             $('#step2').addClass('d-none');
                             $('#step3').removeClass('d-none');
-
                             $('#otpEmailTarget').text(model.Email);
-
                             goToRailStep(3);
                             startOtpTimer();
-
                             $('.otp-input').first().focus();
-
                             showToast(response.message);
-
                             $('html,body').animate({ scrollTop: 0 }, 300);
+
+                            // TESTING ONLY: show OTP in a modal since email response includes it
+                            if (response.otp) {
+                                $('#otpDisplayValue').text(response.otp);
+                                var otpModal = new bootstrap.Modal(document.getElementById('otpDisplayModal'));
+                                otpModal.show();
+                            }
                         }
                         else {
                             $('#reviewError').removeClass('d-none');
                             $('#reviewError span').text(response.message);
-
-                            $btn.prop('disabled', false)
-                                .html('<i class="bi bi-send me-1"></i> Register');
                         }
                     },
-
                     error: function () {
-
-                        $('#reviewError').removeClass('d-none');
-                        $('#reviewError span').text('Something went wrong.');
-
                         $btn.prop('disabled', false)
                             .html('<i class="bi bi-send me-1"></i> Register');
+                        $('#reviewError').removeClass('d-none');
+                        $('#reviewError span').text('Something went wrong.');
                     }
                 });
-
             });
 
 
 
-            // $('#btnProceedToOtp').on('click', function () {
-            //     const $btn = $(this);
-            //     $btn.prop('disabled', true).html('<span class="spin-loader"></span> Sending OTP…');
-            //     setTimeout(function () {
-            //         $btn.prop('disabled', false).html('<i class="bi bi-send me-1"></i> Proceed &amp; Send OTP');
-            //         $('#step2').addClass('d-none');
-            //         $('#step3').removeClass('d-none');
-            //         $('#otpEmailTarget').text('co****ct@sharmaprecision.in');
-            //         goToRailStep(3);
-            //         startOtpTimer();
-            //         $('.otp-input').first().focus();
-            //         showToast('OTP sent to your registered email & mobile.');
-            //         $('html,body').animate({ scrollTop: 0 }, 300);
-            //     }, 1200);
-            // });
+
+
+            //$('#btnProceedToOtp').on('click', function () {
+
+            //    var model = {
+            //        UdyamNumber: $('#rv_udyam_number').val(),   
+            //        MobileNumber: $('#mobileInput').val(),
+            //        Email: $('#rv_email').val(),
+            //        GstinNumber: $('#rv_gstnNumber').val(),     
+            //        PanNumber: $('#rv_panNo').val()             
+            //    };
+
+            //    const $btn = $(this);
+
+            //    $btn.prop('disabled', true)
+            //        .html('<span class="spin-loader"></span> Registering...');
+
+            //    $.ajax({
+            //        url: '/Onboarding/RegisterUser',
+            //        type: 'POST',
+            //        data: model,
+
+            //        success: function (response) {
+
+            //            if (response.status) {
+
+            //                $btn.prop('disabled', false)
+            //                    .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');
+
+            //                $('#step2').addClass('d-none');
+            //                $('#step3').removeClass('d-none');
+
+            //                $('#otpEmailTarget').text(model.Email);
+
+            //                goToRailStep(3);
+            //                startOtpTimer();
+
+            //                $('.otp-input').first().focus();
+
+            //                showToast(response.message);
+
+            //                $('html,body').animate({ scrollTop: 0 }, 300);
+            //            }
+            //            else {
+            //                $('#reviewError').removeClass('d-none');
+            //                $('#reviewError span').text(response.message);
+
+            //                $btn.prop('disabled', false)
+            //                    .html('<i class="bi bi-send me-1"></i> Register');
+            //            }
+            //        },
+
+            //        error: function () {
+
+            //            $('#reviewError').removeClass('d-none');
+            //            $('#reviewError span').text('Something went wrong.');
+
+            //            $btn.prop('disabled', false)
+            //                .html('<i class="bi bi-send me-1"></i> Register');
+            //        }
+            //    });
+
+            //});
 
             // ---------- OTP BOX BEHAVIOUR ----------
             $('.otp-input').on('input', function () {
@@ -424,17 +459,7 @@
                 showToast('A new OTP has been sent.');
             });
 
-            // Back: Step 3 → Step 2 / Step 1
-            $('#btnBackStep2').on('click', function () {
-                clearInterval(otpTimerInterval);
-                $('#step3').addClass('d-none');
-                if (isLoginMode) {
-                    $('#step1').removeClass('d-none');
-                } else {
-                    $('#step2').removeClass('d-none');
-                    goToRailStep(2);
-                }
-            });
+          
 
             // ---------- STEP 3 → STEP 4 (verify OTP) ----------
             $('#btnVerifyOtp').on('click', function () {
