@@ -1,6 +1,11 @@
 ﻿@{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "CustDashboard";
     Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+
+    var currentUser = Context.Session.GetCurrentUser();
+    var enterpriseName = string.IsNullOrWhiteSpace(currentUser?.NameOfEnterprise)
+        ? "there"
+        : currentUser!.NameOfEnterprise;
 }
 
 <style>
@@ -52,9 +57,69 @@
             background: #74112f;
             color: #fff;
         }
+
+    .welcome-banner {
+        background: linear-gradient(135deg, #57001d, #8b1538);
+        color: #fff;
+        border-radius: 16px;
+        padding: 20px 26px;
+        box-shadow: 0 10px 24px rgba(87,0,29,.18);
+    }
+
+        .welcome-banner .greeting {
+            font-size: .8rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #f0c9d5;
+            margin-bottom: 4px;
+        }
+
+        .welcome-banner .enterprise {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .welcome-banner .meta {
+            font-size: .82rem;
+            color: #f3d6df;
+            margin-top: 6px;
+        }
+
+        .welcome-banner .meta span + span::before {
+            content: "•";
+            margin: 0 8px;
+            color: #d79aab;
+        }
 </style>
 
 <div class="container-fluid py-5">
+
+    <!-- Welcome greeting -->
+    <div class="welcome-banner mb-4">
+        <div class="greeting">Welcome back</div>
+        <div class="enterprise">
+            <i class="bi bi-buildings me-2"></i>@enterpriseName
+        </div>
+        @* @if (currentUser != null)
+        {
+            <div class="meta">
+                @if (!string.IsNullOrWhiteSpace(currentUser.UdyamNumber))
+                {
+                    <span>Udyam: @currentUser.UdyamNumber</span>
+                }
+                @if (!string.IsNullOrWhiteSpace(currentUser.GstinNumber))
+                {
+                    <span>GSTIN: @currentUser.GstinNumber</span>
+                }
+                @if (!string.IsNullOrWhiteSpace(currentUser.PanNumber))
+                {
+                    <span>PAN: @currentUser.PanNumber</span>
+                }
+            </div>
+        } *@
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 mb-4 mb-md-0">
             <div class="verify-panel p-4">

@@ -1,4 +1,5 @@
-﻿using FinRiskLensAI.Core.Common;
+﻿using FinRiskLensAI.Common;
+using FinRiskLensAI.Core.Common;
 using FinRiskLensAI.Core.Interfaces.ICommon;
 using FinRiskLensAI.Core.Interfaces.IServices.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.OnBoarding;
@@ -68,7 +69,7 @@ namespace FinRiskLensAI.Controllers
                     Email = model.Email,
                     OTP = _encryption.EncryptString(otp),
                     UpdatedAt = check.Data.UpdatedAt,
-                    UpdatedBy = "1",
+                    UpdatedBy = "system",
                 };
 
                 var otpResult = await _onboardingService.AddUpdateUserOtp(otpModel);
@@ -106,8 +107,9 @@ namespace FinRiskLensAI.Controllers
 
             if (result.Result == tflResultType.tflSuccess)
             {
-                HttpContext.Session.SetInt32("MsmeEnquiryID", result.Data.MsmeEnquiryID ?? 0);
-                HttpContext.Session.SetString("Email", result.Data.Email);
+                // Keep the logged-in user's key identifiers in session so any
+                // page can read them (UdyamNumber, GstinNumber, MobileNumber, PanNumber).
+                HttpContext.Session.SetCurrentUser(result.Data);
 
                 return Json(new
                 {

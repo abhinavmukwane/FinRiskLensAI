@@ -1,3 +1,4 @@
+using FinRiskLensAI.Common;
 using FinRiskLensAI.Core.Interfaces;
 using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Models;
@@ -21,21 +22,28 @@ namespace FinRiskLensAI.Controllers
             _logger = logger;
         }
 
-        public IActionResult Dashboard()
+        public IActionResult CustDashboard()
         {
             return View();
         }
 
         /// <summary>
-        /// Financial Health Card — renders the ML risk analysis result for an MSME
-        /// from its blob folder (result.json). ?uan=UDYAM-XX-XX-XXXXXXX
+        /// Financial Health Card — renders the ML risk analysis result for the
+        /// logged-in MSME only. The UAN is taken from the authenticated session
+        /// (never from the request), so a user can only ever see their own card.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> FinancialHealthCard(string? uan, CancellationToken ct)
+        public async Task<IActionResult> FinancialHealthCard(CancellationToken ct)
         {
+            var uan = HttpContext.Session.GetCurrentUser()?.UdyamNumber;
             var model = new FinancialHealthCardViewModel { Uan = uan?.Trim() };
+
             if (string.IsNullOrWhiteSpace(model.Uan))
+            {
+                // Logged in but no Udyam number on the account yet — nothing to show.
+                model.LoadError = "No Udyam number is linked to your account yet, so there is no Financial Health Card to display.";
                 return View(model);
+            }
 
             try
             {
@@ -51,7 +59,7 @@ namespace FinRiskLensAI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed loading Financial Health Card for {Uan}", model.Uan);
-                model.LoadError = "Could not load data for this Udyam number. Check the number and try again.";
+                model.LoadError = "Could not load your Financial Health Card right now. Please try again later.";
             }
 
             return View(model);

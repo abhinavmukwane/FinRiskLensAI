@@ -43,10 +43,6 @@
     .gauge-score { font-family: var(--font-headline, 'Sora', sans-serif); font-size: 2.6rem; font-weight: 800; color: #57001d; line-height: 1; }
     .gauge-of { font-size: .78rem; color: #974354; }
 
-    .fhc-search { max-width: 560px; }
-    .fhc-search .form-control { height: 48px; border-radius: 12px 0 0 12px; border: 1px solid #d8c3ca; }
-    .fhc-search .btn { border-radius: 0 12px 12px 0; background: #57001d; color: #fff; font-weight: 600; padding: 0 22px; }
-
     .lending-notes { background: #faf7f8; border: 1px solid #ead9df; border-radius: 12px; padding: 14px 16px; }
     .lending-notes-head { font-size: .72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #974354; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
     .lending-note { display: flex; gap: 10px; align-items: flex-start; font-size: .8rem; line-height: 1.55; color: #5c4a50; padding: 7px 0; border-top: 1px dashed #ecdce2; }
@@ -62,28 +58,25 @@
 
 <div class="fhc-wrap">
 
-    <!-- Header + search -->
+    <!-- Header -->
     <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
         <div>
             <h3 class="fhc-title mb-1">Financial Health Card</h3>
             <div class="fhc-sub">AI-computed 6-dimension credit health score from GST, ITR, bank &amp; Udyam data</div>
         </div>
-        <form method="get" class="fhc-search d-flex flex-grow-1" style="min-width:320px;">
-            <input type="text" class="form-control" name="uan" value="@Model.Uan"
-                   placeholder="Enter Udyam number, e.g. UDYAM-MH-20-0067394" />
-            <button class="btn" type="submit"><i class="bi bi-search me-1"></i>Load</button>
-        </form>
+        @if (!string.IsNullOrWhiteSpace(Model.Uan))
+        {
+            <div class="text-end">
+                @if (!string.IsNullOrWhiteSpace(Model.EnterpriseName))
+                {
+                    <div class="fhc-title" style="font-size:1rem;">@Model.EnterpriseName</div>
+                }
+                <div class="fhc-sub"><i class="bi bi-patch-check me-1"></i>@Model.Uan</div>
+            </div>
+        }
     </div>
 
-    @if (string.IsNullOrWhiteSpace(Model.Uan))
-    {
-        <div class="fhc-card text-center py-5">
-            <i class="bi bi-speedometer2" style="font-size:3rem;color:#974354;"></i>
-            <h5 class="fhc-title mt-3">Enter an Udyam number to view its Financial Health Card</h5>
-            <div class="fhc-sub">The MSME must have completed data collection and analysis.</div>
-        </div>
-    }
-    else if (Model.LoadError != null)
+    @if (Model.LoadError != null)
     {
         <div class="alert alert-danger rounded-4">@Model.LoadError</div>
     }
