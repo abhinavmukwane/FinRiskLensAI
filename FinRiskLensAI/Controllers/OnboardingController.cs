@@ -32,6 +32,15 @@ namespace FinRiskLensAI.Controllers
         {
             try
             {
+                if (await _onboardingService.IsUdyamRegistered(uan))
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        isRegistered = true,
+                        message = "User is already registered. Kindly login."
+                    });
+                }
                 var result = await _onboardingService.FetchUdyam(uan);
 
                 if (result.Result == tflResultType.tflSuccess && result.Data != null)
@@ -147,11 +156,12 @@ namespace FinRiskLensAI.Controllers
             // 4. Only persist the OTP if the email actually went out
             var otpModel = new UserOtpModel
             {
+
                 UserRegistrationID = result.Data.UserRegistrationID,
                 MsmeEnquiryID = result.Data.MsmeEnquiryID,
                 Email = model.Email,
                 MobileNumber = model.MobileNumber,
-                OTP = _encryption.EncryptString(otp)
+                OTP = _encryption.EncryptString(otp),
             };
 
             var otpResult = await _onboardingService.AddUpdateUserOtp(otpModel);

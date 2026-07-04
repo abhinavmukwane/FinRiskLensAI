@@ -62,85 +62,6 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             return result;
         }
 
-        //public async Task<MsmeEnquiry> SaveMsmeData(string json)
-        //{
-        //    var model = JsonConvert.DeserializeObject<UdyamResponseModel>(json);
-        //    if (model == null)
-        //        throw new ArgumentException("Invalid or empty JSON payload.", nameof(json));
-
-        //    if (string.IsNullOrWhiteSpace(model.uan))
-        //        throw new ArgumentException("UAN is required to save or update MSME data.");
-
-        //    var excluded = new List<string> { "MsmeEnquiryID", "CreatedAt", "Uan" };
-
-        //    await using var transaction = await _context.Database.BeginTransactionAsync();
-        //    try
-        //    {
-        //        var enquiry = await _context.MsmeEnquiries
-        //            .Include(x => x.Locations)
-        //            .Include(x => x.NicCodes)
-        //            .FirstOrDefaultAsync(x => x.Uan == model.uan);
-
-        //        bool isNew = enquiry == null;
-
-        //        if (isNew)
-        //        {
-        //            enquiry = new MsmeEnquiry
-        //            {
-        //                Uan = model.uan
-        //            };
-        //            _context.MsmeEnquiries.Add(enquiry);
-        //        }
-        //        else
-        //        {
-        //            _context.MsmeLocations.RemoveRange(enquiry.Locations);
-        //            _context.MsmeNicCodes.RemoveRange(enquiry.NicCodes);
-        //        }
-
-        //        model.MapToModelObject(enquiry, excluded);
-        //        model.main_details?.MapToModelObject(enquiry, excluded);
-        //        enquiry.Payload = JsonConvert.SerializeObject(model);
-
-        //        await _context.SaveChangesAsync();
-
-        //        if (model.location_of_plant_details != null)
-        //        {
-        //            foreach (var item in model.location_of_plant_details)
-        //            {
-        //                var location = new MsmeLocation
-        //                {
-        //                    MsmeEnquiryID = enquiry.MsmeEnquiryID
-        //                };
-        //                item.MapToModelObject(location, new List<string> { "MsmeEnquiryID", "CreatedAt" });
-        //                _context.MsmeLocations.Add(location);
-        //            }
-        //        }
-
-        //        if (model.nic_code != null)
-        //        {
-        //            foreach (var item in model.nic_code)
-        //            {
-        //                var nic = new MsmeNicCode
-        //                {
-        //                    MsmeEnquiryID = enquiry.MsmeEnquiryID
-        //                };
-        //                item.MapToModelObject(nic, new List<string> { "MsmeEnquiryID", "CreatedAt" });
-        //                _context.MsmeNicCodes.Add(nic);
-        //            }
-        //        }
-
-        //        await _context.SaveChangesAsync();
-        //        await transaction.CommitAsync();
-
-        //        return enquiry;
-        //    }
-        //    catch
-        //    {
-        //        await transaction.RollbackAsync();
-        //        throw;
-        //    }
-        //}
-
         public async Task SaveMsmeData(string json)
         {
             var model = JsonConvert.DeserializeObject<UdyamResponseModel>(json);
@@ -307,18 +228,42 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
         public async Task<ResultModel<UserOtpModel>> AddUpdateUserOtp(UserOtpModel entity)
         {
             var result = new ResultModel<UserOtpModel>();
+
             try
             {
-                UserOtpModel paObj = new UserOtpModel();
-                entity.MapToModelObject(paObj);
-                paObj.CreatedAt = DateTime.Now;
-                paObj.CreatedBy = "1";
-                _context.UserOtpModel.Add(paObj);
-                await _context.SaveChangesAsync();
+                var existing = await _context.UserOtpModel.FirstOrDefaultAsync(x => x.Email == entity.Email ).ConfigureAwait(false);
 
-                result.Result = tflResultType.tflSuccess;
-                result.Message = "Data Saved Successfully";
-                result.Data = entity;
+                if (existing != null)
+                {
+                    existing.OTP = entity.OTP;
+                    existing.UpdatedAt = DateTime.Now;
+                    existing.UpdatedBy = "system";
+
+                    await _context.SaveChangesAsync().ConfigureAwait(false);
+
+                    result.Result = tflResultType.tflSuccess;
+                    result.Message = "OTP Updated Successfully";
+                    result.Data = existing;
+                }
+                else
+                {
+                    UserOtpModel paObj = new UserOtpModel();
+
+                    entity.MapToModelObject(paObj);
+
+                    paObj.CreatedAt = DateTime.Now;
+                    paObj.CreatedBy = "system";
+
+                    _context.UserOtpModel.Add(paObj);
+
+                    await _context.SaveChangesAsync().ConfigureAwait(false);
+
+                    entity.UserOtpID = paObj.UserOtpID;
+
+                    result.Result = tflResultType.tflSuccess;
+                    result.Message = "OTP Saved Successfully";
+                    result.Data = paObj;
+                }
             }
             catch (Exception ex)
             {
@@ -326,9 +271,9 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                 result.Message = ex.Message;
                 result.Data = null;
             }
+
             return result;
         }
-
         public async Task<ResultModel<UserOtpModel>> FetchUserOTPDet(UserOtpModel model)
         {
             var result = new ResultModel<UserOtpModel>();
@@ -337,8 +282,7 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             {
                 var entity = await _context.UserOtpModel
                     .FirstOrDefaultAsync(x =>
-                        x.Email == model.Email &&
-                        x.MobileNumber == model.MobileNumber);
+                        x.Email == model.Email);
 
                 if (entity == null)
                 {
@@ -374,6 +318,60 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                 result.Result = tflResultType.tflError;
                 result.Message = ex.Message;
                 result.Data = null;
+            }
+
+            return result;
+        }
+        public async Task<bool> IsUdyamRegistered(string uan)
+        {
+            return await _context.MsmeEnquiries
+                .AnyAsync(x => x.Uan == uan);
+        }
+
+        public async Task<ResultModel<UserOtpModel>> ValidateCustomerEmail(string email)
+        {
+            var result = new ResultModel<UserOtpModel>();
+
+            try
+            {
+                var user = await _context.UserRegistration
+                    .FirstOrDefaultAsync(x => x.Email == email);
+
+                if (user == null)
+                {
+                    result.Result = tflResultType.tflNoRecordFound;
+                    result.Message = "Email is not registered.";
+                    return result;
+                }
+
+                var otp = await _context.UserOtpModel
+                    .FirstOrDefaultAsync(x => x.Email == email);
+
+                if (otp == null)
+                {
+                    result.Result = tflResultType.tflNoRecordFound;
+                    result.Message = "OTP record not found.";
+                    return result;
+                }
+
+                var enquiry = await _context.MsmeEnquiries
+                    .FirstOrDefaultAsync(x => x.MsmeEnquiryID == user.MsmeEnquiryID);
+
+                otp.MsmeEnquiryID = user.MsmeEnquiryID;
+                otp.UserRegistrationID = user.UserRegistrationID;
+                otp.MsmeEnquiryID = user.MsmeEnquiryID;
+                otp.MobileNumber = user.MobileNumber;
+                otp.Email = user.Email;
+                otp.UserOtpID = otp.UserOtpID;
+
+                result.Result = tflResultType.tflSuccess;
+                result.Message = enquiry?.NameOfEnterprise ?? "";
+                result.Data = otp;
+            }
+            catch (Exception ex)
+            {
+                result.Result = tflResultType.tflError;
+                result.Message = ex.Message;
             }
 
             return result;

@@ -68,5 +68,15 @@ namespace FinRiskLensAI.Services.Implementation.OnBoarding
         {
             return await _repository.FetchUserOTPDet(model);
         }
+        public async Task<bool> IsUdyamRegistered(string uan)
+        {
+            return await _repository.IsUdyamRegistered(uan);
+        }
+        public async Task<ResultModel<UserOtpModel>> ValidateCustomerEmail(string email)
+        {
+            var result = _repository.ValidateCustomerEmail(email);
+
+            return await result;
+        }
     }
 }

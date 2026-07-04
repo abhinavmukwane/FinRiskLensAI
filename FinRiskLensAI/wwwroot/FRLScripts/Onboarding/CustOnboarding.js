@@ -191,6 +191,19 @@
                         },
 
                         success: function (res) {
+                            if (res.isRegistered) {
+
+                                $('#fetchLoader').hide();
+                                $('#step1').removeClass('d-none');
+
+                                showToast(res.message);
+
+                                setTimeout(function () {
+                                    window.location.href = "/Auth/Login";
+                                }, 1500);
+
+                                return;
+                            }
 
                             if (res.status) {
 
@@ -394,7 +407,6 @@
                 showToast('A new OTP has been sent.');
             });
 
-
             // ---------- STEP 3 → STEP 4 (verify OTP) ----------
 
             $('#btnVerifyOtp').on('click', function () {
@@ -463,51 +475,5 @@
 
             });
 
-            //$('#btnVerifyOtp').on('click', function () {
-            //    const code = $('.otp-input').map(function () { return this.value; }).get().join('');
-            //    if (code.length < 6) {
-            //        $('#otpError').removeClass('d-none').html('<i class="bi bi-exclamation-triangle-fill me-1"></i> Please enter all 6 digits.');
-            //        $('.otp-input').filter(function () { return this.value === ''; }).addClass('is-invalid');
-            //        return;
-            //    }
-            //    const $btn = $(this);
-            //    $btn.prop('disabled', true).html('<span class="spin-loader"></span> Verifying…');
-            //    setTimeout(function () {
-            //        $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i> Verify &amp; Continue');
-            //        clearInterval(otpTimerInterval);
-            //        $('#step3').addClass('d-none');
-            //        $('#step4').removeClass('d-none');
-
-            //        if (isLoginMode) {
-            //            const val = $('#udyamInput').val().trim();
-            //            if (/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(val)) {
-            //                $('#entUdyam').text(val);
-            //                $('#dash_entUdyam').text(val);
-            //            } else {
-            //                $('#entUdyam').text('UDYAM-MH-20-0012345');
-            //                $('#dash_entUdyam').text('UDYAM-MH-20-0012345');
-            //            }
-            //            $('#entName').text('Sharma Precision Engineering Works');
-            //            $('#dash_entName').text('Sharma Precision Engineering Works');
-            //        } else {
-            //            $('#entName').text($('#rv_entName').text());
-            //            $('#dash_entName').text($('#rv_entName').text());
-            //            $('#entUdyam').text($('#udyamInput').val());
-            //            $('#dash_entUdyam').text($('#udyamInput').val());
-            //            goToRailStep(4);
-            //        }
-
-            //        showToast('Identity verified successfully.');
-            //        $('html,body').animate({ scrollTop: 0 }, 300);
-            //    }, 1200);
-            //});
-
-            // ---------- Dashboard button ----------
-            $('#btnGoToDashboard').on('click', function () {
-                showToast('Welcome to your Credit Risk Intelligence Dashboard.');
-                $('#onboardingFlow').addClass('d-none');
-                $('#dashboardView').removeClass('d-none');
-                $('html,body').animate({ scrollTop: 0 }, 300);
-            });
 
         });
