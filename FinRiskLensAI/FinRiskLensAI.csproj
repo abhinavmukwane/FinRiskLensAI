@@ -37,10 +37,4 @@
     <ProjectReference Include="..\FinRiskLensAI.Services\FinRiskLensAI.Services.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Tssipl.Security.Cryptography">
-      <HintPath>bin\Debug\net8.0\Tssipl.Security.Cryptography.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
