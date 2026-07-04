@@ -291,7 +291,7 @@
 
 
             // ---------- STEP 2 → STEP 3 (send OTP) ----------
-
+            
             $('#btnProceedToOtp').on('click', function () {
                 var model = {
                     MsmeEnquiryID: $('#hdnMsmeEnquiryID').val(), 
@@ -305,10 +305,12 @@
                 $btn.prop('disabled', true)
                     .html('<span class="spin-loader"></span> Registering...');
 
+                var nameOfEnterprise = $('#rv_entName').text().trim();
+
                 $.ajax({
                     url: '/Onboarding/RegisterUser',
                     type: 'POST',
-                    data: model,
+                    data: { model, nameOfEnterprise },
                     success: function (response) {
                         $btn.prop('disabled', false)
                             .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');

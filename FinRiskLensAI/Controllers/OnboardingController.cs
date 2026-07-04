@@ -100,7 +100,7 @@ namespace FinRiskLensAI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterUser(UserRegistrationModel model)
+        public async Task<IActionResult> RegisterUser(UserRegistrationModel model,string nameOfEnterprise)
         {
             if (model == null)
             {
@@ -109,7 +109,7 @@ namespace FinRiskLensAI.Controllers
 
             // 1. Register / update the user first
             var result = await _onboardingService.AddUpdateUserRegst(model);
-            if (result == null)
+            if (result.Result == tflResultType.tflError)
             {
                 return Json(new { status = false, message = "Something went wrong." });
             }
@@ -123,27 +123,9 @@ namespace FinRiskLensAI.Controllers
             var otp = Random.Shared.Next(100000, 999999).ToString();
 
             // 3. Try sending the OTP email FIRST
-            bool emailSent;
-            try
-            {
-                emailSent = await _emailService.SendLoginOtpAsync(
-                    model.Email,
-                    otp,
-                    model.Email,
-                    expiryMinutes: 10,
-                    ct: HttpContext.RequestAborted);
-            }
-            catch (Exception ex)
-            {
-                // _logger.LogError(ex, "Failed to send OTP email to {Email}", model.Email);
-                return Json(new { status = false, message = "Failed to send OTP email. Please try again." });
-            }
-
-            if (!emailSent)
-            {
-                return Json(new { status = false, message = "Failed to send OTP email. Please try again." });
-            }
-
+            var emailSent = await _emailService.SendLoginOtpAsync(model.Email, otp, nameOfEnterprise, 
+                            expiryMinutes: 5, ct: HttpContext.RequestAborted);
+           
             // 4. Only persist the OTP if the email actually went out
             var otpModel = new UserOtpModel
             {
