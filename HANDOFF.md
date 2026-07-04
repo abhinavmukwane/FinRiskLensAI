@@ -105,6 +105,16 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   eligibility — WC via turnover/Nayak method (20% of turnover × band factor),
   term loan via EMI-headroom annuity (5y @ 11%). Formulas in
   `Doc/08_ML_ENGINE.md` Stage 8.
+- **Underwriting deep-dives (stage 9, 2026-07-04):** four sections on every
+  result — `BankStatementAnalysis` (AMB/peak from running balances, channel
+  split, cash/salary/customer/supplier classification, cheque vs ECS-NACH
+  returns, OD + min-balance breaches), `GstDeepDive` (GSTR-1 vs 3B consistency,
+  cash-vs-ITC tax discipline, net ITC/mo, top-5 customer/vendor concentration
+  with masked GSTINs), `FinancialRatios` (EBITDA/net margin from ITR-3 P&L,
+  debtor days/asset turnover from ITR balance sheet, N/A when absent),
+  `IndustryRiskInfo` (NIC-2 → static sector weight table, feeds 10% of Business
+  Stability). Appraisal table now 12 ratios. Calculation formulas:
+  `Doc/08_ML_ENGINE.md` Stages 8-9.
 - **Financial Health Card dashboard built:**
   `/Dashboard/FinancialHealthCard?uan=…` (DashboardController + Chart.js) —
   score gauge with needle, dimension radar/bars, strengths/risks, anomaly box,

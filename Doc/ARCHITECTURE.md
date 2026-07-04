@@ -190,10 +190,14 @@ Azure Blob  msme-data/{UAN}/…  ──►  BlobAnalysisService  ──►  resu
   payload size; one file per request, one file in memory at a time).
 - **Output** (`RiskAnalysisResult` in Core): overall score + band, six
   `DimensionScore`s, PFI-template explanations, product recommendations,
-  cross-source anomaly check, and the **`LendingAssessment`** — DSCR, FOIR,
-  banking penetration, gross margin, liquidity ratios with banking benchmarks,
-  plus indicative working-capital (turnover method) and term-loan (EMI annuity)
-  eligibility scaled by score band.
+  cross-source anomaly check, the **`LendingAssessment`** (12 appraisal ratios
+  incl. DSCR/FOIR/banking penetration/GSTR-1-vs-3B consistency/ITR financial
+  ratios, plus indicative working-capital and term-loan eligibility scaled by
+  score band), and four **underwriting deep-dives**: `BankStatementAnalysis`
+  (AMB, channel split, payment classification, return counts),
+  `GstDeepDive` (tax discipline, ITC, customer/vendor concentration),
+  `FinancialRatios` (ITR P&L/balance-sheet), `IndustryRiskInfo`
+  (NIC sector risk weight).
 
 ---
 

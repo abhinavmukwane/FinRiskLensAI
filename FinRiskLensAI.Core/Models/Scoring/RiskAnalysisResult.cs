@@ -55,6 +55,11 @@ namespace FinRiskLensAI.Core.Models.Scoring
         public AnomalyCheckResult Anomaly { get; set; } = new();
         /// <summary>Bank-decision ratios + indicative loan eligibility (null on results computed before this feature).</summary>
         public LendingAssessment? Lending { get; set; }
+        /// <summary>Underwriting deep-dives (null on older persisted results).</summary>
+        public BankStatementAnalysis? BankAnalysis { get; set; }
+        public GstDeepDive? GstAnalysis { get; set; }
+        public FinancialRatios? Financials { get; set; }
+        public IndustryRiskInfo? Industry { get; set; }
         public List<string> ExcludedDimensions { get; set; } = new();
         public string ModelVersion { get; set; } = string.Empty;
         public DateTime ComputedAt { get; set; }

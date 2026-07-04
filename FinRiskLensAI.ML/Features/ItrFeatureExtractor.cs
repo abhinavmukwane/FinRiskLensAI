@@ -56,6 +56,52 @@ namespace FinRiskLensAI.ML.Features
                 features.ItrIncomeTrendSlope = TrendMath.NormalizedSlope(series);
                 features.ItrMonthlyAvgIncome = series.Average() / 12.0;
             }
+
+            ExtractFinancialRatios(result, features);
+        }
+
+        /// <summary>
+        /// P&amp;L / balance-sheet ratios for business filers (ITR-3/5/6 with books).
+        /// Latest year with a trading account wins. Ratios stay null when the source
+        /// figures aren't in the return — never fabricated.
+        /// </summary>
+        private static void ExtractFinancialRatios(JObject result, MsmeFeatureSet features)
+        {
+            foreach (var yearProp in result.Properties().OrderByDescending(p => p.Name))
+            {
+                var year = yearProp.Value as JObject;
+                if (year == null) continue;
+
+                var turnover = FirstNumber(year,
+                    "$..TradingAccount.SalesGrossReceiptsTotal",
+                    "$..TradingAccount.TotRevenueFrmOperations",
+                    "$..PARTA_PL.NoBooksOfAccPL.GrossReceipt");
+                if (!turnover.HasValue || turnover.Value <= 0) continue;
+
+                features.ItrFinancialsYear = yearProp.Name;
+                features.ItrBusinessTurnover = turnover.Value;
+
+                var pbidta = FirstNumber(year, "$..DebitsToPL.PBIDTA");            // EBITDA proxy
+                if (pbidta.HasValue)
+                    features.ItrEbitdaMargin = Math.Round(pbidta.Value / turnover.Value, 4);
+
+                var pat = FirstNumber(year,
+                    "$..TaxProvAppr.ProfitAfterTax",
+                    "$..PARTA_PL.NoBooksOfAccPL.NetProfit");
+                if (pat.HasValue)
+                    features.ItrNetProfitMargin = Math.Round(pat.Value / turnover.Value, 4);
+
+                var debtors = FirstNumber(year,
+                    "$..SundryDebtors", "$..SndryDebtors", "$..TradeReceivables");
+                if (debtors.HasValue && debtors.Value > 0)
+                    features.ItrDebtorDays = Math.Round(debtors.Value / turnover.Value * 365, 1);
+
+                var totalAssets = FirstNumber(year, "$..TotalAssets", "$..TotAssets");
+                if (totalAssets.HasValue && totalAssets.Value > 0)
+                    features.ItrAssetTurnover = Math.Round(turnover.Value / totalAssets.Value, 2);
+
+                return;   // latest business year only
+            }
         }
 
         private static double? FirstNumber(JObject scope, params string[] jsonPaths)

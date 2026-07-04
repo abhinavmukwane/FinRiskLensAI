@@ -115,7 +115,20 @@ path instead of failing. Response (abridged, from a real run):
   "anomaly": { "isAnomalous": false, "anomalyScore": 0.398,
                "gstMonthlyTurnover": 1055609, "itrMonthlyIncome": 22614, "bankMonthlyCredits": 27000 },
   "excludedDimensions": [],
-  "modelVersion": "frl-scoring-v1.0"
+  "modelVersion": "frl-scoring-v1.0",
+
+  // bank-decision + underwriting deep-dive sections (see Stages 8-9)
+  "lending":      { "workingCapitalLimit": 60930000, "termLoanCapacity": 430000,
+                    "ratios": [ /* 12 appraisal ratios with benchmarks + status */ ] },
+  "bankAnalysis": { "averageMonthlyBalance": 244851, "peakBalance": 344700,
+                    "chequeReturnCount": 0, "ecsNachReturnCount": 0,
+                    "modeSplitAmount": { "UPI": 1, "NEFT": 1 }, "monthlyAvgBalance": {} },
+  "gstAnalysis":  { "r1Vs3bConsistency": 0.9331, "cashTaxShare": 0.3858,
+                    "itcMonthlyAvg": 3669752, "topCustomerShare": 0.3986,
+                    "topCustomers": { "27AA•••••1Z5": 0.3986 } },
+  "financials":   { "hasFinancials": false, "ebitdaMargin": null },   // N/A without ITR books
+  "industry":     { "sectorName": "Telecommunications", "nic2Digit": "61",
+                    "riskWeight": 0.75, "outlook": "Favourable" }
 }
 ```
 
@@ -197,7 +210,7 @@ use-case-4 "dashboard refresh button" is now real.
 
 ## 3. How it works — the pipeline
 
-`RiskScoringService.Analyze()` runs eight stages:
+`RiskScoringService.Analyze()` runs nine stages:
 
 ```
 raw JSON payloads
@@ -225,6 +238,9 @@ raw JSON payloads
       │
       ▼
 [8] Lending assessment        bank ratios + indicative eligibility (LendingCalculator)
+      │
+      ▼
+[9] Underwriting deep-dives   BankStatementAnalysis · GstDeepDive · FinancialRatios · IndustryRiskInfo
 ```
 
 ### Stage 1 — Feature extraction
@@ -402,7 +418,7 @@ Fair ×0.60, At Risk ×0.35, High Risk ×0. When GST is missing (thin file),
 annual turnover falls back to `bank inflows × 12`. All figures are rounded to
 ₹10k and labelled indicative — never a sanction.
 
-**The seven credit-appraisal ratios** (each carries value, banking benchmark,
+**The twelve credit-appraisal ratios** (each carries value, banking benchmark,
 and a Strong/Adequate/Weak status; missing sources report `NotAvailable`, never
 a fake number):
 
@@ -411,22 +427,109 @@ a fake number):
 | DSCR | `(monthly surplus + existing EMI) / existing EMI` (capped 10x) | ≥ 1.50x | repayment capacity vs current obligations |
 | FOIR | `existing EMI / monthly bank inflow` | ≤ 40% | how much income is already committed |
 | Banking Penetration | `monthly bank credits / monthly GST sales` | ≥ 60% | do declared sales actually route through the bank — cash businesses score low |
-| Gross Margin | `(GSTR-1 sales − GSTR-2A purchases) / sales` | ≥ 15% | trading margin implied by the GST trail |
+| Gross Margin (GST) | `(GSTR-1 sales − GSTR-2A purchases) / sales` | ≥ 15% | trading margin implied by the GST trail |
 | Days Cash on Hand | `current balances / avg daily outflow` | ≥ 60 days | liquidity runway |
 | Inflow Volatility | coefficient of variation of monthly credits | ≤ 0.30 | earnings steadiness |
 | Credit Note Ratio | `CDNR note value / total turnover` | ≤ 5% | how much headline revenue gets reversed |
+| GSTR-1 vs 3B Consistency | `1 − avg per-period |GSTR-1 taxable − GSTR-3B taxable| / GSTR-3B` | ≥ 90% | invoice-level vs summary declarations agree — persistent gaps signal misdeclaration |
+| EBITDA Margin (ITR) | `PBIDTA / business turnover` (ITR P&L) | ≥ 10% | operating profitability from filed books |
+| Net Profit Margin (ITR) | `ProfitAfterTax / business turnover` | ≥ 5% | bottom-line profitability |
+| Debtor Days (ITR) | `sundry debtors / turnover × 365` (needs ITR balance sheet) | ≤ 60 days | how long customers take to pay |
+| Asset Turnover (ITR) | `turnover / total assets` (needs ITR balance sheet) | ≥ 1.5x | revenue per rupee of assets |
 
 Adequate thresholds sit between Strong and Weak (e.g. DSCR 1.25–1.5, FOIR
-40–55%, penetration 30–60%). The calculator also emits `Notes` — methodology
-lines plus auto-generated warnings (e.g. "banking penetration very low relative
-to GST sales — verify the consented account is the primary operating account").
+40–55%, penetration 30–60%, consistency 75–90%, EBITDA 5–10%). The four ITR
+ratios apply to business filers with books (ITR-3/5/6) and report N/A
+otherwise. The calculator also emits `Notes` — methodology lines plus
+auto-generated warnings (e.g. "banking penetration very low relative to GST
+sales — verify the consented account is the primary operating account") and the
+industry pricing hint.
+
+### Stage 9 — Underwriting deep-dives (how each is calculated)
+
+Four structured sections attached to `RiskAnalysisResult` (all in
+`Core/Models/Scoring/DeepDiveModels.cs`; each is null when its source is
+absent — old persisted results simply lack them):
+
+**`BankStatementAnalysis`** (from AA transactions, deduped by `txnId`):
+- *AMB* — per-transaction running balances grouped by month → monthly average →
+  mean across months. *Peak balance* — max snapshot in the window.
+- *Channel split* — transaction value grouped by normalized mode
+  (UPI/NEFT/IMPS/RTGS/CASH/FT/OTHERS; generic modes are refined from the
+  narration).
+- *Credit classification* — cash deposits (mode CASH or `CASH DEP|CDM`
+  narration), salary credits (`SALARY`), customer receipts (credits minus
+  salary/interest/cash-deposits). *Debit classification* — supplier payments =
+  transfer-channel debits matching `SUPPLIER|VENDOR|PURCHASE|PAYMENT|INVOICE`
+  and not matching `EMI|LOAN|RENT|ELECTRICITY|SALARY|TAX|SIP`.
+- *Returns, separated by instrument* — cheque (`CHQ/CHEQUE` near
+  `RETURN/BOUNCE/DISHONOUR`) vs ECS/NACH/ACH returns, alongside the combined
+  bounce count.
+- *Balance discipline* — overdrawn snapshots (balance < 0) and minimum-balance
+  breaches (balance < ₹10,000 threshold constant); total OD limit read from the
+  account `Summary`.
+
+**`GstDeepDive`:**
+- *GSTR-1 vs 3B consistency* — per period, compare GSTR-1 section totals
+  (B2B+B2CL+B2CS+EXP taxable) with GSTR-3B outward taxable;
+  `1 − average relative gap`.
+- *Tax-payment discipline* — from GSTR-3B `tx_pmt`: cash paid (`pdcash`
+  ipd/cpd/spd/cspd) vs settled via ITC (`pditc` cross-utilization fields) →
+  `CashTaxShare`.
+- *ITC pattern* — monthly average of `itc_elg.itc_net` (IGST+CGST+SGST+cess).
+- *Customer/vendor concentration* — invoice item values summed per counterparty
+  GSTIN (GSTR-1 B2B for customers, GSTR-2A for vendors) → top-5 shares with
+  masked GSTINs, plus headline top-customer/top-vendor share.
+
+**`FinancialRatios`** — see the ITR rows in the ratio table above; sourced from
+the latest assessment year with a trading account (`ItrFinancialsYear`).
+
+**`IndustryRiskInfo`** — NIC 2-digit parsed from the Udyam `nic_code` list →
+static sector table (`UdyamFeatureExtractor.SectorRiskWeight`, 0..1) → outlook
+label (≥0.75 Favourable / ≥0.60 Moderate / else Cautious). The weight feeds 10%
+of Business Stability.
 
 **Dashboard:** the Financial Health Card
 (`/Dashboard/FinancialHealthCard?uan=…`) renders the whole result — score
-gauge with needle, dimension radar + bar charts, strengths/risks, and the Bank
-Lending Assessment section: four eligibility tiles, the ratio table with status
-chips, a Chart.js "Monthly Cashflow & EMI Capacity" bar chart, and the
-"How this was calculated" notes panel.
+gauge with needle, dimension radar + bar charts, strengths/risks, the Bank
+Lending Assessment (four eligibility tiles, the 12-ratio table with status
+chips, the "Monthly Cashflow & EMI Capacity" chart, methodology notes, industry
+outlook chip), plus two deep-dive panels: **Bank Statement Analysis** (8 stat
+tiles, monthly balance trend line, channel doughnut) and **GST Deep-Dive**
+(consistency/tax/ITC/concentration tiles, monthly sales bars, major-customer
+and major-vendor share charts).
+
+### Underwriting coverage matrix (status: 2026-07-04, deep-dives implemented)
+
+**Bank statement (AA)** — `BankStatementAnalysis` on the result: ✅ average
+monthly balance (AMB, from per-txn running balances), peak balance, avg monthly
+credit, cash deposits, salary credits, customer receipts vs supplier payments
+(narration/mode classification), bounce count with **separated cheque and
+ECS/NACH return counts**, transaction-value split by channel
+(UPI/NEFT/IMPS/RTGS/CASH/FT), OD limit, overdrawn snapshots,
+minimum-balance breaches (₹10k threshold), UPI collections quality, seasonality
+(CV + SSA trend). Dashboard: tiles + balance trend line + channel doughnut.
+
+**GST** — `GstDeepDive` on the result: ✅ monthly sales, filing regularity,
+sales trend, credit notes, HSN mix, purchases, **GSTR-1 vs GSTR-3B consistency**
+(per-period agreement of declared taxable values), **tax-payment discipline**
+(cash vs ITC settlement from `tx_pmt`), **net ITC per month** (`itc_elg`),
+**top-5 customer and vendor concentration** (masked GSTINs, shares of B2B
+sales/purchases). Dashboard: tiles + monthly sales bars + customer/vendor
+concentration charts. ❌ e-way bills — still no data source.
+
+**Financial-statement ratios** — `FinancialRatios` on the result, from the ITR
+P&L/balance sheet (business filers with books only; `null`/N/A otherwise, never
+fabricated): ✅ EBITDA margin (`PBIDTA ÷ turnover`), net profit margin
+(`ProfitAfterTax ÷ turnover`), debtor days (`sundry debtors ÷ turnover × 365`),
+asset turnover (`turnover ÷ total assets`). All four also appear as rows in the
+lending appraisal-ratio table with benchmarks (≥10%, ≥5%, ≤60d, ≥1.5x).
+
+**Industry risk** — `IndustryRiskInfo` on the result: ✅ NIC 2-digit → static
+sector risk-weight table (agri 0.55 … construction/restaurants 0.50 … IT 0.85 …
+healthcare 0.80), outlook label (Favourable/Moderate/Cautious), feeds 10% of
+Business Stability and shows as a pricing-hint chip on the lending card.
+Weights are hackathon-grade — tune with real portfolio data.
 
 ### SSA trend (used inside Stage 2)
 

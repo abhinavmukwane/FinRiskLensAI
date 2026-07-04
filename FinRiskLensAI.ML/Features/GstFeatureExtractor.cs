@@ -32,7 +32,10 @@ namespace FinRiskLensAI.ML.Features
                     profile.Value<string>("sts"), "Active", StringComparison.OrdinalIgnoreCase);
             }
 
-            // ── Monthly turnover from GSTR-3B outward taxable supplies (osup_det.txval)
+            // ── Monthly turnover from GSTR-3B outward taxable supplies (osup_det.txval),
+            //    plus tax-payment discipline (cash vs ITC) and net ITC claimed
+            double taxPaidCash = 0, taxPaidItc = 0, itcNetTotal = 0;
+            int itcMonths = 0;
             foreach (var data in ParseAll(gstr3bJsons, ref anyData))
             {
                 var period = data.Value<string>("ret_period");           // MMyyyy
@@ -42,18 +45,39 @@ namespace FinRiskLensAI.ML.Features
                 var txval = data.SelectToken("sup_details.osup_det.txval")?.Value<double>() ?? 0;
                 var zeroRated = data.SelectToken("sup_details.osup_zero.txval")?.Value<double>() ?? 0;
                 features.GstMonthlyTurnover[sortablePeriod] = txval + zeroRated;
+
+                // Tax settled in cash (pdcash: ipd/cpd/spd/cspd) vs via ITC (pditc: *_pd*)
+                foreach (var pd in data.SelectTokens("tx_pmt.pdcash[*]").OfType<JObject>())
+                    taxPaidCash += Sum(pd, "ipd", "cpd", "spd", "cspd");
+                var pditc = data.SelectToken("tx_pmt.pditc") as JObject;
+                if (pditc != null)
+                    taxPaidItc += Sum(pditc, "i_pdi", "i_pdc", "i_pds", "c_pdi", "c_pdc", "s_pdi", "s_pds", "cs_pdcs");
+
+                // Net input tax credit for the month
+                var itcNet = data.SelectToken("itc_elg.itc_net") as JObject;
+                if (itcNet != null)
+                {
+                    itcNetTotal += Sum(itcNet, "iamt", "camt", "samt", "csamt");
+                    itcMonths++;
+                }
             }
 
-            // ── B2B share + counterparty diversity from GSTR-1 summaries
+            // ── B2B share + counterparty diversity from GSTR-1 summaries,
+            //    plus per-period GSTR-1 declared totals for the 1-vs-3B consistency check
             double b2bTax = 0, totalTax = 0;
+            var r1MonthlyTaxable = new Dictionary<string, double>();
             var counterparties = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var data in ParseAll(gstr1SummaryJsons, ref anyData))
             {
+                var r1Period = data.Value<string>("ret_period");
+                var r1Sortable = r1Period?.Length == 6 ? r1Period[2..] + r1Period[..2] : null;
+                double r1PeriodTaxable = 0;
+
                 foreach (var sec in data.SelectTokens("sec_sum[*]").OfType<JObject>())
                 {
                     var name = sec.Value<string>("sec_nm") ?? string.Empty;
                     var tax = sec.Value<double?>("ttl_tax") ?? 0;
-                    if (name is "B2B" or "B2CL" or "B2CS" or "EXP") totalTax += tax;
+                    if (name is "B2B" or "B2CL" or "B2CS" or "EXP") { totalTax += tax; r1PeriodTaxable += tax; }
                     if (name == "B2B") b2bTax += tax;
 
                     foreach (var ctin in sec.SelectTokens("$..cpty_sum[*].ctin"))
@@ -62,15 +86,21 @@ namespace FinRiskLensAI.ML.Features
                         if (!string.IsNullOrEmpty(value)) counterparties.Add(value);
                     }
                 }
+                if (r1Sortable != null) r1MonthlyTaxable[r1Sortable] = r1PeriodTaxable;
             }
 
-            // ── Counterparties from GSTR-1 B2B / e-invoice payloads
+            // ── Customer concentration from GSTR-1 B2B / e-invoice payloads (value per buyer GSTIN)
+            var customerValue = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
             foreach (var data in ParseAll(gstr1B2bJsons, ref anyData))
             {
-                foreach (var ctin in data.SelectTokens("b2b[*].ctin"))
+                foreach (var buyer in data.SelectTokens("b2b[*]").OfType<JObject>())
                 {
-                    var value = ctin.Value<string>();
-                    if (!string.IsNullOrEmpty(value)) counterparties.Add(value);
+                    var ctin = buyer.Value<string>("ctin");
+                    if (string.IsNullOrEmpty(ctin)) continue;
+                    counterparties.Add(ctin);
+                    var value = buyer.SelectTokens("inv[*].itms[*].itm_det.txval")
+                        .Sum(t => t.Value<double?>() ?? 0);
+                    customerValue[ctin] = customerValue.GetValueOrDefault(ctin) + value;
                 }
             }
 
@@ -94,14 +124,21 @@ namespace FinRiskLensAI.ML.Features
                 }
             }
 
-            // ── GSTR-2A: inward (purchase) invoice values
+            // ── GSTR-2A: inward (purchase) invoice values + vendor concentration
             double purchaseValue = 0;
             int purchaseMonths = 0;
+            var vendorValue = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
             foreach (var data in ParseAll(gstr2aB2bJsons, ref anyData))
             {
                 purchaseMonths++;
-                foreach (var txval in data.SelectTokens("b2b[*].inv[*].itms[*].itm_det.txval"))
-                    purchaseValue += txval.Value<double?>() ?? 0;
+                foreach (var supplier in data.SelectTokens("b2b[*]").OfType<JObject>())
+                {
+                    var ctin = supplier.Value<string>("ctin") ?? "(unregistered)";
+                    var value = supplier.SelectTokens("inv[*].itms[*].itm_det.txval")
+                        .Sum(t => t.Value<double?>() ?? 0);
+                    purchaseValue += value;
+                    vendorValue[ctin] = vendorValue.GetValueOrDefault(ctin) + value;
+                }
             }
 
             if (!anyData) return;
@@ -109,6 +146,18 @@ namespace FinRiskLensAI.ML.Features
             features.GstB2bShare = totalTax > 0 ? Math.Clamp(b2bTax / totalTax, 0, 1) : 0;
             features.GstCounterpartyCount = counterparties.Count;
             features.GstHsnProductCount = hsnCodes.Count;
+
+            // ── Tax-payment discipline + ITC pattern
+            if (taxPaidCash + taxPaidItc > 0)
+            {
+                features.GstHasTaxPaymentData = true;
+                features.GstCashTaxShare = taxPaidCash / (taxPaidCash + taxPaidItc);
+            }
+            features.GstItcMonthlyAvg = itcMonths > 0 ? itcNetTotal / itcMonths : 0;
+
+            // ── Customer / vendor concentration (top-5 shares, masked GSTINs)
+            FillConcentration(customerValue, features.GstTopCustomers, v => features.GstTopCustomerShare = v);
+            FillConcentration(vendorValue, features.GstTopVendors, v => features.GstTopVendorShare = v);
 
             if (features.GstMonthlyTurnover.Count > 0)
             {
@@ -134,8 +183,41 @@ namespace FinRiskLensAI.ML.Features
                     features.GstMonthlyTurnover.Keys.Last()) + 1;
                 features.GstFilingRegularity = Math.Clamp(
                     (double)features.GstMonthlyTurnover.Count / Math.Max(1, months), 0, 1);
+
+                // GSTR-1 vs GSTR-3B consistency: average per-period agreement of
+                // declared taxable values (persistent gaps = misdeclaration signal)
+                var overlapping = features.GstMonthlyTurnover.Keys
+                    .Where(p => r1MonthlyTaxable.ContainsKey(p) && features.GstMonthlyTurnover[p] > 0)
+                    .ToList();
+                if (overlapping.Count > 0)
+                {
+                    var avgGap = overlapping.Average(p =>
+                        Math.Abs(r1MonthlyTaxable[p] - features.GstMonthlyTurnover[p])
+                        / features.GstMonthlyTurnover[p]);
+                    features.GstR1Vs3bConsistency = Math.Clamp(1 - avgGap, 0, 1);
+                }
             }
         }
+
+        private static double Sum(JObject obj, params string[] fields)
+            => fields.Sum(f => obj.Value<double?>(f) ?? 0);
+
+        /// <summary>Top-5 counterparty shares of total value, GSTINs masked for display.</summary>
+        private static void FillConcentration(
+            Dictionary<string, double> valueByParty,
+            Dictionary<string, double> target,
+            Action<double> setTopShare)
+        {
+            var total = valueByParty.Values.Sum();
+            if (total <= 0) return;
+            var top = valueByParty.OrderByDescending(kv => kv.Value).Take(5).ToList();
+            setTopShare(Math.Round(top[0].Value / total, 4));
+            foreach (var (ctin, value) in top)
+                target[Mask(ctin)] = Math.Round(value / total, 4);
+        }
+
+        private static string Mask(string ctin)
+            => ctin.Length >= 15 ? $"{ctin[..4]}•••••{ctin[^4..]}" : ctin;
 
         /// <summary>
         /// Real GST APIs wrap the payload as response.message.data; schema samples and

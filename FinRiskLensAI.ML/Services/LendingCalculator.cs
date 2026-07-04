@@ -109,6 +109,33 @@ namespace FinRiskLensAI.ML.Services
                 !f.HasGst ? RatioStatus.NotAvailable : f.GstCreditNoteRatio <= 0.05 ? RatioStatus.Strong : f.GstCreditNoteRatio <= 0.15 ? RatioStatus.Adequate : RatioStatus.Weak,
                 "Share of invoiced revenue reversed via credit notes — high values inflate headline turnover");
 
+            var hasConsistency = f.HasGst && f.GstR1Vs3bConsistency > 0;
+            Add("GSTR-1 vs GSTR-3B Consistency", f.GstR1Vs3bConsistency,
+                hasConsistency ? $"{f.GstR1Vs3bConsistency:P0}" : "N/A", "≥ 90%",
+                !hasConsistency ? RatioStatus.NotAvailable : f.GstR1Vs3bConsistency >= 0.90 ? RatioStatus.Strong : f.GstR1Vs3bConsistency >= 0.75 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "Agreement between invoice-level (GSTR-1) and summary (GSTR-3B) declared sales — persistent gaps signal misdeclaration");
+
+            // ── Financial-statement ratios from ITR (business filers with books only)
+            Add("EBITDA Margin (ITR)", f.ItrEbitdaMargin ?? 0,
+                f.ItrEbitdaMargin.HasValue ? $"{f.ItrEbitdaMargin:P1}" : "N/A", "≥ 10%",
+                !f.ItrEbitdaMargin.HasValue ? RatioStatus.NotAvailable : f.ItrEbitdaMargin >= 0.10 ? RatioStatus.Strong : f.ItrEbitdaMargin >= 0.05 ? RatioStatus.Adequate : RatioStatus.Weak,
+                $"Operating profitability from the ITR P&L{(f.ItrFinancialsYear != null ? $" (AY {f.ItrFinancialsYear})" : "")} — PBIDTA over business turnover");
+
+            Add("Net Profit Margin (ITR)", f.ItrNetProfitMargin ?? 0,
+                f.ItrNetProfitMargin.HasValue ? $"{f.ItrNetProfitMargin:P1}" : "N/A", "≥ 5%",
+                !f.ItrNetProfitMargin.HasValue ? RatioStatus.NotAvailable : f.ItrNetProfitMargin >= 0.05 ? RatioStatus.Strong : f.ItrNetProfitMargin >= 0.02 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "Bottom-line profitability after all costs and tax, from the ITR P&L");
+
+            Add("Debtor Days (ITR)", f.ItrDebtorDays ?? 0,
+                f.ItrDebtorDays.HasValue ? $"{f.ItrDebtorDays:0} days" : "N/A", "≤ 60 days",
+                !f.ItrDebtorDays.HasValue ? RatioStatus.NotAvailable : f.ItrDebtorDays <= 60 ? RatioStatus.Strong : f.ItrDebtorDays <= 90 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "How long customers take to pay — sundry debtors over turnover × 365 (needs ITR balance sheet)");
+
+            Add("Asset Turnover (ITR)", f.ItrAssetTurnover ?? 0,
+                f.ItrAssetTurnover.HasValue ? $"{f.ItrAssetTurnover:0.00}x" : "N/A", "≥ 1.5x",
+                !f.ItrAssetTurnover.HasValue ? RatioStatus.NotAvailable : f.ItrAssetTurnover >= 1.5 ? RatioStatus.Strong : f.ItrAssetTurnover >= 0.8 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "Revenue generated per rupee of assets — turnover over total assets (needs ITR balance sheet)");
+
             // ── Transparency notes
             a.Notes.Add("Working capital via turnover method: requirement 25% of annual turnover, bank finance 20%, borrower margin 5% (Nayak norms for MSME limits up to ₹5 Cr).");
             a.Notes.Add($"Term capacity assumes {TenureMonths / 12} year tenure @ {AnnualRate:P0} p.a., EMI capped at {FoirCap:P0} FOIR and 80% of observed monthly surplus.");
@@ -117,6 +144,8 @@ namespace FinRiskLensAI.ML.Services
                 a.Notes.Add("Banking penetration is very low relative to GST sales — verify whether the consented account is the business's primary operating account.");
             if (!f.HasAa)
                 a.Notes.Add("No AA bank data — cashflow-based ratios unavailable; eligibility derives from GST turnover only.");
+            if (!string.IsNullOrEmpty(f.SectorName))
+                a.Notes.Add($"Industry: {f.SectorName} (NIC {f.SectorNic2 ?? "n/a"}) — sector risk weight {f.SectorRiskWeight:0.00} feeds Business Stability; use as a pricing hint, not a sanction condition.");
 
             return a;
         }

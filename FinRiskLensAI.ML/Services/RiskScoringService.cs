@@ -109,7 +109,71 @@ namespace FinRiskLensAI.ML.Services
 
             // ── 8. Bank-decision ratios + indicative loan eligibility
             result.Lending = LendingCalculator.Compute(features, result.ScoreBand);
+
+            // ── 9. Underwriting deep-dives for the Financial Health Card
+            BuildDeepDives(features, result);
             return result;
+        }
+
+        private static void BuildDeepDives(MsmeFeatureSet f, RiskAnalysisResult result)
+        {
+            if (f.HasAa)
+                result.BankAnalysis = new BankStatementAnalysis
+                {
+                    AverageMonthlyBalance = f.AaAvgMonthlyBalance,
+                    PeakBalance = f.AaPeakBalance,
+                    AverageMonthlyCredit = Math.Round(f.AaAvgMonthlyCredit),
+                    CashDepositsMonthly = f.AaCashDepositsMonthly,
+                    SalaryCreditsMonthly = f.AaSalaryCreditsMonthly,
+                    CustomerReceiptsMonthly = f.AaCustomerReceiptsMonthly,
+                    SupplierPaymentsMonthly = f.AaSupplierPaymentsMonthly,
+                    BounceCount = f.AaBounceCount,
+                    ChequeReturnCount = f.AaChequeReturnCount,
+                    EcsNachReturnCount = f.AaEcsNachReturnCount,
+                    OdLimitTotal = f.AaOdLimitTotal,
+                    OverdrawnTxnCount = f.AaOverdrawnTxnCount,
+                    MinBalanceBreachCount = f.AaMinBalanceBreachCount,
+                    MonthlyAvgBalance = new(f.AaMonthlyAvgBalance),
+                    ModeSplitAmount = new(f.AaModeSplitAmount),
+                    MonthlyCredits = new(f.AaMonthlyCredits),
+                    MonthlyDebits = new(f.AaMonthlyDebits)
+                };
+
+            if (f.HasGst)
+                result.GstAnalysis = new GstDeepDive
+                {
+                    R1Vs3bConsistency = Math.Round(f.GstR1Vs3bConsistency, 4),
+                    HasTaxPaymentData = f.GstHasTaxPaymentData,
+                    CashTaxShare = Math.Round(f.GstCashTaxShare, 4),
+                    ItcMonthlyAvg = Math.Round(f.GstItcMonthlyAvg),
+                    TopCustomerShare = f.GstTopCustomerShare,
+                    TopVendorShare = f.GstTopVendorShare,
+                    TopCustomers = new(f.GstTopCustomers),
+                    TopVendors = new(f.GstTopVendors),
+                    MonthlySales = new(f.GstMonthlyTurnover)
+                };
+
+            if (f.HasItr)
+                result.Financials = new FinancialRatios
+                {
+                    HasFinancials = f.ItrFinancialsYear != null,
+                    SourceYear = f.ItrFinancialsYear,
+                    BusinessTurnover = f.ItrBusinessTurnover,
+                    EbitdaMargin = f.ItrEbitdaMargin,
+                    NetProfitMargin = f.ItrNetProfitMargin,
+                    DebtorDays = f.ItrDebtorDays,
+                    AssetTurnover = f.ItrAssetTurnover
+                };
+
+            if (f.HasUdyam)
+                result.Industry = new IndustryRiskInfo
+                {
+                    SectorName = f.SectorName,
+                    Nic2Digit = f.SectorNic2,
+                    RiskWeight = f.SectorRiskWeight,
+                    Outlook = f.SectorRiskWeight >= 0.75 ? "Favourable"
+                            : f.SectorRiskWeight >= 0.60 ? "Moderate" : "Cautious"
+                };
         }
 
         // ─────────────────────────── dimension calculators (0..1) ───────────────────────────
@@ -191,7 +255,8 @@ namespace FinRiskLensAI.ML.Services
                 : 0.5;
 
             // EPFO headcount trend joins here when the source arrives
-            return Math.Clamp(0.45 * vintage + 0.25 * sizeClass + 0.15 * footprint + 0.15 * tradeCycle, 0, 1);
+            return Math.Clamp(0.40 * vintage + 0.20 * sizeClass + 0.15 * footprint
+                            + 0.15 * tradeCycle + 0.10 * f.SectorRiskWeight, 0, 1);
         }
 
         private static double DebtServiceability(MsmeFeatureSet f, out bool usedNeutral)
