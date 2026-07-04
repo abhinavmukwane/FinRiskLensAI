@@ -1,7 +1,9 @@
 ﻿using FinRiskLensAI.Core.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.OnBoarding;
+using FinRiskLensAI.Core.Models;
 using FinRiskLensAI.Core.Models.Onboarding;
+using FinRiskLensAI.Core.Models.User_Activity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinRiskLensAI.Controllers
@@ -98,22 +100,114 @@ namespace FinRiskLensAI.Controllers
         {
             if (model == null)
             {
-                return Json(new {status = false,message = "Invalid request." });
+                return Json(new { status = false, message = "Invalid request." });
             }
 
+            // 1. Register / update the user first
             var result = await _onboardingService.AddUpdateUserRegst(model);
-
             if (result == null)
             {
-                return Json(new{ status = false, message = "Something went wrong." });
+                return Json(new { status = false, message = "Something went wrong." });
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Email))
+            {
+                return Json(new { status = false, message = "Email is required to send OTP." });
+            }
+
+            // 2. Generate OTP
+            var otp = Random.Shared.Next(100000, 999999).ToString();
+
+            // 3. Try sending the OTP email FIRST
+            bool emailSent;
+            try
+            {
+                emailSent = await _emailService.SendLoginOtpAsync(
+                    model.Email,
+                    otp,
+                    model.Email,
+                    expiryMinutes: 10,
+                    ct: HttpContext.RequestAborted);
+            }
+            catch (Exception ex)
+            {
+                // _logger.LogError(ex, "Failed to send OTP email to {Email}", model.Email);
+                return Json(new { status = false, message = "Failed to send OTP email. Please try again." });
+            }
+
+            if (!emailSent)
+            {
+                return Json(new { status = false, message = "Failed to send OTP email. Please try again." });
+            }
+
+            // 4. Only persist the OTP if the email actually went out
+            var otpModel = new UserOtpModel
+            {
+                UserRegistrationID = result.Data.UserRegistrationID,
+                MsmeEnquiryID = result.Data.MsmeEnquiryID,
+                Email = model.Email,
+                MobileNumber = model.MobileNumber,
+                OTP = Convert.ToInt32(otp)
+            };
+
+            var otpResult = await _onboardingService.AddUpdateUserOtp(otpModel);
+            if (otpResult == null)
+            {
+                return Json(new { status = false, message = "OTP sent but could not be saved. Please contact support." });
             }
 
             return Json(new
             {
                 status = true,
-                message = "User registered successfully."
+                message = "OTP sent successfully to your email.",
+                otp = otp 
             });
         }
+
+
+        //[HttpPost]
+        //public async Task<IActionResult> RegisterUser(UserRegistrationModel model)
+        //{
+        //    if (model == null)
+        //    {
+        //        return Json(new {status = false,message = "Invalid request." });
+        //    }
+
+        //    var result = await _onboardingService.AddUpdateUserRegst(model);
+
+        //    if (result == null)
+        //    {
+        //        return Json(new{ status = false, message = "Something went wrong." });
+        //    }
+
+        //    return Json(new
+        //    {
+        //        status = true,
+        //        message = "User registered successfully."
+        //    });
+        //}
+
+        //[HttpPost]
+        //public async Task<IActionResult> AddUpdateUserOtp(UserOtpModel model)
+        //{
+        //    if (model == null)
+        //    {
+        //        return Json(new { status = false, message = "Invalid request." });
+        //    }
+
+        //    var result = await _onboardingService.AddUpdateUserOtp(model);
+
+        //    if (result == null)
+        //    {
+        //        return Json(new { status = false, message = "Something went wrong." });
+        //    }
+
+        //    return Json(new
+        //    {
+        //        status = true,
+        //        message = "OTP send successfully."
+        //    });
+        //}
 
     }
 }

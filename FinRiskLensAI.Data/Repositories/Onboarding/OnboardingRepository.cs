@@ -4,6 +4,7 @@ using FinRiskLensAI.Core.Interfaces.IRepositories.OnBoarding;
 using FinRiskLensAI.Core.Models;
 using FinRiskLensAI.Core.Models.Onboarding;
 using FinRiskLensAI.Core.Models.Universal;
+using FinRiskLensAI.Core.Models.User_Activity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
@@ -174,6 +175,8 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                 DateOfIncorporation = model.main_details.date_of_incorporation,
                 MsmeDfo = model.main_details.msme_dfo,
                 RegistrationDate = model.main_details.registration_date,
+                GstinNumber = model.main_details.gstin,
+                PanNumber = model.main_details.Pan,
 
                 Payload = JsonConvert.SerializeObject(model),
 
@@ -244,8 +247,8 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
 
                 select new
                 {
-                    e.Uan,e.NameOfEnterprise,e.OrganizationType, e.DateOfIncorporation,e.Email,
-                    e.MobileNumber,l.Line1,l.Building,l.Road,l.Village,l.City, l.District, l.State,l.Pin
+                    e.Uan,e.NameOfEnterprise,e.OrganizationType, e.DateOfIncorporation,e.Email,e.MsmeEnquiryID,
+                    e.MobileNumber,l.Line1,l.Building,l.Road,l.Village,l.City, l.District, l.State,l.Pin,e.GstinNumber,e.PanNumber
                 }).FirstOrDefaultAsync();
 
             if (data == null)
@@ -253,6 +256,7 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
 
             return new UdyamDetailsModel
             {
+                MsmeEnquiryID=data.MsmeEnquiryID,
                 UdyamNumber = data.Uan,
                 EnterpriseName = data.NameOfEnterprise,
                 OrganizationType = data.OrganizationType,
@@ -260,6 +264,8 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                 DateOfIncorporation = data.DateOfIncorporation,
                 Email = data.Email,
                 Mobile = data.MobileNumber,
+                gstin = data.GstinNumber,
+                Pan = data.PanNumber,
 
                 Address = string.Join(", ", new[]
                 {data.Line1, data.Building, data.Road,data.Village, data.City, data.District, data.State,
@@ -276,7 +282,34 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             {
                 UserRegistrationModel paObj = new UserRegistrationModel();
                 entity.MapToModelObject(paObj);
+                paObj.CreatedAt = DateTime.Now;
+                paObj.CreatedBy = "1";      
                 _context.UserRegistration.Add(paObj);
+                await _context.SaveChangesAsync();
+
+                result.Result = tflResultType.tflSuccess;
+                result.Message = "Data Saved Successfully";
+                result.Data = paObj;
+            }
+            catch (Exception ex)
+            {
+                result.Result = tflResultType.tflError;
+                result.Message = ex.Message;
+                result.Data = null;
+            }
+            return result;
+        }
+
+        public async Task<ResultModel<UserOtpModel>> AddUpdateUserOtp(UserOtpModel entity)
+        {
+            var result = new ResultModel<UserOtpModel>();
+            try
+            {
+                UserOtpModel paObj = new UserOtpModel();
+                entity.MapToModelObject(paObj);
+                paObj.CreatedAt = DateTime.Now;
+                paObj.CreatedBy = "1";
+                _context.UserOtpModel.Add(paObj);
                 await _context.SaveChangesAsync();
 
                 result.Result = tflResultType.tflSuccess;
@@ -291,28 +324,5 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             }
             return result;
         }
-
-        //public async Task<ResultModel<RegisterModel>> AddUpdateOtp(RegisterModel entity)
-        //{
-        //    var result = new ResultModel<RegisterModel>();
-        //    try
-        //    {
-        //        T_APPROVEDLOAN paObj = new T_APPROVEDLOAN();
-        //        entity.MapToModelObject(paObj);
-        //        _context.T_APPROVEDLOAN.Add(paObj);
-        //        await _context.SaveChangesAsync();
-
-        //        result.Result = tflResultType.tflSuccess;
-        //        result.Message = "Data Saved Successfully";
-        //        result.Data = entity;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        result.Result = tflResultType.tflError;
-        //        result.Message = ex.Message;
-        //        result.Data = null;
-        //    }
-        //    return result;
-        //}
     }
 }

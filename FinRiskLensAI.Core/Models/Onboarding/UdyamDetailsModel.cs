@@ -8,6 +8,7 @@ namespace FinRiskLensAI.Core.Models.Onboarding
 {
     public class UdyamDetailsModel
     {
+        public int MsmeEnquiryID { get; set; }
         public string UdyamNumber { get; set; }
         public string EnterpriseName { get; set; }
         public string OrganizationType { get; set; }
@@ -29,5 +30,7 @@ namespace FinRiskLensAI.Core.Models.Onboarding
         // NIC Details
         public string NicCode { get; set; }
         public string NicDescription { get; set; }
+        public string Pan { get; set; }
+        public string gstin { get; set; }
     }
 }

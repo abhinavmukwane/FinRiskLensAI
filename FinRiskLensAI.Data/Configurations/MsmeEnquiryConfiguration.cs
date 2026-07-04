@@ -34,6 +34,10 @@ namespace FinRiskLensAI.Data.Configurations
             builder.Property(x => x.OrganizationType).HasMaxLength(100);
             builder.Property(x => x.Gender).HasMaxLength(20);
             builder.Property(x => x.MsmeDfo).HasMaxLength(100);
+
+            builder.Property(x => x.GstinNumber).HasMaxLength(100);
+            builder.Property(x => x.PanNumber).HasMaxLength(100);
+
             builder.Property(x => x.CreatedBy).HasMaxLength(100);
             builder.Property(x => x.UpdatedBy).HasMaxLength(100);
 

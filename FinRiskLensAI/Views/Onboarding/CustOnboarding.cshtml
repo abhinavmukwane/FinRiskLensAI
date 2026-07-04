@@ -151,7 +151,7 @@
                                 <i class="bi bi-building-fill rv-card-icon"></i>
                                 <span class="rv-card-title">Personal Details</span>
                             </div>
-
+                        <input type="hidden" id="hdnMsmeEnquiryID" />
                         </div>
                         <div class="rv-card-body">
                             <div class="row g-0">
@@ -170,10 +170,7 @@
                                     <div class="rv-field-label">PAN Number</div>
                                     <div class="rv-field-value" id="rv_panNo"></div>
                                 </div>
-                                @* <div class="col-md-6 rv-field">
-                                    <div class="rv-field-label">Enterprise Type</div>
-                                    <div class="rv-field-value" id="rv_msme">Micro Enterprise (Manufacturing)</div>
-                                </div> *@
+                                
                             </div>
                         </div>
                     </div>
@@ -342,3 +339,17 @@
             </div>
         </div>
     </div>
+<div class="modal fade" id="otpDisplayModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Your OTP (Testing)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="mb-1">Use this OTP to continue:</p>
+                <h2 id="otpDisplayValue" class="fw-bold"></h2>
+            </div>
+        </div>
+    </div>
+</div>
