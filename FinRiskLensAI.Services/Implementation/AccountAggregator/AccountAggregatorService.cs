@@ -39,15 +39,15 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
         /// AA consent-callback URL: the configured override if set, otherwise
         /// built from the current request so it's correct both locally and after publish.
         /// </summary>
-        private string ResolveCallbackUrl()
+        private string ResolveCallbackUrl(string trnxid)
         {
             if (!string.IsNullOrWhiteSpace(_config.CallbackUrl))
                 return _config.CallbackUrl;
 
             var req = _httpContextAccessor.HttpContext?.Request;
             return req != null
-                ? $"{req.Scheme}://{req.Host}/Home/AAConsentCallback"
-                : "/Home/AAConsentCallback";
+                ? $"{req.Scheme}://{req.Host}/Home/AAConsentCallback/{trnxid}/"
+                : $"/Home/AAConsentCallback/{trnxid}";
         }
 
         private async Task EnsureTokenValidAsync()
@@ -124,6 +124,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                 await EnsureTokenValidAsync().ConfigureAwait(false);
                 AccAggreTokenModel aaToken = _aaRepo.GetAAToken();
 
+                string transactionId = Guid.NewGuid().ToString();
                 var payload = new
                 {
                     header = BuildFinvuHeader(),
@@ -133,7 +134,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                         consentDescription = "Wealth Management Service",
                         templateName = "FINVUDEMO_TESTING",
                         aaId = "cookiejar-aa@finvu.in",
-                        redirectUrl = ResolveCallbackUrl()
+                        redirectUrl = ResolveCallbackUrl(transactionId)
                     }
                 };
 
@@ -159,7 +160,8 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                 AAConsentReqModel aaConReqMdl = new AAConsentReqModel
                 {
                     uan = uan,
-                    transactionId = Guid.NewGuid().ToString(),
+                    custId = AAID,
+                    transactionId = transactionId,
                     rid = resp.header.rid,
                     ts = resp.header.ts,
                     channelId = resp.header.channelId,
@@ -179,7 +181,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                     //_logger.Error("AddAAConsentRequest failed: " + saveResult.Message);
                     return null;
 
-                return resp.body.ConsentHandle;
+                return resp.body.url;
             }
             catch (Exception ex)
             {
@@ -195,10 +197,14 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                              .ConfigureAwait(false);
         }
 
-        public async Task<ConsentDetailsById> CheckConsentStatus(string consentHandle, string AAID)
+        public async Task<ConsentDetailsById> CheckConsentStatus(string trnxid, string AAID)
         {
             try
             {
+                var consentReqData = await _aaRepo.GetAAConsentRequest(trnxid);
+
+                string consentHandle = consentReqData.consentHandle;
+
                 await EnsureTokenValidAsync().ConfigureAwait(false);
 
                 var aaToken = _aaRepo.GetAAToken();
@@ -321,6 +327,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
            }
             return null;
         }
+
         public async Task<string> FinancialInfoFetch(string AAID, string consentId, string sessionId)
         {
             try

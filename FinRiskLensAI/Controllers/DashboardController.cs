@@ -1,5 +1,6 @@
 using FinRiskLensAI.Common;
 using FinRiskLensAI.Core.Interfaces;
+using FinRiskLensAI.Core.Interfaces.IServices.AccountAggregator;
 using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Models;
 using FinRiskLensAI.Utility;
@@ -14,12 +15,44 @@ namespace FinRiskLensAI.Controllers
         private readonly IBlobAnalysisService _analysis;
         private readonly IMsmeDataStore _store;
         private readonly ILogger<DashboardController> _logger;
+        private readonly IAccountAggregatorService _aaService;
 
-        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger)
+        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService)
         {
             _analysis = analysis;
             _store = store;
             _logger = logger;
+            _aaService = AAService;
+        }
+
+        /// <summary>
+        /// Kicks off the Finvu AA consent journey for the logged-in MSME and
+        /// returns the consent URL for the client to open in a new tab.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> InitiateAAFetch()
+        {
+            var user = HttpContext.Session.GetCurrentUser();
+            if (user == null || string.IsNullOrWhiteSpace(user.UdyamNumber))
+                return Json(new { status = false, message = "Your session has expired. Please log in again." });
+
+            if (string.IsNullOrWhiteSpace(user.MobileNumber))
+                return Json(new { status = false, message = "No mobile number is linked to your account." });
+
+            var aaId = user.MobileNumber + "@finvu";
+            try
+            {
+                var url = await _aaService.CreateConsentRequest(user.UdyamNumber, aaId);
+                if (string.IsNullOrWhiteSpace(url))
+                    return Json(new { status = false, message = "Could not initiate the Account Aggregator consent. Please try again." });
+
+                return Json(new { status = true, url, message = "Consent request created — opening the Account Aggregator." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AA consent initiation failed for {Uan}", user.UdyamNumber);
+                return Json(new { status = false, message = "Something went wrong while contacting the Account Aggregator." });
+            }
         }
 
         public IActionResult CustDashboard()
@@ -111,8 +144,5 @@ namespace FinRiskLensAI.Controllers
 
             return View(model);
         }
-
-        // UdyamDetails moved to UdyamController (/Udyam/UdyamDetails), backed by
-        // the common IStaticResponseService over m_StaticResponces.
     }
 }

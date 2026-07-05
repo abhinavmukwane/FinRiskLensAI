@@ -14,6 +14,7 @@ namespace FinRiskLensAI.Data.Configurations
             builder.Property(x => x.ConsentReqId).ValueGeneratedOnAdd();
 
             builder.Property(x => x.uan).HasMaxLength(50);
+            builder.Property(x => x.custId).HasMaxLength(150);
             builder.Property(x => x.transactionId).HasMaxLength(100);
             builder.Property(x => x.rid).HasMaxLength(100);
             builder.Property(x => x.ts).HasMaxLength(50);
