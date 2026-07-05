@@ -119,6 +119,10 @@ namespace FinRiskLensAI.Controllers
 
             // 1. Register / update the user first
             var result = await _onboardingService.AddUpdateUserRegst(model);
+            if (result.Result == tflResultType.tflWarning)
+            {
+                return Json(new { status = false, message = result.Message, clearFields = true });
+            }
             if (result.Result == tflResultType.tflError)
             {
                 return Json(new { status = false, message = "Something went wrong." });

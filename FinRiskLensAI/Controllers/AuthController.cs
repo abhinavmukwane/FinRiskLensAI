@@ -50,17 +50,6 @@ namespace FinRiskLensAI.Controllers
                 }
                 var otp = Random.Shared.Next(100000, 999999).ToString();
 
-                bool emailSent = await _emailService.SendLoginOtpAsync(model.Email,otp,check.Message, expiryMinutes: 5,ct: HttpContext.RequestAborted);
-
-                if (!emailSent)
-                {
-                    return Json(new
-                    {
-                        status = false,
-                        message = "Failed to send OTP."
-                    });
-                }
-
                 // Save/Update OTP
                 var otpModel = new UserOtpModel
                 {
@@ -70,7 +59,7 @@ namespace FinRiskLensAI.Controllers
                     MobileNumber = check.Data.MobileNumber,
                     Email = model.Email,
                     OTP = _encryption.EncryptString(otp),
-                    UpdatedAt = check.Data.UpdatedAt,
+                    UpdatedAt = DateTime.Now,
                     UpdatedBy = "system",
                 };
 
@@ -78,6 +67,17 @@ namespace FinRiskLensAI.Controllers
 
                 if (otpResult.Result == tflResultType.tflSuccess)
                 {
+                    bool emailSent = await _emailService.SendLoginOtpAsync(model.Email, otp, check.Message, expiryMinutes: 5, ct: HttpContext.RequestAborted);
+
+                    if (!emailSent)
+                    {
+                        return Json(new
+                        {
+                            status = false,
+                            message = "Failed to send OTP! Please try again"
+                        });
+                    }
+
                     return Json(new
                     {
                         status = true,

@@ -205,6 +205,17 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             var result = new ResultModel<UserRegistrationModel>();
             try
             {
+                var dup = await _context.UserRegistration
+                    .FirstOrDefaultAsync(x => x.Email == entity.Email || x.MobileNumber == entity.MobileNumber);
+                if (dup != null)
+                {
+                    result.Result = tflResultType.tflWarning;
+                    result.Message = dup.Email == entity.Email
+                        ? "This email is already registered."
+                        : "This mobile number is already registered.";
+                    return result;
+                }
+
                 UserRegistrationModel paObj = new UserRegistrationModel();
                 entity.MapToModelObject(paObj);
                 paObj.CreatedAt = DateTime.Now;
@@ -288,6 +299,15 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                 {
                     result.Result = tflResultType.tflNoRecordFound;
                     result.Message = "OTP record not found.";
+                    result.Data = null;
+                    return result;
+                }
+
+                // UpdatedAt is stamped UtcNow by ApplicationDbContext.SetAuditableFields() on every save — compare in UTC.
+                if (DateTime.UtcNow - entity.UpdatedAt > TimeSpan.FromMinutes(5))   // matches the 5-min email expiry
+                {
+                    result.Result = tflResultType.tflError;
+                    result.Message = "OTP has expired. Please resend a new OTP.";
                     result.Data = null;
                     return result;
                 }

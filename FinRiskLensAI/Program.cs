@@ -36,9 +36,12 @@ builder.Services.AddAppDbContext(builder.Configuration);
 
 builder.Services.AddSession(options =>
 {
+    options.Cookie.Name = "frlai.sid";
     options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
+    options.Cookie.HttpOnly = true;                          // no JS access
     options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // HTTPS only
+    options.Cookie.SameSite = SameSiteMode.Strict;           // no cross-site send
 });
 
 var app = builder.Build();

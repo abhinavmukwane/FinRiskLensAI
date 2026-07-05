@@ -154,7 +154,7 @@
                     // Hide Step1 & Show Loader
                     $('#step1').addClass('d-none');
 
-                    $('#fetchLoader .screen-title').text('Talking to the Udyam registry...');
+                    $('#fetchLoader .screen-title').text('Initiating the Udyam check...');
 
                     $('#ls1').html('<i class="bi bi-check-circle-fill"></i> Validating Udyam number format');
                     $('#ls2').html('<i class="bi bi-check-circle-fill"></i> Fetching enterprise & PAN record');
@@ -348,6 +348,14 @@
                         else {
                             $('#reviewError').removeClass('d-none');
                             $('#reviewError span').text(response.message);
+                            showToast(response.message);
+
+                            if (response.clearFields) {
+                                $('#rv_email').val('');
+                                $('#mobileInput').val('');
+                                $('#btnProceedToOtp').prop('disabled', true);
+                                $('#rv_email').focus();
+                            }
                         }
                     },
                     error: function () {
