@@ -338,8 +338,6 @@
                             $('.otp-input').first().focus();
                             showToast(response.message);
                             $('html,body').animate({ scrollTop: 0 }, 300);
-
-                            // TESTING ONLY: show OTP in a modal since email response includes it
                             if (response.otp) {
                                 $('#otpDisplayValue').text(response.otp);
                                 var otpModal = new bootstrap.Modal(document.getElementById('otpDisplayModal'));
@@ -391,7 +389,10 @@
                 }
             });
 
+
+
             let otpTimerInterval;
+
             function startOtpTimer() {
                 let t = 60;
                 $('#otpTimer').text('00:60');
@@ -408,17 +409,16 @@
                     }
                 }, 1000);
             }
+
             $('#resendOtp').on('click', function (e) {
                 e.preventDefault();
 
                 if ($(this).hasClass('disabled')) return;
 
-                var $link = $(this);
-                var originalHtml = $link.html();
+                var $btn = $(this);
+                var originalHtml = $btn.html();
 
-                // Get the email - adjust this depending on where you're storing it
-                // after the first OTP was generated (hidden field, span text, etc.)
-                var email = $("#email").val() ? $("#email").val().trim() : $("#otpEmailTarget").text().trim();
+                var email =  $("#otpEmailTarget").text().trim();
 
                 if (!email) {
                     showToast('Email not found. Please restart the process.');
@@ -429,9 +429,9 @@
                     Email: email
                 };
 
-                // Prevent double clicks while the call is in flight
-                $link.addClass('disabled');
-                $link.html('<i class="bi bi-arrow-repeat me-1"></i>Sending...');
+                // Disable + show sending state while the call is in flight
+                $btn.addClass('disabled');
+                $btn.html('<i class="bi bi-arrow-repeat me-1"></i>Sending...');
 
                 $.ajax({
                     url: "/Auth/GenCustomerOtp",
@@ -439,26 +439,27 @@
                     contentType: "application/json",
                     data: JSON.stringify(model),
                     success: function (response) {
-                        if (response && response.success) {
+                        if (response && response.status) {
                             $('.otp-input').val('');
                             $('.otp-input').first().focus();
-                            startOtpTimer();
                             showToast('A new OTP has been sent.');
+
+                            $btn.html(originalHtml);
+                            startOtpTimer();
                         } else {
                             showToast('Failed to resend OTP. Try again.');
+                            $btn.html(originalHtml);
+                            $btn.removeClass('disabled');
                         }
                     },
                     error: function () {
                         showToast('Something went wrong while resending OTP.');
-                    },
-                    complete: function () {
-                        $link.html(originalHtml);
-                        // Only re-enable if startOtpTimer() doesn't already handle disabling
-                        // during the countdown - remove this line if it does
-                        $link.removeClass('disabled');
+                        $btn.html(originalHtml);
+                        $btn.removeClass('disabled');
                     }
                 });
             });
+
 
             // ---------- Copy OTP (dev modal) ----------
             $("#copyOtpBtn").on("click", function () {
