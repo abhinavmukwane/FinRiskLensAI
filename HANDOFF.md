@@ -1,4 +1,4 @@
-# Session Handoff — FinRiskLensAI (as of 2026-07-02)
+# Session Handoff — FinRiskLensAI (as of 2026-07-05)
 
 Context file for Claude Code. This summarizes the project state, decisions made,
 and working conventions from the development session on the office PC, so work can
@@ -27,9 +27,8 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   `BaseEntity` was deleted; `AuditableEntity` has audit fields only; no
   `IsDeleted`/soft-delete. `IRepository<T>.GetByIdAsync` takes `int`. Migrations
   were re-baselined to a single `InitialCreate` under this convention.
-- ⚠ `m_StaticResponces` table exists in the DB but its entity/config/migration code
-  was never pushed to git (created directly by a teammate). It must be re-added as
-  an entity with `StaticResponcesID` (int identity) under the new convention.
+- ~~⚠ `m_StaticResponces` entity/config missing from git~~ — resolved 2026-07-05
+  (entity + config now in code; served via `UdyamController` / `IStaticResponseService`).
 - DbContext registered via `DataServiceCollectionExtensions.AddAppDbContext()` (in
   Data project), called from `Program.cs`. Generic `IRepository<T>` →
   `RepositoryBase<T>` registered in `DataModule`.
@@ -45,6 +44,19 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
     `Payload` (nvarchar(max)). Cache flow: hit table by UAN first, call API only on miss.
   - `t_MsmeLocations` / `t_MsmeNicCodes` — child tables (FK `MsmeEnquiryId`, cascade)
     for `location_of_plant_details` and `nic_code` arrays.
+  - **Added 2026-07-05:**
+    - `t_UserRegistration` (`UserRegistrationModel`) — customer account: Mobile, Email,
+      UdyamNumber, GstinNumber, PanNumber, FK `MsmeEnquiryID`. Indexed on all lookup cols.
+    - `t_UserOtp` (`UserOtpModel`) — login OTP per user (Email, encrypted `OTP`,
+      MobileNumber, FKs). OTP stored **encrypted** (`IEncryption`); one row per email
+      (upsert in `AddUpdateUserOtp`).
+    - `t_AccAggreToken` (`AccAggreTokenModel`) — single-row Finvu login-token store
+      (rid/ts/token/UpdatedOn), token valid 23h.
+    - `t_AAConsentRequest` (`AAConsentReqModel`) — one row per AA consent request:
+      uan, custId, transactionId, header (rid/ts/channelId), encryptedRequest,
+      requestDate, encryptedFiuId, consentHandle, url, CreatedOn.
+    - `m_StaticResponces` — now has entity/config in code (moved to `UdyamController`,
+      backed by `IStaticResponseService`); the earlier ⚠ gap is closed.
 - Entities in `Core/Models/{Admin,Onboarding}`, configs in `Data/Configurations/`,
   all derive from `AuditableEntity`.
 - **Migration commands** (run from the solution root, `F:\FinRiskLensAI_Git`; needs
@@ -146,6 +158,74 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 - `.brandbar` header is sticky (both `Index.css` and `CustomerOnboarding.css`),
   `section[id] { scroll-margin-top: 90px }` keeps anchor targets clear of it.
 
+### 5. Customer auth — email OTP + session (built 2026-07-05)
+- **Email:** MailKit (`IEmailService`/`EmailService` in Services), STARTTLS. Config
+  `Smtp:*` in appsettings — host **`sdin-pp-wb3.webhostbox.net`** (the shared-hosting
+  server behind `finrisklensai.com`; using the domain name fails TLS cert validation),
+  port 587, `EnableSsl:true`, `AllowCertificateNameMismatch:true` (accepts the host's
+  `*.webhostbox.net` cert — the ONLY validation error tolerated). Branded HTML OTP
+  template in `Services/Templates/LoginOtpEmailTemplate.cs`. Note: outbound port 25 is
+  blocked locally; 587 STARTTLS ("TLS" in mail-client terms, = `EnableSsl:true`) works.
+- **Onboarding flow** (`OnboardingController` + `wwwroot/FRLScripts/Onboarding/CustOnboarding.js`):
+  Udyam lookup → review → `RegisterUser` (rejects duplicate Email/Mobile with a popup +
+  field clear) → email OTP → `FetchUserOTPDet` validates → session set → redirect to
+  `/Dashboard/CustDashboard`. Controllers return a `redirectUrl` for the JS to follow.
+- **Login** (`AuthController` + `wwwroot/FRLScripts/CustLogin/CustLogin.js`):
+  `GenCustomerOtp` (unregistered email → toast + redirect to onboarding),
+  `ValidateUserOtp`. OTP **expiry = 5 min**, checked in `FetchUserOTPDet` using
+  `DateTime.UtcNow` (⚠ `SetAuditableFields()` stamps `UpdatedAt` in **UtcNow** — compare
+  in UTC or every OTP reads as expired). Resend built into CustLogin.js (30s timer).
+- **Session** (`Common/SessionExtensions.cs`): the logged-in MSME is stored as one JSON
+  object under key `CurrentUser` (`UserSessionModel`: UserRegistrationID, MsmeEnquiryID,
+  NameOfEnterprise, Email, MobileNumber, UdyamNumber, GstinNumber, PanNumber). Read
+  anywhere via `HttpContext.Session.GetCurrentUser()` (or `Context.Session…` in views —
+  imported in `_ViewImports`). `[CustDashboardAuthorize]` guards the dashboard off this.
+  Cookie renamed **`frlai.sid`**, `HttpOnly`+`Secure`+`SameSite=Strict`. In-memory
+  session/DataProtection keys are ephemeral (see gotchas).
+- **CustDashboard** (`Views/Dashboard/CustDashboard.cshtml`): welcome banner (enterprise
+  name + Udyam/GSTIN/PAN from session); GST/AA/ITR modals (static backdrop, blurred
+  page, per-field validation before submit). `FinancialHealthCard` now takes UAN **from
+  session only** (search box removed) — a user only ever sees their own card.
+
+### 6. Dummy data + GST seeding (built 2026-07-05)
+- `DummyDataService` (`IDummyDataService`) generates a random-but-valid Udyam response
+  (valid PAN, **GSTIN with correct base-36 check digit**, mobile, state from the UAN
+  token). `OnboardingController.FetchUdyam` uses it when the real Udyam lookup misses,
+  and uploads `udyam.json` to the UAN's blob folder.
+- Blob folder **`DUMMY-DATA`** holds a real 6-month GST fileset (36 files copied from
+  `UDYAM-MH-20-0067394`). `Dashboard/SeedFinancialData` copies them into the logged-in
+  user's folder, rewriting the template filer's GSTIN/PAN → the user's, and is a no-op
+  if the folder already has `gstr*` files. Hooked to the dashboard "Fetch GSTR Details"
+  button (validates password + consent first).
+- Note: `IMsmeDataStore` upper-cases folder names, so `"dummy-data"` resolves to `DUMMY-DATA`.
+
+### 7. Account Aggregator — Finvu integration (built 2026-07-05)
+- **API:** Finvu/FinFactor. Config `Finvu:*` in appsettings (`FinvuApi`,
+  `AaUserId` `channel@dhanaprayoga`, `AaPassword`, `FinvuChannelId` `finsense`,
+  `CallbackUrl` empty=auto). Bound to `FinvuSettings`, registered as an instance in
+  `Program.cs` (same pattern as `Smtp`/`Groq`).
+- `AccountAggregatorService` fully wired to Finvu (token login, `CreateConsentRequest`
+  → `/ConsentRequestPlus`, `CheckConsentStatus`, FI request/status/fetch).
+  `AccountAggregatorRepository` implemented against `t_AccAggreToken` (single-row upsert)
+  and `t_AAConsentRequest`.
+- **Consent flow:** dashboard "Fetch AA Details" → `Dashboard/InitiateAAFetch`
+  (validates consent, `custId = mobile + "@finvu"`) → `CreateConsentRequest(uan, custId)`
+  returns the Finvu consent URL → JS **opens it in a new tab** (opened synchronously
+  pre-await to dodge popup blockers). Consent row saved with a fresh GUID `transactionId`
+  that is ALSO embedded in the redirect URL, so the callback can find it.
+- **Callback** (`Home/AAConsentCallback/{trnxid?}?ecres=…&resdate=…&fi=…`): looks up the
+  consent by `trnxid`, calls `CheckConsentStatus(trnxid, custId)`, and renders success/
+  failure (`Views/Home/AAConsentCallback.cshtml`) off the verified `Body.Status`
+  (fallback: presence of `ecres`). ⚠ `custId` is persisted on the consent row precisely
+  because the `SameSite=Strict` session cookie is NOT sent on Finvu's cross-site redirect
+  — session is unavailable in the callback.
+- Redirect/callback URL is dynamic: `ResolveCallbackUrl` uses `Finvu:CallbackUrl` if set,
+  else builds `{scheme}://{host}/Home/AAConsentCallback/{trnxid}/` from the request
+  (`IHttpContextAccessor`) — correct locally and after publish. Behind a proxy, set
+  `Finvu:CallbackUrl` or enable forwarded headers.
+- ⚠ Known bug in `CheckConsentStatus`: the 2nd call (`/Consent/{consentId}`) reads
+  `response.Content` instead of `response2.Content` — parses the wrong body. Not yet fixed.
+
 ## Decisions & conventions (IMPORTANT)
 
 - **Never add a Claude co-author line to commits.** Author is Abhinav only.
@@ -178,21 +258,43 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 - Missing data sources must feed NEUTRAL values into the ML feature vector, not
   zeros — a zero reads as worst-case behavior (this bit us: "no ITR" produced a
   bogus "ITR filed late" explanation until fixed).
+- **Razor views are compiled into the DLL** (no runtime compilation). Editing a
+  `.cshtml` and re-running with `--no-build` (or Ctrl+F5 without rebuild) serves the
+  OLD view — always rebuild. (This masqueraded as "showToast not working": the toast
+  markup existed on disk but the stale binary didn't have it.)
+- **DataProtection keys are in-memory/ephemeral** (warnings at startup: "Using an
+  in-memory repository", "Neither user profile nor HKLM registry available"). Session
+  cookies encrypted with a previous run's key fail to decrypt after restart →
+  "key not found in key ring" + users silently logged out. Fix before deploy:
+  `AddDataProtection().PersistKeysToFileSystem(...)` (shared path for multi-instance).
+- Session store is also in-memory — doesn't survive restart or scale across instances;
+  swap to Redis/SQL distributed cache when scaling.
+- Timestamps: `AuditableEntity` audit fields are stamped **UtcNow** by
+  `SetAuditableFields()` on every save (overrides whatever you set). Any time-window
+  check (e.g. OTP expiry) MUST compare in UTC. Non-audit models (AA token/consent) keep
+  their own `DateTime.Now` fields — those compare in local time.
+- `SameSite=Strict` session cookie is not sent on cross-site redirects back to us
+  (e.g. Finvu AA callback) — don't rely on session in redirect landing pages; carry
+  what you need in the URL / persisted row instead.
 
 ## Likely next steps (not started)
 
-1. Wire the data-pull services (teammate added AA/HttpClientHelper code in Core) to
-   save API responses straight to blob via `IMsmeDataStore.UploadAsync` — Option A
-   discussed; blob side is ready.
-2. Admin login controller/service/UI against `ADM_Login` (+ JWT bearer registration —
+1. **AA data pull:** on a successful consent callback, run FI request → status → fetch
+   (`FinancialInfoRequest`/`…ReqStatus`/`…Fetch` already exist), decrypt, and write the
+   AA bank JSON to the UAN's blob folder as `aa.json` so scoring picks it up. Fix the
+   `CheckConsentStatus` `response2.Content` bug first (see §7).
+2. Confirm the ConsentStatus/FI endpoints' AAID param against the Finvu sandbox —
+   code passes `custId` (`mobile@finvu`); if it should be the AA handle
+   (`cookiejar-aa@finvu.in`), switch it.
+3. Admin login controller/service/UI against `ADM_Login` (+ JWT bearer registration —
    gap #2 in `Doc/07_SETUP_GAPS.md` still open).
-3. `UdyamLookupService` with the t_MsmeEnquiry cache-or-API flow.
 4. EPFO extractor when the data source arrives (slot exists: `EpfoJson`,
    `epfo.json`, `HasEpfo`).
-5. ~~Financial Health Card dashboard~~ — DONE (see ML engine section above);
-   remaining UI work: score trend line once historical computations exist.
-6. Map `RiskAnalysisResult` onto `ScoreComputation`/`ScoreExplanation`/
-   `CreditProductRecommendation` entities (not created yet) per `Doc/01_DOMAIN_MODEL.md`.
-7. Swap synthetic training data for IDBI sandbox data when it opens **July 22**.
-8. Anomaly-detector thresholds need tuning with realistic data (current test mixed
+5. Map `RiskAnalysisResult` onto `ScoreComputation`/`ScoreExplanation`/
+   `CreditProductRecommendation` entities (not created yet) per `Doc/01_DOMAIN_MODEL.md`;
+   then add the score **trend line** to the Financial Health Card.
+6. Swap synthetic training data for IDBI sandbox data when it opens **July 22**.
+7. Anomaly-detector thresholds need tuning with realistic data (current test mixed
    one company's GST with personal ITR/AA, so cross-source figures were incoherent).
+8. **Pre-deploy hardening:** persist DataProtection keys, move secrets out of
+   `appsettings.json`, replace dummy-data/GST-seeding demo shortcuts with real pulls.
