@@ -4,8 +4,9 @@
 
     var currentUser = Context.Session.GetCurrentUser();
     var enterpriseName = string.IsNullOrWhiteSpace(currentUser?.NameOfEnterprise)
-        ? "there"
-        : currentUser!.NameOfEnterprise;
+        ? "there" : currentUser!.NameOfEnterprise;
+    var aaid = currentUser.MobileNumber + "@finvu";
+    var gstn = currentUser.GstinNumber;
 }
 
 <div class="container-fluid py-5">
@@ -48,7 +49,7 @@
                             <small class="text-muted">Goods & Services Tax Verification</small>
                         </div>
 
-                        <button class="btn btn-submit" data-bs-toggle="modal" data-bs-target="#verificationModal" data-title="Fetch Udyam Details">
+                        <button class="btn btn-submit" data-bs-toggle="modal" data-bs-target="#verificationModal" data-title="Fetch GSTR Details">
                             Fetch Details
                         </button>
                     </div>
@@ -153,13 +154,14 @@
 
 @* Modal *@
 
-<div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel" aria-hidden="true">
+<div class="modal fade" id="verificationModal" tabindex="-1" data-bs-backdrop="static"
+     aria-labelledby="verificationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content verification-modal">
             <div class="modal-header border-0 pb-0">
                 <div>
                     <h5 class="modal-title " id="verificationModalLabel">
-                        Fetch Udyam Details
+                        Fetch GSTR Details
                     </h5>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -169,9 +171,9 @@
                 <!-- User ID -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold">
-                        User ID
+                        GST Number
                     </label>
-                    <input type="text" class="form-control custom-input"  placeholder="Enter User ID">
+                    <input type="text" id="gstNumber" class="form-control custom-input" placeholder="Enter User ID" value="@gstn" disabled readonly>
                 </div>
 
                 <!-- Password -->
@@ -179,16 +181,18 @@
                     <label class="form-label fw-semibold">
                         Password
                     </label>
-                    <input type="password" class="form-control custom-input" placeholder="Enter Password">
+                    <input type="password" id="gstPassword" class="form-control custom-input" placeholder="Enter Password">
+                    <div class="invalid-feedback">Please enter your GST portal password.</div>
                 </div>
 
                 <!-- Consent -->
                 <div class="consent-box">
                     <div class="form-check">
-                        <input class="form-check-input rv-checkbox" type="checkbox" id="consentCheck">
-                        <label class="form-check-label" for="consentCheck">
+                        <input class="form-check-input rv-checkbox" type="checkbox" id="gstConsent">
+
+                        <label class="form-check-label" for="gstConsent">
                             I authorize the platform to securely access my
-                            <strong>ITR Registration details</strong> for
+                            <strong>GSTR details</strong> for
                             verification purposes. I understand that my data
                             will only be used for verification and handled
                             securely.
@@ -196,9 +200,11 @@
                     </div>
 
                 </div>
+                <div id="gstFetchStatus" class="small mt-2"></div>
+
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button class="btn btn-theme w-100"> Fetch Details</button>
+                <button type="button" id="fetchGstrBtn" class="btn btn-theme w-100">Fetch GSTR Details</button>
             </div>
 
         </div>
@@ -208,9 +214,9 @@
 
 <div class="modal fade" id="aaConsentModal" tabindex="-1" aria-labelledby="aaConsentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content verification-modal">
 
-            <div class="modal-header">
+            <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title" id="aaConsentModalLabel">
                     Account Aggregator Consent
                 </h5>
@@ -220,9 +226,9 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label fw-semibold">
-                        Mobile Number
+                        Account Aggregator ID
                     </label>
-                    <input type="text" class="form-control custom-input" placeholder="Enter Mobile Number">
+                    <input type="text" class="form-control custom-input" placeholder="Enter Mobile Number" value="@aaid" disabled readonly>
                 </div>
                 <div class="consent-box">
 
@@ -231,7 +237,7 @@
 
                         <label class="form-check-label" for="consentCheck">
                             I authorize the platform to securely access my
-                            <strong>ITR Registration details</strong> for
+                            <strong>Bank Account Statements</strong> for
                             verification purposes. I understand that my data
                             will only be used for verification and handled
                             securely.
@@ -242,7 +248,7 @@
             </div>
 
             <div class="modal-footer border-0 pt-0">
-                <button class="btn btn-theme w-100"> Fetch Details</button>
+                <button class="btn btn-theme w-100"> Fetch AA Details</button>
             </div>
 
         </div>
@@ -251,11 +257,10 @@
 
 <div class="modal fade" id="itrModal" tabindex="-1" aria-labelledby="itrModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content verification-modal">
 
-            <div class="modal-header">
+            <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title" id="itrModalLabel">
-                    <i class="bi bi-file-earmark-text-fill text-warning me-2"></i>
                     Income Tax Return Verification
                 </h5>
 
@@ -303,7 +308,7 @@
             </div>
 
               <div class="modal-footer border-0 pt-0">
-                <button class="btn btn-theme w-100"> Fetch Details</button>
+                <button class="btn btn-theme w-100"> Fetch ITR Details</button>
             </div>
 
         </div>
@@ -311,13 +316,48 @@
 </div>
 
 
-<script>
-    const verificationModal = document.getElementById('verificationModal');
-    
-     verificationModal.addEventListener('show.bs.modal', function (event) {
-         const button = event.relatedTarget;
-         const title = button.getAttribute('data-title');
-    
-         verificationModal.querySelector('.modal-title').textContent = title;
-     });
-</script>
+   <script>
+       const verificationModal = document.getElementById('verificationModal');
+       
+        verificationModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const title = button.getAttribute('data-title');
+
+            verificationModal.querySelector('.modal-title').textContent = title;
+        });
+
+        // ---------- Fetch GSTR: validate the modal, then seed GST data ----------
+        document.getElementById('fetchGstrBtn').addEventListener('click', async function () {
+            const gst = document.getElementById('gstNumber');
+            const pwd = document.getElementById('gstPassword');
+            const consent = document.getElementById('gstConsent');
+            const status = document.getElementById('gstFetchStatus');
+            status.textContent = '';
+
+            // Validate every field.
+            let ok = true;
+            if (!gst.value.trim()) { status.innerHTML = '<span class="text-danger">No GST number linked to your account.</span>'; ok = false; }
+            pwd.classList.toggle('is-invalid', !pwd.value.trim());
+            if (!pwd.value.trim()) ok = false;
+            consent.classList.toggle('is-invalid', !consent.checked);
+            if (!consent.checked) { status.innerHTML = '<span class="text-danger">Please accept the consent to continue.</span>'; ok = false; }
+            if (!ok) return;
+
+            this.disabled = true;
+            status.innerHTML = '<span class="text-muted">Fetching GSTR details…</span>';
+            try {
+                const resp = await fetch('/Dashboard/SeedFinancialData');
+                const res = await resp.json();
+                if (res.status) {
+                    status.innerHTML = '<span class="text-success">' + res.message + ' Redirecting…</span>';
+                    setTimeout(() => window.location.href = '/Dashboard/FinancialHealthCard', 1200);
+                } else {
+                    status.innerHTML = '<span class="text-danger">' + res.message + '</span>';
+                    this.disabled = false;
+                }
+            } catch (e) {
+                status.innerHTML = '<span class="text-danger">Something went wrong. Please try again.</span>';
+                this.disabled = false;
+            }
+        });
+   </script>

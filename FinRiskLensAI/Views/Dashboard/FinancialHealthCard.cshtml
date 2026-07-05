@@ -131,6 +131,10 @@
                     <div class="fhc-sub mt-3">
                         @(Model.EnterpriseName ?? Model.Uan) &middot; computed @r.ComputedAt.ToString("dd MMM yyyy HH:mm") UTC
                     </div>
+                    <button id="reAnalyzeBtn" class="btn text-white mt-3" style="background:#57001d;border-radius:10px;padding:8px 22px;font-weight:600;">
+                        <i class="bi bi-arrow-repeat me-1"></i> Re-analyze Score
+                    </button>
+                    <div id="reAnalyzeStatus" class="fhc-sub mt-2"></div>
                 </div>
             </div>
 
@@ -172,6 +176,18 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            document.getElementById('reAnalyzeBtn').addEventListener('click', async function () {
+                this.disabled = true;
+                document.getElementById('reAnalyzeStatus').textContent = 'Re-analyzing with the latest data…';
+                try {
+                    const resp = await fetch('/api/msme-data/@Model.Uan/analyze?force=true', { method: 'POST' });
+                    if (resp.ok) { location.reload(); }
+                    else { document.getElementById('reAnalyzeStatus').textContent = 'Failed: ' + await resp.text(); this.disabled = false; }
+                } catch (e) { document.getElementById('reAnalyzeStatus').textContent = 'Error: ' + e; this.disabled = false; }
+            });
+        </script>
 
         <!-- ===================== Row 2: Charts ===================== -->
         <div class="row g-4 mb-4">

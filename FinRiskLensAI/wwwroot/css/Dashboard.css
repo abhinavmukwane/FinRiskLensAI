@@ -1715,6 +1715,11 @@ img {
     box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
 }
 
+.modal-backdrop.show {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
 .modal-header {
     background: #faf7f8;
 }

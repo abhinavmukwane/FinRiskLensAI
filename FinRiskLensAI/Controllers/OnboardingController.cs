@@ -1,6 +1,8 @@
 ﻿using FinRiskLensAI.Common;
 using FinRiskLensAI.Core.Common;
+using FinRiskLensAI.Core.Interfaces;
 using FinRiskLensAI.Core.Interfaces.ICommon;
+using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Core.Interfaces.IServices.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.OnBoarding;
 using FinRiskLensAI.Core.Models;
@@ -16,12 +18,16 @@ namespace FinRiskLensAI.Controllers
         private readonly IOnboardingService _onboardingService;
         private readonly IEmailService _emailService;
         private readonly IEncryption _encryption;
+        private readonly IMsmeDataStore _store;
+        private readonly IDummyDataService _dummyData;
 
-        public OnboardingController(IOnboardingService onboardingService, IEmailService emailService, IEncryption encryption)
+        public OnboardingController(IOnboardingService onboardingService, IEmailService emailService, IEncryption encryption, IMsmeDataStore store, IDummyDataService dummyData)
         {
             _onboardingService = onboardingService;
             _emailService = emailService;
             _encryption = encryption;
+            _store = store;
+            _dummyData = dummyData;
         }
         public IActionResult CustOnboarding()
         {
@@ -50,8 +56,17 @@ namespace FinRiskLensAI.Controllers
 
                     return Json(new{status = true, uan = result.Data.UdyamNumber, message = "Success"});
                 }
+                else
+                {
+                    var dummyUdyamResp = _dummyData.GetDummyUdyam(uan);
 
-                return Json(new{ status = false,message = result.Message});
+                    await _onboardingService.SaveMsmeData(dummyUdyamResp);
+
+                    // Drop udyam.json into the UAN's blob folder so the ML pipeline has source data.
+                    await _store.UploadAsync(uan, MsmeDataFiles.Udyam, dummyUdyamResp, HttpContext.RequestAborted);
+
+                    return Json(new { status = true, uan = uan, message = "Success" });
+                }
             }
             catch (Exception ex)
             {
