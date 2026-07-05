@@ -1,4 +1,6 @@
 ﻿using Autofac;
+using FinRiskLensAI.Core.Common;
+using FinRiskLensAI.Core.Interfaces.ICommon;
 
 namespace FinRiskLensAI.Core.DI
 {
@@ -6,8 +8,11 @@ namespace FinRiskLensAI.Core.DI
     {
         protected override void Load(ContainerBuilder builder)
         {
-            // Example: register AutoMapper profiles, FluentValidation validators etc.
-            // builder.RegisterType<ProductValidator>().As<IValidator<Product>>().InstancePerLifetimeScope();
+            // Shared HTTP helper (wraps one app-lifetime HttpClient) — used by the
+            // chatbot (Groq) and the AA data-pull services.
+            builder.RegisterType<HttpClientHelper>()
+                   .As<IHttpClientHelper>()
+                   .SingleInstance();
         }
     }
 }

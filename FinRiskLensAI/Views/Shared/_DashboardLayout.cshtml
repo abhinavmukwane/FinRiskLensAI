@@ -208,7 +208,7 @@
                     <i class="bi bi-bar-chart-line"></i>
                     <span>Financial Score</span>
                 </a>
-                <a class="nav-link" href="/Dashboard/UdyamDetails">
+                <a class="nav-link" href="/Udyam/UdyamDetails">
                     <i class="bi bi-grid-3x3-gap"></i>
                     <span>Udyam Details</span>
                 </a>
@@ -304,5 +304,8 @@
         });
         });
     </script>
+
+    @* Universal AI chatbot — pages pass screen data via window.frlChatContext *@
+    @await Html.PartialAsync("_Chatbot")
 </body>
 </html>
