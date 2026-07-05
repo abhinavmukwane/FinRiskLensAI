@@ -3,143 +3,143 @@
     Layout = "~/Views/Shared/_CustOnboardingLayout.cshtml";
 }
 <link href="~/css/custlogin.css" rel="stylesheet" />
- <script src="~/frlscripts/custlogin/custlogin.js"></script> 
+<script src="~/frlscripts/custlogin/custlogin.js"></script>
 <link href="~/css/index.css" rel="stylesheet" />
 <style>
 
-    
+
     :root {
-    --primary: #5e0023;
-    --primary-container: #801538;
-    --on-primary: #ffffff;
-    --secondary: #725c1e;
-    --secondary-container: #fcdd91;
-    --background: #fbf9f6;
-    --surface-lowest: #ffffff;
-    --surface-low: #f5f3f0;
-    --on-surface: #1b1c1a;
-    --on-surface-variant: #564145;
-    --outline-variant: #dcbfc3;
-    --danger: #b3392c;
-    --success: #2f7d5c;
+        --primary: #5e0023;
+        --primary-container: #801538;
+        --on-primary: #ffffff;
+        --secondary: #725c1e;
+        --secondary-container: #fcdd91;
+        --background: #fbf9f6;
+        --surface-lowest: #ffffff;
+        --surface-low: #f5f3f0;
+        --on-surface: #1b1c1a;
+        --on-surface-variant: #564145;
+        --outline-variant: #dcbfc3;
+        --danger: #b3392c;
+        --success: #2f7d5c;
     }
 
     #otpDisplayModal .modal-content {
-    border: none !important;
-    border-radius: .9rem !important;
-    overflow: hidden !important;
-    box-shadow: 0 24px 60px -20px rgba(94,0,35,.45) !important;
+        border: none !important;
+        border-radius: .9rem !important;
+        overflow: hidden !important;
+        box-shadow: 0 24px 60px -20px rgba(94,0,35,.45) !important;
     }
 
     #otpDisplayModal .modal-header {
-    background: linear-gradient(120deg, var(--primary) 0%, var(--primary-container) 100%) !important;
-    border-bottom: none !important;
-    padding: 1.25rem 1.5rem !important;
+        background: linear-gradient(120deg, var(--primary) 0%, var(--primary-container) 100%) !important;
+        border-bottom: none !important;
+        padding: 1.25rem 1.5rem !important;
     }
 
     #otpDisplayModal .modal-title {
-    color: var(--on-primary) !important;
-    font-weight: 800;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    gap: .6rem;
+        color: var(--on-primary) !important;
+        font-weight: 800;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: .6rem;
     }
 
-    #otpDisplayModal .modal-title i {
-    font-size: 1.1rem;
-    color: var(--secondary-container);
-    }
+        #otpDisplayModal .modal-title i {
+            font-size: 1.1rem;
+            color: var(--secondary-container);
+        }
 
     #otpDisplayModal .btn-close {
-    filter: brightness(0) invert(1);
-    opacity: .85;
+        filter: brightness(0) invert(1);
+        opacity: .85;
     }
 
-    #otpDisplayModal .btn-close:hover {
-    opacity: 1;
-    }
+        #otpDisplayModal .btn-close:hover {
+            opacity: 1;
+        }
 
     #otpDisplayModal .modal-body {
-    padding: 2rem 1.5rem 1.5rem;
-    background-color: var(--surface-lowest);
+        padding: 2rem 1.5rem 1.5rem;
+        background-color: var(--surface-lowest);
     }
 
-    #otpDisplayModal .modal-body p {
-    font-size: .85rem;
-    color: var(--on-surface-variant);
-    }
+        #otpDisplayModal .modal-body p {
+            font-size: .85rem;
+            color: var(--on-surface-variant);
+        }
 
     #otpDisplayModal .otp-display-box {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    background-color: var(--surface-low);
-    border: 1.5px dashed var(--outline-variant);
-    border-radius: .6rem;
-    padding: .85rem 1.5rem;
-    margin: .25rem 0 .5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        background-color: var(--surface-low);
+        border: 1.5px dashed var(--outline-variant);
+        border-radius: .6rem;
+        padding: .85rem 1.5rem;
+        margin: .25rem 0 .5rem;
     }
 
     #otpDisplayModal #otpDisplayValue {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 800;
-    font-size: 1.8rem;
-    letter-spacing: .35rem;
-    color: var(--primary);
-    margin: 0;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        font-size: 1.8rem;
+        letter-spacing: .35rem;
+        color: var(--primary);
+        margin: 0;
     }
 
     #otpDisplayModal .otp-copy-btn {
-    background: none;
-    border: none;
-    color: var(--secondary);
-    font-size: 1.1rem;
-    padding: .25rem;
-    line-height: 1;
-    transition: color .15s ease, transform .1s ease;
+        background: none;
+        border: none;
+        color: var(--secondary);
+        font-size: 1.1rem;
+        padding: .25rem;
+        line-height: 1;
+        transition: color .15s ease, transform .1s ease;
     }
 
-    #otpDisplayModal .otp-copy-btn:hover {
-    color: var(--primary);
-    }
+        #otpDisplayModal .otp-copy-btn:hover {
+            color: var(--primary);
+        }
 
-    #otpDisplayModal .otp-copy-btn:active {
-    transform: scale(.9);
-    }
+        #otpDisplayModal .otp-copy-btn:active {
+            transform: scale(.9);
+        }
 
     #otpDisplayModal .otp-dev-note {
-    display: flex;
-    align-items: flex-start;
-    gap: .5rem;
-    background-color: rgba(114,92,30,.08);
-    border: 1px solid rgba(252,221,145,.4);
-    border-radius: .5rem;
-    padding: .6rem .8rem;
-    font-size: .75rem;
-    color: var(--on-surface-variant);
-    text-align: left;
-    margin-top: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: .5rem;
+        background-color: rgba(114,92,30,.08);
+        border: 1px solid rgba(252,221,145,.4);
+        border-radius: .5rem;
+        padding: .6rem .8rem;
+        font-size: .75rem;
+        color: var(--on-surface-variant);
+        text-align: left;
+        margin-top: 1rem;
     }
 
-    #otpDisplayModal .otp-dev-note i {
-    color: var(--secondary);
-    margin-top: .1rem;
-    }
+        #otpDisplayModal .otp-dev-note i {
+            color: var(--secondary);
+            margin-top: .1rem;
+        }
 
     #otpDisplayModal .modal-footer {
-    background-color: var(--surface-low) !important;
-    border-top: 1px solid rgba(220,191,195,.4) !important;
-    padding: 1rem 1.5rem !important;
+        background-color: var(--surface-low) !important;
+        border-top: 1px solid rgba(220,191,195,.4) !important;
+        padding: 1rem 1.5rem !important;
     }
 
-    #otpDisplayModal .modal-footer .btn-maroon {
-    width: 100%;
-    justify-content: center;
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    }
+        #otpDisplayModal .modal-footer .btn-maroon {
+            width: 100%;
+            justify-content: center;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
 
 </style>
 
@@ -235,105 +235,117 @@
     </div>
 </div>
 
-<!-- Footer -->
-    <footer class="bg-light border-top px-margin-desktop py-5 mt-5">
-        <div class="mx-auto" style="max-width: 1440px;">
-            <div class="row g-4">
-                <div class="col-lg-4 space-y-3">
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <div class="bg-primary rounded-3 d-flex align-items-center justify-content-center"
-                             style="width: 1.75rem; height: 1.75rem;">
-                            <i class="bi bi-bar-chart-fill text-white" style="font-size: 14px;"></i>
-                        </div>
-                        <span class="h5 text-primary font-heading mb-0 fw-bold">FinRiskLens AI</span>
-                    </div>
-                    <p class="small text-secondary" style="max-width: 320px;">
-                        The future of credit risk is data-driven,
-                        transparent, and inclusive. Join the revolution in MSME banking.
-                    </p>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <h5 class="font-data small text-dark uppercase tracking-widest mb-3"
-                        style="font-size: 10px; font-weight: 700;">
-                        Platform
-                    </h5>
-                    <ul class="list-unstyled space-y-2 small">
-                        <li>
-                            <a class="text-secondary hover-text-primary text-decoration-none" href="#">Risk Modeling</a>
-                        </li>
-                        <li>
-                            <a class="text-secondary hover-text-primary text-decoration-none" href="#">
-                                Data
-                                Connectors
-                            </a>
-                        </li>
-                        <li>
-                            <a class="text-secondary hover-text-primary text-decoration-none" href="#">
-                                Decision
-                                Engine
-                            </a>
-                        </li>
-                        <li>
-                            <a class="text-secondary hover-text-primary text-decoration-none" href="#">
-                                Compliance
-                                Audit
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <h5 class="font-data small text-dark uppercase tracking-widest mb-3"
-                        style="font-size: 10px; font-weight: 700;">
-                        Company
-                    </h5>
-                    <ul class="list-unstyled space-y-2 small">
-                        <li><a class="text-secondary hover-text-primary text-decoration-none" href="#">About Us</a></li>
-                        <li>
-                            <a class="text-secondary hover-text-primary text-decoration-none" href="#">Methodology</a>
-                        </li>
-                        <li><a class="text-secondary hover-text-primary text-decoration-none" href="#">Careers</a></li>
-                        <li><a class="text-secondary hover-text-primary text-decoration-none" href="#">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2">
-                    <h5 class="font-data small text-dark uppercase tracking-widest mb-3"
-                        style="font-size: 10px; font-weight: 700;">
-                        Legal
-                    </h5>
-                    <ul class="list-unstyled space-y-2 small">
-                        <li>
-                            <a class="text-secondary hover-text-primary text-decoration-none" href="#">
-                                Privacy
-                                Policy
-                            </a>
-                        </li>
-                        <li>
-                            <a class="text-secondary hover-text-primary text-decoration-none" href="#">
-                                Terms of
-                                Service
-                            </a>
-                        </li>
-                        <li><a class="text-secondary hover-text-primary text-decoration-none" href="#">Security</a></li>
-                    </ul>
-                </div>
+<!-- Toasts -->
+<div class="toast-custom">
+    <div class="toast align-items-center text-bg-success border-0" id="liveToast" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle-fill me-2"></i><span id="toastMsg">Done</span>
             </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
 
-            <div class="mt-5 pt-3 border-top border-secondary border-opacity-10 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                <p class="font-data small text-secondary mb-0">© 2024 FinRiskLens AI. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a class="text-secondary hover-text-primary" href="#">
-                        <i class="bi bi-globe2 fs-5"></i>
-                    </a>
-                    <a class="text-secondary hover-text-primary" href="#">
-                        <i class="bi bi-at fs-5"></i>
-                    </a>
-                    <a class="text-secondary hover-text-primary" href="#">
-                        <i class="bi bi-share-fill fs-5"></i>
-                    </a>
+<!-- Footer -->
+<footer class="bg-light border-top px-margin-desktop py-5 mt-5">
+    <div class="mx-auto" style="max-width: 1440px;">
+        <div class="row g-4">
+            <div class="col-lg-4 space-y-3">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="bg-primary rounded-3 d-flex align-items-center justify-content-center"
+                         style="width: 1.75rem; height: 1.75rem;">
+                        <i class="bi bi-bar-chart-fill text-white" style="font-size: 14px;"></i>
+                    </div>
+                    <span class="h5 text-primary font-heading mb-0 fw-bold">FinRiskLens AI</span>
                 </div>
+                <p class="small text-secondary" style="max-width: 320px;">
+                    The future of credit risk is data-driven,
+                    transparent, and inclusive. Join the revolution in MSME banking.
+                </p>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <h5 class="font-data small text-dark uppercase tracking-widest mb-3"
+                    style="font-size: 10px; font-weight: 700;">
+                    Platform
+                </h5>
+                <ul class="list-unstyled space-y-2 small">
+                    <li>
+                        <a class="text-secondary hover-text-primary text-decoration-none" href="#">Risk Modeling</a>
+                    </li>
+                    <li>
+                        <a class="text-secondary hover-text-primary text-decoration-none" href="#">
+                            Data
+                            Connectors
+                        </a>
+                    </li>
+                    <li>
+                        <a class="text-secondary hover-text-primary text-decoration-none" href="#">
+                            Decision
+                            Engine
+                        </a>
+                    </li>
+                    <li>
+                        <a class="text-secondary hover-text-primary text-decoration-none" href="#">
+                            Compliance
+                            Audit
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <h5 class="font-data small text-dark uppercase tracking-widest mb-3"
+                    style="font-size: 10px; font-weight: 700;">
+                    Company
+                </h5>
+                <ul class="list-unstyled space-y-2 small">
+                    <li><a class="text-secondary hover-text-primary text-decoration-none" href="#">About Us</a></li>
+                    <li>
+                        <a class="text-secondary hover-text-primary text-decoration-none" href="#">Methodology</a>
+                    </li>
+                    <li><a class="text-secondary hover-text-primary text-decoration-none" href="#">Careers</a></li>
+                    <li><a class="text-secondary hover-text-primary text-decoration-none" href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <h5 class="font-data small text-dark uppercase tracking-widest mb-3"
+                    style="font-size: 10px; font-weight: 700;">
+                    Legal
+                </h5>
+                <ul class="list-unstyled space-y-2 small">
+                    <li>
+                        <a class="text-secondary hover-text-primary text-decoration-none" href="#">
+                            Privacy
+                            Policy
+                        </a>
+                    </li>
+                    <li>
+                        <a class="text-secondary hover-text-primary text-decoration-none" href="#">
+                            Terms of
+                            Service
+                        </a>
+                    </li>
+                    <li><a class="text-secondary hover-text-primary text-decoration-none" href="#">Security</a></li>
+                </ul>
             </div>
         </div>
-    </footer>
+
+        <div class="mt-5 pt-3 border-top border-secondary border-opacity-10 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <p class="font-data small text-secondary mb-0">©  FinRiskLens AI. All rights reserved.</p>
+            <div class="d-flex gap-3">
+                <a class="text-secondary hover-text-primary" href="#">
+                    <i class="bi bi-globe2 fs-5"></i>
+                </a>
+                <a class="text-secondary hover-text-primary" href="#">
+                    <i class="bi bi-at fs-5"></i>
+                </a>
+                <a class="text-secondary hover-text-primary" href="#">
+                    <i class="bi bi-share-fill fs-5"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
 
 
 <div class="modal fade" id="otpDisplayModal" tabindex="-1" aria-hidden="true">
@@ -369,4 +381,4 @@
             </div>
         </div>
     </div>
-    </div>
+</div>
