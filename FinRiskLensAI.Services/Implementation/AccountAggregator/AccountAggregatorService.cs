@@ -117,7 +117,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
             }
         }
 
-        public async Task<string> CreateConsentRequest(string transactionId, string AAID)
+        public async Task<string> CreateConsentRequest(string uan, string AAID)
         {
             try
             {
@@ -158,7 +158,8 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
 
                 AAConsentReqModel aaConReqMdl = new AAConsentReqModel
                 {
-                    transactionId = transactionId,
+                    uan = uan,
+                    transactionId = Guid.NewGuid().ToString(),
                     rid = resp.header.rid,
                     ts = resp.header.ts,
                     channelId = resp.header.channelId,

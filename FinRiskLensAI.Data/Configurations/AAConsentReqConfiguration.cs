@@ -13,6 +13,7 @@ namespace FinRiskLensAI.Data.Configurations
             builder.HasKey(x => x.ConsentReqId);
             builder.Property(x => x.ConsentReqId).ValueGeneratedOnAdd();
 
+            builder.Property(x => x.uan).HasMaxLength(50);
             builder.Property(x => x.transactionId).HasMaxLength(100);
             builder.Property(x => x.rid).HasMaxLength(100);
             builder.Property(x => x.ts).HasMaxLength(50);
@@ -23,6 +24,7 @@ namespace FinRiskLensAI.Data.Configurations
             builder.Property(x => x.consentHandle).HasMaxLength(100);
             builder.Property(x => x.url);                 // long redirect URL — nvarchar(max)
 
+            builder.HasIndex(x => x.uan);
             builder.HasIndex(x => x.transactionId);
             builder.HasIndex(x => x.consentHandle);
         }

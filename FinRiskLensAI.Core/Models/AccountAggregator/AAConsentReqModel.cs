@@ -9,6 +9,7 @@ namespace FinRiskLensAI.Core.Models.AccountAggregator
     public class AAConsentReqModel
     {
         public int ConsentReqId { get; set; }
+        public string uan { get; set; }
         public string transactionId { get; set; }
         public string rid { get; set; }
         public string ts { get; set; }
