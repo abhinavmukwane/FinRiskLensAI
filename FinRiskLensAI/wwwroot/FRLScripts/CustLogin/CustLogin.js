@@ -239,5 +239,73 @@
 
         });
 
+
+
+        // ---------- Resend OTP Click ----------
+        $("#resendBtn").click(function (e) {
+
+            e.preventDefault();
+
+            if ($(this).prop("disabled")) return;
+
+            var email = $("#email").val().trim();
+
+            if (email == "") {
+                showToast("Email not found. Please restart the process.");
+                return;
+            }
+
+            var model = {
+                Email: email
+            };
+
+            var $btn = $(this);
+            var originalHtml = $btn.html();
+
+            $.ajax({
+
+                url: "/Auth/GenCustomerOtp",
+                type: "POST",
+                data: model,
+
+                beforeSend: function () {
+                    $btn.prop("disabled", true);
+                    $btn.html('<i class="bi bi-arrow-repeat"></i> Sending...');
+                },
+
+                success: function (res) {
+
+                    if (res.status) {
+
+                        // Show OTP in modal (Development only)
+                        $("#otpDisplayValue").text(res.otp);
+
+                        var otpModal = new bootstrap.Modal(document.getElementById("otpDisplayModal"));
+                        otpModal.show();
+
+                        clearOtpBoxes();
+                        $(".otp-input").first().focus();
+
+                        showToast("A new OTP has been sent.");
+
+                        startResendTimer();
+                    }
+                    else {
+                        $btn.prop("disabled", false);
+                        $btn.html(originalHtml);
+                        showToast(res.message || "Failed to resend OTP.");
+                    }
+                },
+
+                error: function () {
+                    $btn.prop("disabled", false);
+                    $btn.html(originalHtml);
+                    showToast("Something went wrong while resending OTP.");
+                }
+
+            });
+
+        });
+
     });
 

@@ -6,186 +6,6 @@
 @* Added By Sourabh 2026-07-03 YMD *@
 <script src="~/frlscripts/onboarding/custonboarding.js"></script>
 
-<style>
-    :root {
-    --primary: #5e0023;
-    --primary-container: #801538;
-    --on-primary: #ffffff;
-    --secondary: #725c1e;
-    --secondary-container: #fcdd91;
-    --background: #fbf9f6;
-    --surface-lowest: #ffffff;
-    --surface-low: #f5f3f0;
-    --on-surface: #1b1c1a;
-    --on-surface-variant: #564145;
-    --outline-variant: #dcbfc3;
-    --danger: #b3392c;
-    --success: #2f7d5c;
-}
-
-.form-check-input.rv-checkbox {
-    width: 1.25em;
-    height: 1.25em;
-    border: 2px solid var(--maroon) !important;
-    border-radius: .3rem;
-    cursor: pointer;
-    transition: all .15s ease;
-    background-color: #fff;
-    background-image: none !important;
-    appearance: none;
-    -webkit-appearance: none;
-    position: relative;
-    box-sizing: border-box;
-    margin: 0;
-    flex-shrink: 0;
-}
-
-    .form-check-input.rv-checkbox:checked {
-        background-color: var(--maroon) !important;
-        border-color: var(--maroon) !important;
-    }
-
-    .form-check-input.rv-checkbox:checked::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        top: 45%;
-        width: 30%;
-        height: 55%;
-        border: solid #fff;
-        border-width: 0 2px 2px 0;
-        transform: translate(-50%, -50%) rotate(45deg);
-    }
-
-    .form-check-input.rv-checkbox:focus {
-        box-shadow: 0 0 0 .2rem rgba(94,0,35,.15) !important;
-    }
-
-    .form-check-input.rv-checkbox:hover {
-        border-color: var(--maroon) !important;
-    }
-
-    /* ---------- OTP display modal ---------- */
-    #otpDisplayModal .modal-content {
-    border: none;
-    border-radius: .9rem;
-    overflow: hidden;
-    box-shadow: 0 24px 60px -20px rgba(94,0,35,.45);
-    }
-
-    #otpDisplayModal .modal-header {
-     background: linear-gradient(120deg, var(--primary) 0%, var(--primary-container) 100%) !important;
-    border-bottom: none;
-    padding: 1.25rem 1.5rem;
-    }
-
-    #otpDisplayModal .modal-title {
-    color: var(--on-primary);
-    font-weight: 800;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    }
-
-    #otpDisplayModal .modal-title i {
-    font-size: 1.1rem;
-    color: var(--secondary-container);
-    }
-
-    #otpDisplayModal .btn-close {
-    filter: brightness(0) invert(1);
-    opacity: .85;
-    }
-
-    #otpDisplayModal .btn-close:hover {
-    opacity: 1;
-    }
-
-    #otpDisplayModal .modal-body {
-    padding: 2rem 1.5rem 1.5rem;
-    background-color: var(--surface-lowest);
-    }
-
-    #otpDisplayModal .modal-body p {
-    font-size: .85rem;
-    color: var(--on-surface-variant);
-    }
-
-    .otp-display-box {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    background-color: var(--surface-low);
-    border: 1.5px dashed var(--outline-variant);
-    border-radius: .6rem;
-    padding: .85rem 1.5rem;
-    margin: .25rem 0 .5rem;
-    }
-
-    #otpDisplayValue {
-    font-family: 'Manrope', sans-serif;
-    font-weight: 800;
-    font-size: 1.8rem;
-    letter-spacing: .35rem;
-    color: var(--primary);
-    margin: 0;
-    }
-
-    .otp-copy-btn {
-    background: none;
-    border: none;
-    color: var(--secondary);
-    font-size: 1.1rem;
-    padding: .25rem;
-    line-height: 1;
-    transition: color .15s ease, transform .1s ease;
-    }
-
-    .otp-copy-btn:hover {
-    color: var(--primary);
-    }
-
-    .otp-copy-btn:active {
-    transform: scale(.9);
-    }
-
-    .otp-dev-note {
-    display: flex;
-    align-items: flex-start;
-    gap: .5rem;
-    background-color: rgba(114,92,30,.08);
-    border: 1px solid rgba(252,221,145,.4);
-    border-radius: .5rem;
-    padding: .6rem .8rem;
-    font-size: .75rem;
-    color: var(--on-surface-variant);
-    text-align: left;
-    margin-top: 1rem;
-    }
-
-    .otp-dev-note i {
-    color: var(--secondary);
-    margin-top: .1rem;
-    }
-
-    #otpDisplayModal .modal-footer {
-    background-color: var(--surface-low);
-    border-top: 1px solid rgba(220,191,195,.4);
-    padding: 1rem 1.5rem;
-    }
-
-    #otpDisplayModal .modal-footer .btn-maroon {
-    width: 100%;
-    justify-content: center;
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    }
-
-</style>
-
-
     <div class="container py-4 py-md-1">
         <div id="onboardingFlow">
 
@@ -392,7 +212,41 @@
                                         <span class="rv-card-title">Contact Details</span>
                                     </div>
                                 </div>
-                                <div class="rv-card-body">
+                            <div class="rv-card-body">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="rv-field-label">Email Address</div>
+                                        <span class="rv-badge rv-badge-required">REQUIRED</span>
+                                    </div>
+
+                                    <div class="rv-mobile-input-wrap">
+                                        <span class="rv-mobile-prefix">
+                                            <i class="bi bi-envelope-fill"></i>
+                                        </span>
+                                        <input type="email"
+                                               class="rv-mobile-input"
+                                               id="rv_email"
+                                               placeholder="Enter Email Address">
+                                        <i class="bi bi-pencil rv-mobile-edit"></i>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 20px;">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <div class="rv-field-label">Primary Mobile Number</div>
+                                            <span class="rv-badge rv-badge-required">REQUIRED</span>
+                                        </div>
+                                        <div class="rv-mobile-input-wrap">
+                                            <span class="rv-mobile-prefix">+91</span>
+                                            <input type="text" class="rv-mobile-input" id="mobileInput"
+                                                   placeholder="98xxxxxxxx" maxlength="10">
+                                            <i class="bi bi-pencil rv-mobile-edit"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+@*                                 <div class="rv-card-body">
                                 <div>
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <div class="rv-field-label">Email Address</div>
@@ -425,7 +279,7 @@
                                             <i class="bi bi-pencil rv-mobile-edit"></i>
                                         </div>
                                     </div>
-                                </div>
+                                </div> *@
                             </div>
                         </div>
                     </div>

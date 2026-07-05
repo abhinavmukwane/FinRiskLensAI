@@ -16,8 +16,173 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.js"></script>
     <link href="~/css/dashboard.css" rel="stylesheet" />
-</head>
 
+
+<style>
+    :root {
+    --maroon: #8b1538;
+    }
+
+    .verification-modal {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,.15);
+    }
+
+    .modal-header {
+    background: linear-gradient(120deg, #57001d 0%, #8b1538 100%);
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+    }
+
+    .modal-header .modal-title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 0px 0px 9px;
+    }
+
+    .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: .85;
+    }
+
+    .modal-header .btn-close:hover {
+    opacity: 1;
+    }
+
+    .custom-input {
+    border-radius: 10px;
+    height: 48px;
+    border: 1px solid #d8d8d8;
+    }
+
+    .custom-input:focus {
+    border-color: #8b1538;
+    box-shadow: 0 0 0 .15rem rgba(139,21,56,.15);
+    }
+
+    .consent-box {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    background: #faf7f8;
+    border: 1px solid #ead9df;
+    border-radius: 10px;
+    padding: 15px;
+    }
+
+    .consent-box .form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    padding-left: 0;
+    width: 100%;
+    }
+
+    .consent-box .form-check-label {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 0;
+    cursor: pointer;
+    }
+
+    .form-check-input.rv-checkbox {
+    width: 1.25em;
+    height: 1.25em;
+    border: 2px solid var(--maroon) !important;
+    border-radius: .3rem;
+    cursor: pointer;
+    transition: all .15s ease;
+    background-color: #fff;
+    background-image: none !important;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    box-sizing: border-box;
+    margin: 0;
+    flex-shrink: 0;
+    }
+
+    .form-check-input.rv-checkbox:checked {
+    background-color: var(--maroon) !important;
+    border-color: var(--maroon) !important;
+    }
+
+    .form-check-input.rv-checkbox:checked::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    width: 30%;
+    height: 55%;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .form-check-input.rv-checkbox:focus {
+    box-shadow: 0 0 0 .2rem rgba(94,0,35,.15) !important;
+    }
+
+    .form-check-input.rv-checkbox:hover {
+    border-color: var(--maroon) !important;
+    }
+
+    .btn-theme {
+    background: #8b1538;
+    color: #fff;
+    border-radius: 10px;
+    padding: 11px;
+    font-weight: 600;
+    }
+
+    .btn-theme:hover {
+    background: #74112f;
+    color: #fff;
+    }
+
+    .welcome-banner {
+    background: linear-gradient(135deg, #57001d, #8b1538);
+    color: #fff;
+    border-radius: 16px;
+    padding: 20px 26px;
+    box-shadow: 0 10px 24px rgba(87,0,29,.18);
+    }
+
+    .welcome-banner .greeting {
+    font-size: .8rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #f0c9d5;
+    margin-bottom: 4px;
+    }
+
+    .welcome-banner .enterprise {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    }
+
+    .welcome-banner .meta {
+    font-size: .82rem;
+    color: #f3d6df;
+    margin-top: 6px;
+    }
+
+    .welcome-banner .meta span + span::before {
+    content: "•";
+    margin: 0 8px;
+    color: #d79aab;
+    }
+</style>
+</head>
 <body>
 
     <div class="app-shell" id="appShell">
@@ -35,33 +200,29 @@
             </div>
 
             <nav class="sidebar-nav">
-                <a class="nav-link active" href="/Dashboard/CustDashboard">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <a class="nav-link " href="/Dashboard/CustDashboard">
+                    <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
                 <a class="nav-link" href="/Dashboard/FinancialHealthCard">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <i class="bi bi-bar-chart-line"></i>
                     <span>Financial Score</span>
                 </a>
                 <a class="nav-link" href="/Dashboard/UdyamDetails">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <i class="bi bi-grid-3x3-gap"></i>
                     <span>Udyam Details</span>
                 </a>
                 <a class="nav-link" href="#">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    <span>Account Agrigator Details</span>
+                    <i class="bi bi-diagram-3"></i><span>Account Agrigator Details</span>
                 </a>
                 <a class="nav-link" href="#">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    <span>GST Details</span>
+                    <i class="bi bi-receipt"></i> <span>GST Details</span>
                 </a>
                 <a class="nav-link" href="#">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                    <span>ITR Details</span>
+                    <i class="bi bi-file-earmark-text"></i><span>ITR Details</span>
                 </a>
                 <a class="nav-link" href="#">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><line x1="8" y1="7" x2="16" y2="7"></line><line x1="8" y1="11" x2="16" y2="11"></line><line x1="8" y1="15" x2="12" y2="15"></line></svg>
-                    <span>Transactions</span>
+                    <i class="bi bi-credit-card-2-front"></i><span>Transactions</span>
                 </a>
             </nav>
 
@@ -101,7 +262,7 @@
                         @* <span class="topbar-user-name">@enterpriseName</span> *@
 
                         <button class="topbar-avatar" type="button" aria-label="User menu">
-                            <i class="bi bi-person-circle"></i>
+                            <i class="bi bi-person"></i>
                         </button>
                     </div>
                 </div>
@@ -124,6 +285,24 @@
           toggle.addEventListener('click', () => appShell.classList.toggle('sidebar-collapsed'));
           backdrop.addEventListener('click', () => appShell.classList.remove('sidebar-collapsed'));
         })();
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const currentPath = window.location.pathname.toLowerCase();
+        const links = document.querySelectorAll('.sidebar-nav .nav-link');
+
+        links.forEach(link => {
+        const linkPath = link.getAttribute('href').toLowerCase();
+
+        // skip placeholder "#" links
+        if (linkPath === '#') return;
+
+        if (linkPath === currentPath) {
+        link.classList.add('active');
+        } else {
+        link.classList.remove('active');
+        }
+        });
+        });
     </script>
 </body>
 </html>
