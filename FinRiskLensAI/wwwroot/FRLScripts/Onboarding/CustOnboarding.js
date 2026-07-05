@@ -1,6 +1,8 @@
 ﻿
         $(function () {
 
+            $(".rv-mobile-input").prop("disabled", true);
+
             // ---------- HELPERS ----------
             function showToast(msg) {
                 $('#toastMsg').text(msg);
@@ -218,7 +220,6 @@
                                         }
 
                                         var d = response.data;
-                                        console.log(d);
                                         $("#rv_entName").text(d.enterpriseName);
                                         $("#rv_orgType").text(d.organizationType);
                                         $("#rv_dob").text(d.dateOfIncorporation);
@@ -399,14 +400,56 @@
                     }
                 }, 1000);
             }
-
             $('#resendOtp').on('click', function (e) {
                 e.preventDefault();
+
                 if ($(this).hasClass('disabled')) return;
-                $('.otp-input').val('');
-                $('.otp-input').first().focus();
-                startOtpTimer();
-                showToast('A new OTP has been sent.');
+
+                var $link = $(this);
+                var originalHtml = $link.html();
+
+                // Get the email - adjust this depending on where you're storing it
+                // after the first OTP was generated (hidden field, span text, etc.)
+                var email = $("#email").val() ? $("#email").val().trim() : $("#otpEmailTarget").text().trim();
+
+                if (!email) {
+                    showToast('Email not found. Please restart the process.');
+                    return;
+                }
+
+                var model = {
+                    Email: email
+                };
+
+                // Prevent double clicks while the call is in flight
+                $link.addClass('disabled');
+                $link.html('<i class="bi bi-arrow-repeat me-1"></i>Sending...');
+
+                $.ajax({
+                    url: "/Auth/GenCustomerOtp",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(model),
+                    success: function (response) {
+                        if (response && response.success) {
+                            $('.otp-input').val('');
+                            $('.otp-input').first().focus();
+                            startOtpTimer();
+                            showToast('A new OTP has been sent.');
+                        } else {
+                            showToast('Failed to resend OTP. Try again.');
+                        }
+                    },
+                    error: function () {
+                        showToast('Something went wrong while resending OTP.');
+                    },
+                    complete: function () {
+                        $link.html(originalHtml);
+                        // Only re-enable if startOtpTimer() doesn't already handle disabling
+                        // during the countdown - remove this line if it does
+                        $link.removeClass('disabled');
+                    }
+                });
             });
 
             // ---------- Copy OTP (dev modal) ----------
@@ -493,3 +536,13 @@
 
 
         });
+
+$(document).on("click", ".rv-mobile-edit", function () {
+
+    var $input = $(this).closest(".rv-mobile-input-wrap").find(".rv-mobile-input");
+
+    $input.prop("disabled", false);
+    $input.focus();
+
+    $(this).addClass("d-none");
+});
