@@ -112,9 +112,7 @@ namespace FinRiskLensAI.Controllers
             return View(model);
         }
 
-        public IActionResult UdyamDetails()
-        {
-            return View();
-        }
+        // UdyamDetails moved to UdyamController (/Udyam/UdyamDetails), backed by
+        // the common IStaticResponseService over m_StaticResponces.
     }
 }

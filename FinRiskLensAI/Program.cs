@@ -26,6 +26,9 @@ builder.Host.ConfigureContainer<ContainerBuilder>(container =>
     container.RegisterInstance(
         builder.Configuration.GetSection("Smtp").Get<FinRiskLensAI.Core.Models.Common.SmtpSettings>()
         ?? new FinRiskLensAI.Core.Models.Common.SmtpSettings());
+    container.RegisterInstance(
+        builder.Configuration.GetSection("Groq").Get<FinRiskLensAI.Core.Models.Common.GroqSettings>()
+        ?? new FinRiskLensAI.Core.Models.Common.GroqSettings());
 });
 
 // Add services to the container.
