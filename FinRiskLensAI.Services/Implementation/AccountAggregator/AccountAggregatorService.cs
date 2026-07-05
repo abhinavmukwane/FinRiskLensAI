@@ -4,6 +4,7 @@ using FinRiskLensAI.Core.Interfaces.IRepositories.AccountAggregator;
 using FinRiskLensAI.Core.Interfaces.IServices.AccountAggregator;
 using FinRiskLensAI.Core.Models.AccountAggregator;
 using FinRiskLensAI.Core.Models.Common;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -24,11 +25,29 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
         private readonly IAccountAggregatorRepository _aaRepo;
         private readonly IHttpClientHelper _httpClientHelper;
         private readonly FinvuSettings _config;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AccountAggregatorService(
-            IAccountAggregatorRepository aaRepo, IHttpClientHelper httpClientHelper, FinvuSettings config)
+            IAccountAggregatorRepository aaRepo, IHttpClientHelper httpClientHelper,
+            FinvuSettings config, IHttpContextAccessor httpContextAccessor)
         {
-            _aaRepo = aaRepo; _httpClientHelper = httpClientHelper; _config = config;
+            _aaRepo = aaRepo; _httpClientHelper = httpClientHelper;
+            _config = config; _httpContextAccessor = httpContextAccessor;
+        }
+
+        /// <summary>
+        /// AA consent-callback URL: the configured override if set, otherwise
+        /// built from the current request so it's correct both locally and after publish.
+        /// </summary>
+        private string ResolveCallbackUrl()
+        {
+            if (!string.IsNullOrWhiteSpace(_config.CallbackUrl))
+                return _config.CallbackUrl;
+
+            var req = _httpContextAccessor.HttpContext?.Request;
+            return req != null
+                ? $"{req.Scheme}://{req.Host}/Home/AAConsentCallback"
+                : "/Home/AAConsentCallback";
         }
 
         private async Task EnsureTokenValidAsync()
@@ -111,15 +130,16 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                     body = new
                     {
                         custId = AAID,
-                        consentDescription = "Apply for loan",
-                        templateName = "BANK_STATEMENT_ONETIME",
-                        aaId = "cookiejar-aa@finvu.in"
+                        consentDescription = "Wealth Management Service",
+                        templateName = "FINVUDEMO_TESTING",
+                        aaId = "cookiejar-aa@finvu.in",
+                        redirectUrl = ResolveCallbackUrl()
                     }
                 };
 
                 HttpResponseMessage response = await _httpClientHelper
                                                         .SendPostRequestFullResp(
-                                                            _config.FinvuApi + "/SubmitConsentRequest",
+                                                            _config.FinvuApi + "/ConsentRequestPlus",
                                                             JsonConvert.SerializeObject(payload),
                                                             BuildAuthHeader(aaToken.token))
                                                         .ConfigureAwait(false);
@@ -142,18 +162,11 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                     rid = resp.header.rid,
                     ts = resp.header.ts,
                     channelId = resp.header.channelId,
-                    aaId_custId = resp.body.custId,
-                    consentHandle = resp.body.consentHandle,
-                    consentPurpose = resp.body.consentPurpose,
-                    consentDescription = resp.body.consentDescription,
+                    encryptedRequest = resp.body.encryptedRequest,
                     requestDate = resp.body.requestDate,
-                    consentStatus = resp.body.consentStatus,
-                    requestSessionId = resp.body.requestSessionId,
-                    requestConsentId = resp.body.requestConsentId,
-                    dateTimeRangeFrom = resp.body.dateTimeRangeFrom,
-                    dateTimeRangeTo = resp.body.dateTimeRangeTo,
-                    aaId_bank = resp.body.aaId,
-                    fetchType = resp.body.fetchType,
+                    encryptedFiuId = resp.body.encryptedFiuId,
+                    consentHandle = resp.body.ConsentHandle,
+                    url = resp.body.url,
                     CreatedOn = DateTime.Now
                 };
 
@@ -165,7 +178,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                     //_logger.Error("AddAAConsentRequest failed: " + saveResult.Message);
                     return null;
 
-                return resp.body.consentHandle.ToString();
+                return resp.body.ConsentHandle;
             }
             catch (Exception ex)
             {
