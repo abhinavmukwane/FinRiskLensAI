@@ -1,4 +1,5 @@
-﻿using FinRiskLensAI.Core.Models.Admin;
+﻿using FinRiskLensAI.Core.Models.AccountAggregator;
+using FinRiskLensAI.Core.Models.Admin;
 using FinRiskLensAI.Core.Models.Common;
 using FinRiskLensAI.Core.Models.Onboarding;
 using FinRiskLensAI.Core.Models.Universal;
@@ -24,6 +25,8 @@ namespace FinRiskLensAI.Data.DbContextEDMX
         public DbSet<StaticResponseModel> StaticResponseModel => Set<StaticResponseModel>();
         public DbSet<UserRegistrationModel> UserRegistration => Set<UserRegistrationModel>();
         public DbSet<UserOtpModel> UserOtpModel => Set<UserOtpModel>();
+        public DbSet<AccAggreTokenModel> AccAggreTokens => Set<AccAggreTokenModel>();
+        public DbSet<AAConsentReqModel> AAConsentRequests => Set<AAConsentReqModel>();
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
