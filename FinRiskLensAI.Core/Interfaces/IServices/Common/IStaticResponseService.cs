@@ -15,10 +15,16 @@ namespace FinRiskLensAI.Core.Interfaces.IServices.Common
         /// <summary>The full row — every cached JSON response for the Udyam number.</summary>
         Task<ResultModel<StaticResponseModel>> FetchResponses(string udyamNumber);
 
-        /// <summary>One cached response column's raw JSON, or null when absent.</summary>
-        Task<string?> FetchResponse(string udyamNumber, StaticResponseType type);
+        /// <summary>
+        /// The single common accessor for any cached response column (Udyam, IP,
+        /// PAN, GST, ITR…) — returns that column's raw JSON, or null when absent.
+        /// </summary>
+        Task<string?> GetStaticCommonResponce(string udyamNumber, StaticResponseType type);
 
-        /// <summary>The Udyam response deserialized into the strongly-typed model, or null when absent/unparseable.</summary>
-        Task<UdyamResponseModel?> FetchUdyamResponse(string udyamNumber);
+        /// <summary>
+        /// Same as <see cref="GetStaticCommonResponce(string, StaticResponseType)"/>
+        /// but deserialized into <typeparamref name="T"/>; null when absent/unparseable.
+        /// </summary>
+        Task<T?> GetStaticCommonResponce<T>(string udyamNumber, StaticResponseType type) where T : class;
     }
 }

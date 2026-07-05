@@ -2,6 +2,7 @@ using FinRiskLensAI.Common;
 using FinRiskLensAI.Core.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.Common;
 using FinRiskLensAI.Core.Models.Onboarding;
+using FinRiskLensAI.Core.Models.Universal;
 using FinRiskLensAI.Models;
 using FinRiskLensAI.Utility;
 using Microsoft.AspNetCore.Mvc;
@@ -58,7 +59,7 @@ namespace FinRiskLensAI.Controllers
 
             try
             {
-                var udyam = await _staticResponses.FetchUdyamResponse(uan);
+                var udyam = await _staticResponses.GetStaticCommonResponce<UdyamResponseModel>(uan, StaticResponseType.Udyam);
 
                 if (udyam == null)
                     model.LoadError = $"No stored Udyam response was found for {uan}.";

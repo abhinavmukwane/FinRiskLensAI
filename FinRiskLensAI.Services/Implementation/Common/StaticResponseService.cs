@@ -21,7 +21,7 @@ namespace FinRiskLensAI.Services.Implementation.Common
         public Task<ResultModel<StaticResponseModel>> FetchResponses(string udyamNumber)
             => _repository.FetchByUdyamNumber(udyamNumber);
 
-        public async Task<string?> FetchResponse(string udyamNumber, StaticResponseType type)
+        public async Task<string?> GetStaticCommonResponce(string udyamNumber, StaticResponseType type)
         {
             var result = await _repository.FetchByUdyamNumber(udyamNumber);
 
@@ -41,13 +41,13 @@ namespace FinRiskLensAI.Services.Implementation.Common
             };
         }
 
-        public async Task<UdyamResponseModel?> FetchUdyamResponse(string udyamNumber)
+        public async Task<T?> GetStaticCommonResponce<T>(string udyamNumber, StaticResponseType type) where T : class
         {
-            var json = await FetchResponse(udyamNumber, StaticResponseType.Udyam);
+            var json = await GetStaticCommonResponce(udyamNumber, type);
 
             return string.IsNullOrWhiteSpace(json)
                 ? null
-                : JsonConvert.DeserializeObject<UdyamResponseModel>(json);
+                : JsonConvert.DeserializeObject<T>(json);
         }
     }
 }

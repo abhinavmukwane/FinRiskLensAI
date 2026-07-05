@@ -1,7 +1,9 @@
 using FinRiskLensAI.Common;
 using FinRiskLensAI.Core.Interfaces;
 using FinRiskLensAI.Core.Interfaces.IServices.AccountAggregator;
+using FinRiskLensAI.Core.Interfaces.IServices.Common;
 using FinRiskLensAI.Core.Models.Storage;
+using FinRiskLensAI.Core.Models.Universal;
 using FinRiskLensAI.Models;
 using FinRiskLensAI.Utility;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +18,48 @@ namespace FinRiskLensAI.Controllers
         private readonly IMsmeDataStore _store;
         private readonly ILogger<DashboardController> _logger;
         private readonly IAccountAggregatorService _aaService;
+        private readonly IStaticResponseService _staticResponses;
 
-        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService)
+        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService, IStaticResponseService staticResponses)
         {
             _analysis = analysis;
             _store = store;
             _logger = logger;
             _aaService = AAService;
+            _staticResponses = staticResponses;
+        }
+
+        /// <summary>
+        /// Source-IP security audit for the logged-in MSME, read from the
+        /// IPResponce column of m_StaticResponces via the common static-response
+        /// service (same table/service as Udyam, GST, etc.). Rendered in the
+        /// dashboard "Secure Connection IP" popup.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetIpVerification()
+        {
+            var uan = HttpContext.Session.GetCurrentUser()?.UdyamNumber;
+            var vm = new IpVerificationViewModel();
+
+            if (!string.IsNullOrWhiteSpace(uan))
+            {
+                try
+                {
+                    var json = await _staticResponses.GetStaticCommonResponce(uan, StaticResponseType.Ip);
+                    if (!string.IsNullOrWhiteSpace(json))
+                        vm = IpVerificationViewModel.FromJson(json);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed loading IP verification for {Uan}", uan);
+                }
+            }
+
+            // No IPResponce cached yet — show static placeholder data for display.
+            if (!vm.HasData)
+                vm = IpVerificationViewModel.Demo();
+
+            return Json(new { status = vm.HasData, data = vm });
         }
 
         /// <summary>
