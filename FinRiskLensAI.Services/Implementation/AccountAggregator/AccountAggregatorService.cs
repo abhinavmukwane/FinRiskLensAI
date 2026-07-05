@@ -3,6 +3,7 @@ using FinRiskLensAI.Core.Interfaces.ICommon;
 using FinRiskLensAI.Core.Interfaces.IRepositories.AccountAggregator;
 using FinRiskLensAI.Core.Interfaces.IServices.AccountAggregator;
 using FinRiskLensAI.Core.Models.AccountAggregator;
+using FinRiskLensAI.Core.Models.Common;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -22,11 +23,12 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
     {
         private readonly IAccountAggregatorRepository _aaRepo;
         private readonly IHttpClientHelper _httpClientHelper;
+        private readonly FinvuSettings _config;
 
         public AccountAggregatorService(
-            IAccountAggregatorRepository aaRepo, IHttpClientHelper httpClientHelper)
+            IAccountAggregatorRepository aaRepo, IHttpClientHelper httpClientHelper, FinvuSettings config)
         {
-            _aaRepo = aaRepo; _httpClientHelper = httpClientHelper;
+            _aaRepo = aaRepo; _httpClientHelper = httpClientHelper; _config = config;
         }
 
         private async Task EnsureTokenValidAsync()
@@ -42,7 +44,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
             ts = DateTime.UtcNow.ToString(
                             "yyyy-MM-ddTHH:mm:ss.fff",
                             CultureInfo.InvariantCulture) + "+00:00",
-            channelId = "_config.Settings.finvuChannelId"
+            channelId = _config.FinvuChannelId
         };
 
         private Dictionary<string, string> BuildAuthHeader(string token) =>
@@ -57,6 +59,8 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                     header = BuildFinvuHeader(),
                     body = new
                     {
+                        userId = _config.AaUserId,
+			            password = _config.AaPassword
                     }
                 };
 
@@ -64,9 +68,8 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
 
                 string responseContent = await _httpClientHelper
                     .SendPostRequest(
-                        "_config.Settings.finvuApi" + "/User/Login",
-                        jsonPayload,
-                        null)
+                        _config.FinvuApi + "/User/Login",
+                        jsonPayload, null)
                     .ConfigureAwait(false);
 
                 var resp = JsonConvert.DeserializeObject<TokenResponse>(responseContent);
@@ -116,7 +119,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
 
                 HttpResponseMessage response = await _httpClientHelper
                                                         .SendPostRequestFullResp(
-                                                            "_config.Settings.finvuApi" + "/SubmitConsentRequest",
+                                                            _config.FinvuApi + "/SubmitConsentRequest",
                                                             JsonConvert.SerializeObject(payload),
                                                             BuildAuthHeader(aaToken.token))
                                                         .ConfigureAwait(false);
@@ -190,7 +193,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
 
                 HttpResponseMessage response = await _httpClientHelper
                     .SendGetRequestFullResp(
-                        "_config.Settings.finvuApi" + $"/ConsentStatus/{consentHandle}/{AAID}",
+                        _config.FinvuApi + $"/ConsentStatus/{consentHandle}/{AAID}",
                         BuildAuthHeader(aaToken.token))
                     .ConfigureAwait(false);
 
@@ -234,7 +237,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
 
                 HttpResponseMessage response = await _httpClientHelper
                                                         .SendPostRequestFullResp(
-                                                           " _config.Settings.finvuApi" + "/FIRequest",
+                                                           _config.FinvuApi + "/FIRequest",
                                                             JsonConvert.SerializeObject(payload),
                                                             BuildAuthHeader(aaToken.token))
                                                         .ConfigureAwait(false);
@@ -268,7 +271,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
 
                HttpResponseMessage response = await _httpClientHelper
                                                        .SendGetRequestFullResp(
-                                                           "_config.Settings.finvuApi" + $"/FIStatus/{consentId}/{sessionId}/{consentHandle}/{AAID}",
+                                                           _config.FinvuApi + $"/FIStatus/{consentId}/{sessionId}/{consentHandle}/{AAID}",
                                                            BuildAuthHeader(aaToken.token))
                                                        .ConfigureAwait(false);
 
@@ -299,7 +302,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
 
                 HttpResponseMessage response = await _httpClientHelper
                                                         .SendGetRequestFullResp(
-                                                           " _config.Settings.finvuApi" + $"/FIFetch/{AAID}/{consentId}/{sessionId}",
+                                                           _config.FinvuApi + $"/FIFetch/{AAID}/{consentId}/{sessionId}",
                                                             BuildAuthHeader(aaToken.token))
                                                         .ConfigureAwait(false);
 

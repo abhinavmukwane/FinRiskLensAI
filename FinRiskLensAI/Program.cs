@@ -29,6 +29,9 @@ builder.Host.ConfigureContainer<ContainerBuilder>(container =>
     container.RegisterInstance(
         builder.Configuration.GetSection("Groq").Get<FinRiskLensAI.Core.Models.Common.GroqSettings>()
         ?? new FinRiskLensAI.Core.Models.Common.GroqSettings());
+    container.RegisterInstance(
+        builder.Configuration.GetSection("Finvu").Get<FinRiskLensAI.Core.Models.Common.FinvuSettings>()
+        ?? new FinRiskLensAI.Core.Models.Common.FinvuSettings());
 });
 
 // Add services to the container.
