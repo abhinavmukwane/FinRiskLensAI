@@ -15,7 +15,7 @@ namespace FinRiskLensAI.Core.Interfaces.IServices.AccountAggregator
         Task GenerateFinvuToken();
         Task<string> CreateConsentRequest(string transactionId, string AAID);
         Task<AAConsentReqModel> GetAAConsentData(string transactionId);
-        Task<ConsentStatusModel> CheckConsentStatus(string consentHandle, string AAID);
+        Task<ConsentDetailsById> CheckConsentStatus(string consentHandle, string AAID);
         Task<FinInfoRespModel> FinancialInfoRequest(string consentHandle, string AAID, string consentId);
         Task<FinInfoRespStatusModel> FinancialInfoReqStatus(string consentHandle, string AAID, string consentId, string sessionId);
         Task<string> FinancialInfoFetch(string AAID, string consentId, string sessionId);

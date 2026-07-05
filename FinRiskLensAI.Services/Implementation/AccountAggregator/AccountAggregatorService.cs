@@ -181,7 +181,7 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                              .ConfigureAwait(false);
         }
 
-        public async Task<ConsentStatusModel> CheckConsentStatus(string consentHandle, string AAID)
+        public async Task<ConsentDetailsById> CheckConsentStatus(string consentHandle, string AAID)
         {
             try
             {
@@ -206,7 +206,21 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                     .ReadAsStringAsync()
                     .ConfigureAwait(false);
 
-                return JsonConvert.DeserializeObject<ConsentStatusModel>(responseContent);
+                var ConsentStatusResp = JsonConvert.DeserializeObject<ConsentStatusModel>(responseContent);
+
+                HttpResponseMessage response2 = await _httpClientHelper
+                    .SendGetRequestFullResp(
+                        _config.FinvuApi + $"/Consent/{ConsentStatusResp.body.consentId}",
+                        BuildAuthHeader(aaToken.token))
+                    .ConfigureAwait(false);
+
+                string responseContent2 = await response.Content
+                    .ReadAsStringAsync()
+                    .ConfigureAwait(false);
+
+                var ConsentDetResp = JsonConvert.DeserializeObject<ConsentDetailsById>(responseContent2);
+
+                return ConsentDetResp;
             }
             catch
             {
