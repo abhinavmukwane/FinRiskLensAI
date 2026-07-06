@@ -1,4 +1,4 @@
-# Session Handoff — FinRiskLensAI (as of 2026-07-05)
+# Session Handoff — FinRiskLensAI (as of 2026-07-06)
 
 Context file for Claude Code. This summarizes the project state, decisions made,
 and working conventions from the development session on the office PC, so work can
@@ -53,7 +53,8 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
     - `t_AccAggreToken` (`AccAggreTokenModel`) — single-row Finvu login-token store
       (rid/ts/token/UpdatedOn), token valid 23h.
     - `t_AAConsentRequest` (`AAConsentReqModel`) — one row per AA consent request:
-      uan, custId, transactionId, header (rid/ts/channelId), encryptedRequest,
+      uan, **custId** (persisted so the cross-site callback can re-derive AAID
+      without a session), transactionId, header (rid/ts/channelId), encryptedRequest,
       requestDate, encryptedFiuId, consentHandle, url, CreatedOn.
     - `m_StaticResponces` — now has entity/config in code (moved to `UdyamController`,
       backed by `IStaticResponseService`); the earlier ⚠ gap is closed.
@@ -228,13 +229,27 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   failure (`Views/Home/AAConsentCallback.cshtml`) off the verified `Body.Status`
   (fallback: presence of `ecres`). ⚠ `custId` is persisted on the consent row precisely
   because the `SameSite=Strict` session cookie is NOT sent on Finvu's cross-site redirect
-  — session is unavailable in the callback.
+  — session is unavailable in the callback. Callback view: shows Transaction ID + Consent
+  Handle + Consent Status only; "Return To Dashboard" hides the AA modal on the opener
+  tab (window.opener) and closes itself, "Try Again" re-enables the Fetch button.
+- **FI pipeline (2026-07-06):** when the callback sees `Status == "ACTIVE"` it calls
+  `AccountAggregatorService.FetchAndStoreFinancialData(trnxid, consentDetails)` which runs
+  FI request → status → fetch (gated on `errorCode == 0` at each step, FIDataRange from
+  the consent detail) and writes the fetched JSON to the UAN's blob folder as **`aa.json`**
+  (overwrite = update). Service was optimized: injected `ILogger` + `IMsmeDataStore`,
+  a `GetValidTokenAsync()` helper dedupes the token dance, real structured logs + input
+  validation on every method, the `CheckConsentStatus` `response2.Content` bug is **fixed**.
 - Redirect/callback URL is dynamic: `ResolveCallbackUrl` uses `Finvu:CallbackUrl` if set,
   else builds `{scheme}://{host}/Home/AAConsentCallback/{trnxid}/` from the request
   (`IHttpContextAccessor`) — correct locally and after publish. Behind a proxy, set
   `Finvu:CallbackUrl` or enable forwarded headers.
-- ⚠ Known bug in `CheckConsentStatus`: the 2nd call (`/Consent/{consentId}`) reads
-  `response.Content` instead of `response2.Content` — parses the wrong body. Not yet fixed.
+- ⚠⚠ **AA data does not score yet.** `FinancialInfoFetch` stores the **raw** Finvu FIFetch
+  response, whose FI objects are **encrypted**. `AaFeatureExtractor` needs *decrypted*
+  data shaped `body[*].fiObjects[*]` (with `Summary`/`Transactions`), so it finds 0
+  accounts → `HasAa=false` → AA contributes nothing to the score. `BlobAnalysisService.
+  AnalyzeAsync` now logs a warning when `aa.json` is present but has no `fiObjects` node.
+  Real fix = AA ECDH decryption before storing; demo fix = drop a plaintext `aa.json`
+  (like the DUMMY-DATA GST trick). No FIStatus polling yet, so first-call PENDING → empty.
 
 ## Decisions & conventions (IMPORTANT)
 
@@ -272,11 +287,13 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   `.cshtml` and re-running with `--no-build` (or Ctrl+F5 without rebuild) serves the
   OLD view — always rebuild. (This masqueraded as "showToast not working": the toast
   markup existed on disk but the stale binary didn't have it.)
-- **DataProtection keys are in-memory/ephemeral** (warnings at startup: "Using an
-  in-memory repository", "Neither user profile nor HKLM registry available"). Session
-  cookies encrypted with a previous run's key fail to decrypt after restart →
-  "key not found in key ring" + users silently logged out. Fix before deploy:
-  `AddDataProtection().PersistKeysToFileSystem(...)` (shared path for multi-instance).
+- **DataProtection keys — FIXED 2026-07-06.** Were in-memory/ephemeral → session cookies
+  couldn't decrypt after an app restart → silent logout. This surfaced in production as
+  "re-analyze → reload → logged out": the heavy first re-analyze (LightGBM/PCA training)
+  recycles the IIS app pool, regenerating keys. `Program.cs` now persists keys to
+  `App_Data/DataProtectionKeys` with `SetApplicationName("FinRiskLensAI")`. ⚠ prod: the
+  app-pool identity needs WRITE access to `App_Data`; keys are unencrypted at rest
+  (protect with a cert for real prod); use a SHARED path if you scale to multiple instances.
 - Session store is also in-memory — doesn't survive restart or scale across instances;
   swap to Redis/SQL distributed cache when scaling.
 - Timestamps: `AuditableEntity` audit fields are stamped **UtcNow** by
@@ -289,13 +306,15 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 
 ## Likely next steps (not started)
 
-1. **AA data pull:** on a successful consent callback, run FI request → status → fetch
-   (`FinancialInfoRequest`/`…ReqStatus`/`…Fetch` already exist), decrypt, and write the
-   AA bank JSON to the UAN's blob folder as `aa.json` so scoring picks it up. Fix the
-   `CheckConsentStatus` `response2.Content` bug first (see §7).
+1. **AA data → score (the big open item):** the FI pipeline + `aa.json` write are DONE
+   (§7), but the stored FI data is encrypted so it doesn't score. Add AA ECDH decryption
+   (write decrypted `body[*].fiObjects[*]` to `aa.json`), OR for the demo generate/seed a
+   plaintext AA fileset like DUMMY-DATA GST. Also add FIStatus polling (first call is
+   usually PENDING → empty fetch). Watch the `BlobAnalysisService` "no fiObjects" warning.
 2. Confirm the ConsentStatus/FI endpoints' AAID param against the Finvu sandbox —
    code passes `custId` (`mobile@finvu`); if it should be the AA handle
-   (`cookiejar-aa@finvu.in`), switch it.
+   (`cookiejar-aa@finvu.in`), switch it. Also the FI pipeline runs INLINE in the callback
+   (3 sequential Finvu calls block the page) — move to a background task if too slow.
 3. Admin login controller/service/UI against `ADM_Login` (+ JWT bearer registration —
    gap #2 in `Doc/07_SETUP_GAPS.md` still open).
 4. EPFO extractor when the data source arrives (slot exists: `EpfoJson`,
@@ -306,5 +325,6 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 6. Swap synthetic training data for IDBI sandbox data when it opens **July 22**.
 7. Anomaly-detector thresholds need tuning with realistic data (current test mixed
    one company's GST with personal ITR/AA, so cross-source figures were incoherent).
-8. **Pre-deploy hardening:** persist DataProtection keys, move secrets out of
-   `appsettings.json`, replace dummy-data/GST-seeding demo shortcuts with real pulls.
+8. **Pre-deploy hardening:** ~~persist DataProtection keys~~ (done — protect them with a
+   cert / shared path for multi-instance), move secrets out of `appsettings.json`, and
+   replace the dummy-data / GST-seeding demo shortcuts with real pulls.
