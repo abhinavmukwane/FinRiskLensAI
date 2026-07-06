@@ -127,11 +127,13 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   `IndustryRiskInfo` (NIC-2 → static sector weight table, feeds 10% of Business
   Stability). Appraisal table now 12 ratios. Calculation formulas:
   `Doc/08_ML_ENGINE.md` Stages 8-9.
-- **Financial Health Card dashboard built:**
-  `/Dashboard/FinancialHealthCard?uan=…` (DashboardController + Chart.js) —
-  score gauge with needle, dimension radar/bars, strengths/risks, anomaly box,
-  Bank Lending Assessment section (eligibility tiles, ratio table, cashflow/EMI
-  chart, methodology notes), run-analysis button for folders without a result.
+- **Financial Health Card dashboard built:** `Dashboard/FinancialHealthCard`
+  (DashboardController + Chart.js) — UAN comes from the authenticated **session**,
+  not a query param (see §5), so a user only sees their own card. Renders the score
+  gauge with needle, dimension radar/bars, strengths/risks, anomaly box, Bank
+  Lending Assessment (eligibility tiles, 12-ratio table, cashflow/EMI chart,
+  methodology notes, industry chip), the Bank Statement Analysis + GST Deep-Dive
+  panels, and a run-analysis button for folders without a result.
 
 ### 3. Two API entry paths
 - `POST /api/scoring/analyze` (`ScoringController`) — payloads in the body. Kept
@@ -157,6 +159,14 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 - All icons are Bootstrap Icons (Material Symbols removed, including the font link).
 - `.brandbar` header is sticky (both `Index.css` and `CustomerOnboarding.css`),
   `section[id] { scroll-margin-top: 90px }` keeps anchor targets clear of it.
+- **Branding (2026-07-05):** `wwwroot/Logo.png` (full lockup) + `wwwroot/favicon.ico`
+  wired into all three layouts (`_Layout`, `_CustOnboardingLayout`, `_DashboardLayout`) —
+  favicon `<link>` in each `<head>`, logo replaces the old "FR" text mark / sidebar SVG.
+- **Hero animation (`Index.cshtml`):** the bento cluster in the `col-lg-6` hero div —
+  the two corner cards (`hero-float-id`/`hero-float-chart`) float via CSS keyframes; the
+  center Financial Health Card is FIXED (no float, per request). Inside it a live score
+  counts between realistic values with the band label + gauge needle following, tiles
+  pulse, and the trend bars re-randomize. All scoped inline; `prefers-reduced-motion` honored.
 
 ### 5. Customer auth — email OTP + session (built 2026-07-05)
 - **Email:** MailKit (`IEmailService`/`EmailService` in Services), STARTTLS. Config
