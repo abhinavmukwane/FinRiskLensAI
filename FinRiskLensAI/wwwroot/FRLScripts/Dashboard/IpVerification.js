@@ -2,7 +2,7 @@
 // Source IP Security Audit — dashboard "Secure Connection IP" popup.
 // The badge IP is server-rendered from session (captured at login). The IP
 // risk data is fetched ONLY when the popup opens (DashboardController
-// .GetIpVerification → the single IP risk service), then bound into the
+// .GetIpVerificationDetail → the single IP risk service), then bound into the
 // existing modal, and a Leaflet map is rendered.
 // ============================================================================
 
@@ -151,7 +151,7 @@
         if (loaded) return;
         loaded = true;
         try {
-            const res = await fetch('/Dashboard/GetIpVerification');
+            const res = await fetch('/Dashboard/GetIpVerificationDetail');
             const json = await res.json();
             data = json && json.data;
         } catch (e) {

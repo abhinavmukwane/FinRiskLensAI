@@ -111,7 +111,7 @@ namespace FinRiskLensAI.Controllers
             {
                 // Capture the client IP once, then keep the logged-in user's key
                 // identifiers (incl. ClientIP) in session so any page can read them.
-                result.Data.ClientIP = IP_Get_Service.GetClientIPAddress(HttpContext);
+                result.Data.ClientIP = await IP_Get_Service.GetClientIPAddressAsync(HttpContext);
                 HttpContext.Session.SetCurrentUser(result.Data);
 
                 return Json(new

@@ -37,7 +37,7 @@ namespace FinRiskLensAI.Controllers
         /// popup opens — never during login.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetIpVerification()
+        public async Task<IActionResult> GetIpVerificationDetail()
         {
             var user = HttpContext.Session.GetCurrentUser();
             var ip = user?.ClientIP;
