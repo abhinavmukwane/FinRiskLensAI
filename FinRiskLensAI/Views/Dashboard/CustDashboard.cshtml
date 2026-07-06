@@ -224,6 +224,11 @@
                                 </div>
 
                                 <div class="fraud-gauge-wrapper">
+                                    <svg viewBox="0 0 160 160">
+                                        <circle class="gauge-ring-bg" cx="80" cy="80" r="70"></circle>
+                                        <circle id="ipGauge" class="gauge-ring-fill" cx="80" cy="80" r="70"></circle>
+                                    </svg>
+
                                     <div class="spark-emitter-overlay">
                                         <div class="emitter-head">
                                             <div class="spark-slot s1"><div class="spark-line l1"></div></div>
@@ -235,16 +240,11 @@
                                             <div class="spark-slot s7"><div class="spark-line l7"></div></div>
                                             <div class="spark-slot s8"><div class="spark-line l8"></div></div>
                                         </div>
+                                    </div>
 
-                                        <svg viewBox="0 0 160 160">
-                                            <circle class="gauge-ring-bg" cx="80" cy="80" r="70"></circle>
-                                            <circle id="ipGauge" class="gauge-ring-fill" cx="80" cy="80" r="70"></circle>
-                                        </svg>
-
-                                        <div class="gauge-inner-info">
-                                            <span id="ipGaugeVal" class="gauge-inner-value">0%</span>
-                                            <span class="gauge-inner-label">Fraud Score</span>
-                                        </div>
+                                    <div class="gauge-inner-info">
+                                        <span id="ipGaugeVal" class="gauge-inner-value">0%</span>
+                                        <span class="gauge-inner-label">Fraud Score</span>
                                     </div>
                                 </div>
                             </div>
