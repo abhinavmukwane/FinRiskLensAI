@@ -64,7 +64,7 @@
             <h3 class="fhc-title mb-1">Financial Health Card</h3>
             <div class="fhc-sub">AI-computed 6-dimension credit health score from GST, ITR, bank &amp; Udyam data</div>
         </div>
-        @if (!string.IsNullOrWhiteSpace(Model.Uan))
+       @*  @if (!string.IsNullOrWhiteSpace(Model.Uan))
         {
             <div class="text-end">
                 @if (!string.IsNullOrWhiteSpace(Model.EnterpriseName))
@@ -73,7 +73,18 @@
                 }
                 <div class="fhc-sub"><i class="bi bi-patch-check me-1"></i>@Model.Uan</div>
             </div>
-        }
+        } *@
+      @if (Model != null && Model.HasResult)
+{
+    <button type="button"
+            class="btn text-white mt-3"
+            style="background:#57001d;border-radius:10px;padding:8px 22px;font-weight:600;"
+            onclick="window.open('@Url.Action("FinancialReport", "Report")', '_blank')">
+        <i class="bi bi-download me-1"></i>
+        Download Report
+    </button>
+}
+
     </div>
 
     @if (Model.LoadError != null)

@@ -4,7 +4,6 @@ using FinRiskLensAI.Core.DI;
 using FinRiskLensAI.Data.DI;
 using FinRiskLensAI.ML.DI;
 using FinRiskLensAI.Services.DI;
-using FinRiskLensAI.Services.Implementation.Common;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,9 +50,6 @@ builder.Services.AddSession(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // HTTPS only
     options.Cookie.SameSite = SameSiteMode.Strict;           // no cross-site send
 });
-
-builder.Services.AddScoped<ReportGeneratorService>();
-builder.Services.AddScoped<IViewRenderService, ViewRenderService>();
 
 var app = builder.Build();
 
