@@ -181,6 +181,24 @@
     margin: 0 8px;
     color: #d79aab;
     }
+
+    /* Bhashini language widget — themed for the light topbar */
+    .topbar, .topbar-right, .topbar-actions { overflow: visible; }
+    .bhashini-plugin-container { display: flex; align-items: center; }
+    .bhashini-plugin-container .bhashini-dropdown-btn {
+        background: #fff;
+        border: 1px solid #ead9df;
+        border-radius: 10px;
+        padding: .3rem .45rem;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: background .2s ease, border-color .2s ease;
+    }
+    .bhashini-plugin-container .bhashini-dropdown-btn:hover {
+        background: #faf7f8;
+        border-color: var(--maroon);
+    }
+    .bhashini-plugin-container .bhashini-dropdown-btn-icon svg { display: block; width: 24px; height: 24px; }
 </style>
 </head>
 <body>
@@ -264,9 +282,11 @@
                 </div>
 
                 <div class="topbar-right">
-                   
+
                     <div class="topbar-actions">
-                        
+                        <!-- Translation Plugin -->
+                        <div class="bhashini-plugin-container"></div>
+
                         @* <span class="topbar-user-name">@enterpriseName</span> *@
 
 @*                         <button class="topbar-avatar" type="button" aria-label="User menu">
@@ -315,5 +335,14 @@
 
     @* Universal AI chatbot — pages pass screen data via window.frlChatContext *@
     @await Html.PartialAsync("_Chatbot")
+
+    <script src="~/js/website_translation_utility.js"
+            asp-append-version="true"
+            page-source-language="en"
+            translation-language-list="en,hi,mr,ta,gu,gom,sa"
+            language_order="en,hi,mr,ta,gu,gom,sa"
+            initial_preferred_language="en"
+            language-icon-color="#8b1538">
+    </script>
 </body>
 </html>
