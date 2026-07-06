@@ -1,8 +1,6 @@
 ﻿using FinRiskLensAI.Core.Interfaces.IServices.Common;
 using FinRiskLensAI.Services.Implementation.Common;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Playwright;
-using Rotativa.AspNetCore;
 
 namespace FinRiskLensAI.Controllers
 {
