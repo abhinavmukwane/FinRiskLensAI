@@ -15,6 +15,8 @@
 
     public class Body
     {
+        public int errorCode { get; set; }
+        public string errorMsg { get; set; }
         public string ConsentId { get; set; }
         public string Status { get; set; }
         public DateTime CreateTimestamp { get; set; }

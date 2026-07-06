@@ -4,7 +4,9 @@ using FinRiskLensAI.Core.DI;
 using FinRiskLensAI.Data.DI;
 using FinRiskLensAI.ML.DI;
 using FinRiskLensAI.Services.DI;
+using Microsoft.AspNetCore.DataProtection;
 using Serilog;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,15 @@ builder.Services.AddControllersWithViews()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
         new System.Text.Json.Serialization.JsonStringEnumConverter()));
 builder.Services.AddAppDbContext(builder.Configuration);
+
+// Persist DataProtection keys so session cookies survive app restarts / pool
+// recycles — otherwise ephemeral keys regenerate and everyone is silently logged
+// out (this bit us: the heavy first re-analyze can recycle the app pool).
+var keysDir = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys");
+Directory.CreateDirectory(keysDir);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysDir))
+    .SetApplicationName("FinRiskLensAI");
 
 builder.Services.AddSession(options =>
 {

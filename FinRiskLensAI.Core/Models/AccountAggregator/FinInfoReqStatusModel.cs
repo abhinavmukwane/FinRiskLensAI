@@ -23,6 +23,8 @@ namespace FinRiskLensAI.Core.Models.AccountAggregator
 
         public class Body
         {
+            public int errorCode { get; set; }
+            public string errorMsg { get; set; }
             public string fiRequestStatus { get; set; }
             public List<Account> accounts { get; set; }
         }

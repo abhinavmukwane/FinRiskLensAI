@@ -40,6 +40,7 @@ namespace FinRiskLensAI.Controllers
 
             string? consentStatus = null;
             string? consentHandle = null;
+            bool dataStored = false;
 
             // Confirm the outcome with Finvu rather than trusting the redirect alone:
             // look up the consent we stored for this transaction, then query its status.
@@ -54,11 +55,21 @@ namespace FinRiskLensAI.Controllers
                     {
                         var details = await _aaService.CheckConsentStatus(trnxid, consent.custId);
                         consentStatus = details?.Body?.Status;
+
+                        // Consent is ACTIVE → run the FI pipeline (request → status → fetch)
+                        // and store the bank data as aa.json in the MSME's blob folder.
+                        if (details?.Body != null && details.Body.errorCode == 0
+                            && string.Equals(consentStatus, "ACTIVE", StringComparison.OrdinalIgnoreCase))
+                        {
+                            dataStored = await _aaService.FetchAndStoreFinancialData(trnxid, details);
+                            if (!dataStored)
+                                _logger.LogWarning("AA data fetch/store did not complete for {TrnxId}.", trnxid);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "AA consent status check failed for {TrnxId}", trnxid);
+                    _logger.LogError(ex, "AA consent processing failed for {TrnxId}", trnxid);
                 }
             }
 
@@ -68,8 +79,8 @@ namespace FinRiskLensAI.Controllers
                 : !string.IsNullOrEmpty(ecres);
 
             _logger.LogInformation(
-                "AA consent callback: trnxid={TrnxId} status={Status} ecresPresent={HasEcres} resdate={ResDate} fi={Fi} result={Result}",
-                trnxid, consentStatus, !string.IsNullOrEmpty(ecres), resdate, fi, isSuccess ? "success" : "failure");
+                "AA consent callback: trnxid={TrnxId} status={Status} dataStored={Stored} ecresPresent={HasEcres} resdate={ResDate} fi={Fi} result={Result}",
+                trnxid, consentStatus, dataStored, !string.IsNullOrEmpty(ecres), resdate, fi, isSuccess ? "success" : "failure");
 
             return View(new AAConsentCallbackViewModel
             {

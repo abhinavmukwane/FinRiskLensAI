@@ -2,6 +2,7 @@ using FinRiskLensAI.Core.Interfaces;
 using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Core.Models.Scoring;
 using FinRiskLensAI.ML.Storage;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace FinRiskLensAI.ML.Services
@@ -17,11 +18,13 @@ namespace FinRiskLensAI.ML.Services
     {
         private readonly IMsmeDataStore _store;
         private readonly IRiskScoringService _scoring;
+        private readonly ILogger<BlobAnalysisService> _logger;
 
-        public BlobAnalysisService(IMsmeDataStore store, IRiskScoringService scoring)
+        public BlobAnalysisService(IMsmeDataStore store, IRiskScoringService scoring, ILogger<BlobAnalysisService> logger)
         {
             _store = store;
             _scoring = scoring;
+            _logger = logger;
         }
 
         public async Task SaveManifestAsync(string uan, MsmeDataManifest.ExpectedFiles expected, CancellationToken ct = default)
@@ -106,6 +109,23 @@ namespace FinRiskLensAI.ML.Services
                         request.Gstr2aB2bJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
                     else if (file.StartsWith(MsmeDataFiles.Gstr1B2bPrefix, StringComparison.OrdinalIgnoreCase))
                         request.Gstr1B2bJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
+                }
+
+                // Diagnostics: confirm which sources actually reached the scorer.
+                _logger.LogInformation(
+                    "Analyze {Uan}: files=[{Files}] udyam={U} itr={I} aa={A} gstTaxpayer={G} gstr3b={G3}",
+                    uan, string.Join(",", status.FilesPresent),
+                    request.UdyamJson != null, request.ItrJson != null, request.AaJson != null,
+                    request.GstTaxpayerJson != null, request.Gstr3bJsons.Count);
+
+                if (!string.IsNullOrWhiteSpace(request.AaJson)
+                    && !request.AaJson.Contains("fiObjects", StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogWarning(
+                        "Analyze {Uan}: aa.json present ({Len} chars) but has no 'fiObjects' node — the AA "
+                        + "extractor expects decrypted FI data (body[*].fiObjects[*]); this looks like the raw/"
+                        + "encrypted Finvu FIFetch response, so AA will NOT contribute to the score.",
+                        uan, request.AaJson.Length);
                 }
 
                 var result = _scoring.Analyze(request);

@@ -545,6 +545,7 @@
 
         // ---------- Fetch AA: validate consent, create consent request, open URL in new tab ----------
         document.getElementById('fetchAaBtn').addEventListener('click', async function () {
+            const btn = this;
             const consent = document.getElementById('aaConsent');
             const status = document.getElementById('aaFetchStatus');
             status.textContent = '';
@@ -559,7 +560,8 @@
             // we set its URL once the consent request comes back.
             const aaWin = window.open('', '_blank');
 
-            this.disabled = true;
+            // Disable so the consent can only be initiated once; re-enable only on failure.
+            btn.disabled = true;
             status.innerHTML = '<span class="text-muted">Creating consent request…</span>';
             try {
                 const resp = await fetch('/Dashboard/InitiateAAFetch', { method: 'POST' });
@@ -570,12 +572,13 @@
                 } else {
                     if (aaWin) aaWin.close();
                     status.innerHTML = '<span class="text-danger">' + res.message + '</span>';
+                    btn.disabled = false;
                 }
             } catch (e) {
                 if (aaWin) aaWin.close();
                 status.innerHTML = '<span class="text-danger">Something went wrong. Please try again.</span>';
+                btn.disabled = false;
             }
-            this.disabled = false;
         });
    </script>
 

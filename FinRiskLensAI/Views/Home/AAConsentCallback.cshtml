@@ -245,7 +245,7 @@
                 <div class="details-header">Application Details</div>
 
                 <div class="detail-row">
-                    <div class="detail-label">Application ID</div>
+                    <div class="detail-label">Transaction ID</div>
                     <div class="detail-value">@(Model.ApplicationId ?? "—")</div>
                 </div>
 
@@ -263,27 +263,14 @@
                         @(ok ? "Approved" : "Failed")
                     </div>
                 </div>
-
-                <div class="detail-row">
-                    <div class="detail-label">Verification Status</div>
-                    <div class="detail-value @(ok ? "value-progress" : "value-failed")">
-                        @(ok ? "In Progress" : "Unsuccessful")
-                    </div>
-                </div>
             </div>
 
             @if (ok)
             {
-                <div class="next-step">
-                    <i class="fa-solid fa-clock"></i>
-                    Verification usually completes within a few minutes.
-                </div>
-
-                <button type="button" class="btn-action" onclick="window.close();">
+                <button type="button" class="btn-action" onclick="returnToDashboard();">
                     <i class="fa-solid fa-house"></i>
                     Return To Dashboard
                 </button>
-
             }
             else
             {
@@ -292,7 +279,7 @@
                     Please retry the consent process to continue your credit assessment.
                 </div>
 
-                <button type="button" class="btn-action" onclick="window.close();">
+                <button type="button" class="btn-action" onclick="tryAgain();">
                     <i class="fa-solid fa-rotate-right"></i>
                     Try Again
                 </button>
@@ -304,6 +291,42 @@
         </div>
 
     </div>
+
+    <script>
+        // This page is opened in a tab by the dashboard (window.opener). On close we
+        // tidy up that dashboard tab: hide the AA modal (success) or re-enable the
+        // Fetch button so the user can retry (failure).
+        function closeAaModalOnOpener() {
+            try {
+                if (window.opener && !window.opener.closed) {
+                    var doc = window.opener.document;
+                    var modalEl = doc.getElementById('aaConsentModal');
+                    if (modalEl && window.opener.bootstrap) {
+                        window.opener.bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                    }
+                    window.opener.focus();
+                }
+            } catch (e) { /* cross-tab access can fail silently */ }
+        }
+
+        function returnToDashboard() {
+            closeAaModalOnOpener();
+            window.close();
+            // Fallback if the tab wasn't script-opened (window.close blocked).
+            window.location.href = '/Dashboard/CustDashboard';
+        }
+
+        function tryAgain() {
+            try {
+                if (window.opener && !window.opener.closed) {
+                    var btn = window.opener.document.getElementById('fetchAaBtn');
+                    if (btn) btn.disabled = false;
+                    window.opener.focus();
+                }
+            } catch (e) { }
+            window.close();
+        }
+    </script>
 
 </body>
 
