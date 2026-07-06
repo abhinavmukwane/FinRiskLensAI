@@ -31,6 +31,9 @@ namespace FinRiskLensAI.Data.Configurations
             builder.Property(x => x.PanNumber)
                    .HasMaxLength(100);
 
+            builder.Property(x => x.IPAddress)
+                   .HasMaxLength(50);
+
             builder.Property(x => x.MsmeEnquiryID);
 
             builder.HasOne(x => x.MsmeEnquiry)

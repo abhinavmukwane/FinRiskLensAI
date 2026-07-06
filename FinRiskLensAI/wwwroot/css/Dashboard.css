@@ -301,7 +301,7 @@ img {
 
     .nav-link.active {
         background: var(--color-primary-container);
-        color: var(--color-on-primary-container);
+        color: #f3ebed;
         font-weight: 600;
     }
     .nav-link i {

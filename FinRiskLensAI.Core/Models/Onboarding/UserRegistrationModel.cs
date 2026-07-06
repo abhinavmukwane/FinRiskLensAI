@@ -23,6 +23,7 @@ namespace FinRiskLensAI.Core.Models.Onboarding
         
         public int? MsmeEnquiryID { get; set; }
 
+        public string? IPAddress { get; set; }
         public virtual MsmeEnquiry? MsmeEnquiry { get; set; }
     }
 }
