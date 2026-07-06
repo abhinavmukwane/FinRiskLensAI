@@ -43,15 +43,24 @@ namespace FinRiskLensAI.Controllers
             var ip = user?.ClientIP;
             var uan = user?.UdyamNumber;
 
-            var json = await _ipRisk.GetIpRiskScoreAsync(ip ?? string.Empty, uan ?? string.Empty, HttpContext.RequestAborted);
+            var vm = new IpVerificationViewModel();
+            try
+            {
+                var json = await _ipRisk.GetIpRiskScoreAsync(ip ?? string.Empty, uan ?? string.Empty, HttpContext.RequestAborted);
+                if (!string.IsNullOrWhiteSpace(json))
+                    vm = IpVerificationViewModel.FromJson(json);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed loading IP risk score");
+            }
 
-            var vm = string.IsNullOrWhiteSpace(json)
-                ? new IpVerificationViewModel()
-                : IpVerificationViewModel.FromJson(json);
-
+            // Until the production key is live, always show the static/demo data
+            // so the badge and popup never fall back to an empty "no data" state.
             if (!vm.HasData)
                 vm = IpVerificationViewModel.Demo();
 
+            // Prefer the client IP captured at login; otherwise keep the static IP.
             if (!string.IsNullOrWhiteSpace(ip))
                 vm.Ip = ip;
 

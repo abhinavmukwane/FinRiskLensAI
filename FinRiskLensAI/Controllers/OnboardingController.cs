@@ -10,7 +10,6 @@ using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Core.Models.User_Activity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace FinRiskLensAI.Controllers
 {
@@ -133,10 +132,9 @@ namespace FinRiskLensAI.Controllers
                 return Json(new { status = false, message = "Invalid request." });
             }
 
-            model.IPAddress = GetUserIpAddress();
-
-            // Save IP in Session
-            HttpContext.Session.SetString("IPAddress", model.IPAddress);
+            // Resolve the client IP via the single common helper and persist it
+            // with the registration record (public IP on localhost via ipify).
+            model.IPAddress = await IP_Get_Service.GetClientIPAddressAsync(HttpContext);
 
             // 1. Register / update the user first
             var result = await _onboardingService.AddUpdateUserRegst(model);
@@ -212,54 +210,6 @@ namespace FinRiskLensAI.Controllers
             });
         }
 
-
-        private string GetUserIpAddress(bool lan = false)
-        {
-            string userIPAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault();
-
-            if (!string.IsNullOrWhiteSpace(userIPAddress))
-            {
-                userIPAddress = userIPAddress.Split(',')[0].Trim();
-            }
-
-            if (string.IsNullOrWhiteSpace(userIPAddress))
-            {
-                userIPAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            }
-
-            // Localhost
-            if (string.IsNullOrWhiteSpace(userIPAddress) ||
-                userIPAddress == "::1" ||
-                userIPAddress == "127.0.0.1")
-            {
-                lan = true;
-                userIPAddress = string.Empty;
-            }
-
-            if (lan && string.IsNullOrWhiteSpace(userIPAddress))
-            {
-                try
-                {
-                    string hostName = Dns.GetHostName();
-                    IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
-
-                    foreach (IPAddress ip in hostEntry.AddressList)
-                    {
-                        if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                        {
-                            userIPAddress = ip.ToString();
-                            break;
-                        }
-                    }
-                }
-                catch
-                {
-                    userIPAddress = "127.0.0.1";
-                }
-            }
-
-            return userIPAddress;
-        }
 
     }
 }

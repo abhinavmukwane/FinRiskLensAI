@@ -146,7 +146,7 @@
         setTimeout(function () { map.invalidateSize(); }, 200);
     }
 
-    // Fetch the IP risk data once, only when the popup is first opened.
+    // Fetch the IP data once (static method until the production key is live).
     async function load() {
         if (loaded) return;
         loaded = true;
@@ -154,16 +154,22 @@
             const res = await fetch('/Dashboard/GetIpVerificationDetail');
             const json = await res.json();
             data = json && json.data;
+
+            // Show the IP (from the static method) in the badge.
+            const badgeEl = document.getElementById('ipBadgeValue');
+            if (badgeEl && data && data.ip) badgeEl.textContent = data.ip;
         } catch (e) {
             data = null;
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Populate the badge from the static IP data on page load.
+        load();
+
         const modal = document.getElementById('ipAuditModal');
         if (!modal) return;
 
-        // API is called on popup open (not during login / page load).
         modal.addEventListener('shown.bs.modal', async function () {
             await load();
             render(data);
