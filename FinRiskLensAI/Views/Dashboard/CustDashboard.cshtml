@@ -7,6 +7,10 @@
         ? "there" : currentUser!.NameOfEnterprise;
     var aaid = currentUser.MobileNumber + "@finvu";
     var gstn = currentUser.GstinNumber;
+
+    // Client IP captured on the session user at login — shown in the "Secure Connection IP" badge.
+    var clientIp = currentUser?.ClientIP;
+    if (string.IsNullOrWhiteSpace(clientIp)) clientIp = "N/A";
 }
 
 <div class="container-fluid py-5">
@@ -25,7 +29,7 @@
              data-bs-toggle="modal" data-bs-target="#ipAuditModal">
             <span class="ip-pulse-dot"></span>
             <span class="ip-badge-text">Secure Connection IP:</span>
-            <span class="ip-badge-value" id="ipBadgeValue">…</span>
+            <span class="ip-badge-value" id="ipBadgeValue">@clientIp</span>
         </div>
         @* @if (currentUser != null)
         {

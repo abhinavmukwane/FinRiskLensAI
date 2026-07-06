@@ -34,6 +34,9 @@ builder.Host.ConfigureContainer<ContainerBuilder>(container =>
     container.RegisterInstance(
         builder.Configuration.GetSection("Finvu").Get<FinRiskLensAI.Core.Models.Common.FinvuSettings>()
         ?? new FinRiskLensAI.Core.Models.Common.FinvuSettings());
+    container.RegisterInstance(
+        builder.Configuration.GetSection("Signzy").Get<FinRiskLensAI.Core.Models.Common.SignzySettings>()
+        ?? new FinRiskLensAI.Core.Models.Common.SignzySettings());
 });
 
 // Add services to the container.

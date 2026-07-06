@@ -23,5 +23,8 @@ namespace FinRiskLensAI.Core.Models.User_Activity
         public string? GstinNumber { get; set; }
 
         public string? PanNumber { get; set; }
+
+        /// <summary>Client IP captured once at login.</summary>
+        public string? ClientIP { get; set; }
     }
 }

@@ -1,8 +1,9 @@
 // ============================================================================
-// Source IP Security Audit — dashboard welcome-banner badge + popup.
-// Fetches the cached IPResponce (via DashboardController.GetIpVerification,
-// backed by the common GetStaticCommonResponce service) once on page load,
-// fills the badge, populates the modal, and renders a Leaflet map on open.
+// Source IP Security Audit — dashboard "Secure Connection IP" popup.
+// The badge IP is server-rendered from session (captured at login). The IP
+// risk data is fetched ONLY when the popup opens (DashboardController
+// .GetIpVerification → the single IP risk service), then bound into the
+// existing modal, and a Leaflet map is rendered.
 // ============================================================================
 
 (function () {
@@ -145,6 +146,7 @@
         setTimeout(function () { map.invalidateSize(); }, 200);
     }
 
+    // Fetch the IP risk data once, only when the popup is first opened.
     async function load() {
         if (loaded) return;
         loaded = true;
@@ -152,25 +154,20 @@
             const res = await fetch('/Dashboard/GetIpVerification');
             const json = await res.json();
             data = json && json.data;
-            document.getElementById('ipBadgeValue').textContent =
-                (data && data.hasData && data.ip) ? data.ip : 'N/A';
-            render(data);
         } catch (e) {
-            document.getElementById('ipBadgeValue').textContent = 'N/A';
-            render(null);
+            data = null;
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        load();
-
         const modal = document.getElementById('ipAuditModal');
-        if (modal) {
-            // Replay the gauge scan on each open, and lazy-init the map once.
-            modal.addEventListener('shown.bs.modal', function () {
-                render(data);
-                initMap();
-            });
-        }
+        if (!modal) return;
+
+        // API is called on popup open (not during login / page load).
+        modal.addEventListener('shown.bs.modal', async function () {
+            await load();
+            render(data);
+            initMap();
+        });
     });
 })();

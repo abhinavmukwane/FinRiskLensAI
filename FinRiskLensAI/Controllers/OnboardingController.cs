@@ -193,6 +193,8 @@ namespace FinRiskLensAI.Controllers
 
             if (result.Result == tflResultType.tflSuccess)
             {
+                // Capture the client IP once and keep it with the session user.
+                result.Data.ClientIP = IP_Get_Service.GetClientIPAddress(HttpContext);
                 HttpContext.Session.SetCurrentUser(result.Data);
 
                 return Json(new
