@@ -191,6 +191,23 @@
                 gap: .4rem;
             }
 
+        /* Bhashini language widget — themed to sit in the maroon brandbar */
+        .brandbar { overflow: visible; }                 /* let the language dropdown escape the header */
+        .bhashini-plugin-container { display: flex; align-items: center; }
+        .bhashini-plugin-container .bhashini-dropdown-btn {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: .75rem;
+            padding: .3rem .45rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: background .2s ease, border-color .2s ease;
+        }
+        .bhashini-plugin-container .bhashini-dropdown-btn:hover {
+            background: rgba(255,255,255,.15);
+            border-color: var(--gold-soft);
+        }
+        .bhashini-plugin-container .bhashini-dropdown-btn-icon svg { display: block; width: 24px; height: 24px; }
     </style>
 
 </head>
@@ -209,9 +226,9 @@
                     <div class="brand-sub">IDBI Innovate · MSME Onboarding</div>
                 </div>
             </a>
-            @if (ViewBag.Title != "CustLogin")
-            {
-                <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                @if (ViewBag.Title != "CustLogin")
+                {
                     <a href="/Auth/CustLogin"
                        class="btn text-white px-3 py-2 rounded-3 font-heading d-flex align-items-center gap-2"
                        style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); font-size: 0.85rem; font-weight: 600; transition: all 0.2s ease;"
@@ -221,8 +238,10 @@
                            style="font-size: 1.1rem; vertical-align: middle;"></i>
                         Login
                     </a>
-                </div>
-            }
+                }
+                <!-- Translation Plugin -->
+                <div class="bhashini-plugin-container"></div>
+            </div>
 
         </div>
     </div>
@@ -232,6 +251,13 @@
         @RenderBody()
     </main>
 
-
+    <script src="~/js/website_translation_utility.js"
+            asp-append-version="true"
+            page-source-language="en"
+            translation-language-list="en,hi,mr,ta,gu,gom,sa"
+            language_order="en,hi,mr,ta,gu,gom,sa"
+            initial_preferred_language="en"
+            language-icon-color="#F3E2B2">
+    </script>
 </body>
 </html>

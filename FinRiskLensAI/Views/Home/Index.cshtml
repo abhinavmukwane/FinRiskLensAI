@@ -40,8 +40,10 @@
                 </div>
             </div>
 
-            <!-- Hero Mockups (Bento Cluster) -->
-            <div class="col-lg-6 position-relative d-none d-lg-block hero-cluster" style="height: 520px;">
+            @* Bento Cluster — decorative animated mockup. dont-translate + bhashini-skip-mutation
+               keep the translation plugin from re-hitting its API on every animation frame. *@
+            <div class="col-lg-6 position-relative d-none d-lg-block hero-cluster dont-translate bhashini-skip-mutation"
+                 translate="no" style="height: 520px;">
                 <!-- Main Preview Panel -->
                 <div class="position-absolute top-50 start-50 translate-middle w-100 card-premium overflow-hidden"
                      style="max-width: 440px; z-index: 10;">
@@ -66,8 +68,8 @@
                                 <div class="position-relative d-flex align-items-center justify-content-center rounded-circle risk-gauge-gradient p-1"
                                      style="width: 100px; height: 100px;">
                                     <div class="w-100 h-100 rounded-circle bg-white d-flex flex-column align-items-center justify-content-center">
-                                        <span id="heroScore" class="h4 text-primary font-heading mb-0 fw-bold">842</span>
-                                        <span id="heroBand" class="font-data text-secondary uppercase"
+                                        <span id="heroScore" class="h4 text-primary font-heading mb-0 fw-bold dont-translate" translate="no">842</span>
+                                        <span id="heroBand" class="font-data text-secondary uppercase dont-translate" translate="no"
                                               style="font-size: 6px; letter-spacing: 1px;">EXCELLENT</span>
                                     </div>
                                     <div id="heroNeedle" class="position-absolute top-50 start-50 translate-middle w-100 h-100"
@@ -172,12 +174,16 @@
 
                     function tweenTo(target) {
                         var start = current, startT = performance.now(), dur = 1200;
+                        var lastVal = null, lastBand = null;
                         function step(now) {
                             var p = Math.min(1, (now - startT) / dur);
                             var eased = 1 - Math.pow(1 - p, 3);
                             var val = Math.round(start + (target - start) * eased);
-                            scoreEl.textContent = val;
-                            bandEl.textContent = bandFor(val);
+                            // Only touch the DOM when the value actually changes — avoids
+                            // ~60 redundant text-node replacements per second.
+                            if (val !== lastVal) { scoreEl.textContent = val; lastVal = val; }
+                            var band = bandFor(val);
+                            if (band !== lastBand) { bandEl.textContent = band; lastBand = band; }
                             if (p < 1) requestAnimationFrame(step); else current = target;
                         }
                         requestAnimationFrame(step);
