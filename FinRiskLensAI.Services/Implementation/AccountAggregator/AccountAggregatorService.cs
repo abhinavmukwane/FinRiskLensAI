@@ -228,19 +228,24 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
 
                 var ConsentStatusResp = JsonConvert.DeserializeObject<ConsentStatusModel>(responseContent);
 
-                HttpResponseMessage response2 = await _httpClientHelper
+                if(ConsentStatusResp.body.consentStatus == "ACCEPTED")
+                {
+                    HttpResponseMessage response2 = await _httpClientHelper
                     .SendGetRequestFullResp(
                         _config.FinvuApi + $"/Consent/{ConsentStatusResp.body.consentId}",
                         BuildAuthHeader(aaToken.token))
                     .ConfigureAwait(false);
 
-                string responseContent2 = await response.Content
-                    .ReadAsStringAsync()
-                    .ConfigureAwait(false);
+                    string responseContent2 = await response2.Content
+                        .ReadAsStringAsync()
+                        .ConfigureAwait(false);
 
-                var ConsentDetResp = JsonConvert.DeserializeObject<ConsentDetailsById>(responseContent2);
+                    var ConsentDetResp = JsonConvert.DeserializeObject<ConsentDetailsById>(responseContent2);
 
-                return ConsentDetResp;
+                    return ConsentDetResp;
+                }
+
+                return null;
             }
             catch
             {
