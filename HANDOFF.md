@@ -297,8 +297,33 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   `App_Data/DataProtectionKeys` with `SetApplicationName("FinRiskLensAI")`. ⚠ prod: the
   app-pool identity needs WRITE access to `App_Data`; keys are unencrypted at rest
   (protect with a cert for real prod); use a SHARED path if you scale to multiple instances.
-- Session store is also in-memory — doesn't survive restart or scale across instances;
-  swap to Redis/SQL distributed cache when scaling.
+- Session store is now **SQL-backed** (2026-07-07): `AddDistributedSqlServerCache`
+  → table `[FinRiskLensAI].[SessionCache]`, registered before `AddSession` in
+  `Program.cs`. Fixes the prod bug where re-analyze → reload logged the user out:
+  the heavy analyze recycled the app pool (or a farm switch), the in-memory session
+  was wiped, and `CustDashboardAuthorize` redirected to Auth/CustLogin. SQL session
+  survives recycles and multi-instance farms. The `GetCurrentUser()` API is unchanged.
+  Create-table SQL (run once per DB; login's own schema, no dbo needed):
+  ```sql
+  CREATE TABLE [FinRiskLensAI].[SessionCache](
+      [Id] nvarchar(449) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL,
+      [Value] varbinary(max) NOT NULL,
+      [ExpiresAtTime] datetimeoffset(7) NOT NULL,
+      [SlidingExpirationInSeconds] bigint NULL,
+      [AbsoluteExpiration] datetimeoffset(7) NULL,
+      CONSTRAINT [pk_Id] PRIMARY KEY CLUSTERED ([Id] ASC));
+  CREATE NONCLUSTERED INDEX [Index_ExpiresAtTime] ON [FinRiskLensAI].[SessionCache]([ExpiresAtTime]);
+  ```
+  (equivalent to `dotnet sql-cache create "<conn>" FinRiskLensAI SessionCache`).
+  Table already created on the remote DB.
+- **Analyze perf hardening (2026-07-07)** — the /analyze request was dying on the
+  shared prod host ("TypeError: Failed to fetch", no result.json) because it (a)
+  trained the ML models inline on first call and (b) downloaded 40+ blob files
+  sequentially — slow enough to trip the reverse-proxy timeout / recycle the pool.
+  Fixes: `MlWarmupService` (IHostedService in the ML project) pre-trains LightGBM +
+  PCA at startup off the request path (`ScoreCalibrationModel.Warmup()` /
+  `IncomeAnomalyDetector.Warmup()`); `BlobAnalysisService.AnalyzeAsync` now downloads
+  all files in parallel (SemaphoreSlim(8)). Warm-path analyze is ~3s locally.
 - Timestamps: `AuditableEntity` audit fields are stamped **UtcNow** by
   `SetAuditableFields()` on every save (overrides whatever you set). Any time-window
   check (e.g. OTP expiry) MUST compare in UTC. Non-audit models (AA token/consent) keep

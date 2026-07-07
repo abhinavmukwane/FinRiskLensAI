@@ -51,6 +51,8 @@ namespace FinRiskLensAI.Controllers
                     var consent = await _aaService.GetAAConsentData(trnxid);
                     consentHandle = consent?.consentHandle;
 
+                    await Task.Delay(5000); // Wait for 5 seconds
+
                     if (consent != null && !string.IsNullOrWhiteSpace(consent.custId))
                     {
                         var details = await _aaService.CheckConsentStatus(trnxid, consent.custId);

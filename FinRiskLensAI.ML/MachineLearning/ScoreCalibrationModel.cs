@@ -21,6 +21,10 @@ namespace FinRiskLensAI.ML.MachineLearning
 
         private class Prediction { public float Score { get; set; } }
 
+        /// <summary>Force the (lazy) LightGBM training now — call at startup so the first
+        /// /analyze request doesn't pay the training cost on the request thread.</summary>
+        public void Warmup() => _ = _trained.Value;
+
         public double PredictScore(ScoreFeatureVector input)
         {
             var (ml, model) = _trained.Value;

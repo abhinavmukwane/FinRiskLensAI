@@ -85,32 +85,55 @@ namespace FinRiskLensAI.ML.Services
 
             try
             {
-                // One file in memory at a time — large AA/GST dumps never coexist in RAM
+                // Download every needed file in parallel (bounded). 40+ sequential blob
+                // round-trips from a shared host easily blow past the reverse-proxy
+                // response timeout — the request would die mid-run ("Failed to fetch")
+                // before result.json was written. Payloads are small JSON (~200 KB), so
+                // holding them briefly in one dictionary is fine.
+                var fixedFiles = new[] { MsmeDataFiles.Udyam, MsmeDataFiles.Itr, MsmeDataFiles.Aa,
+                                         MsmeDataFiles.GstTaxpayer, MsmeDataFiles.Epfo };
+                var toDownload = fixedFiles.Concat(status.FilesPresent)
+                    .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+                var downloaded = new System.Collections.Concurrent.ConcurrentDictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+                using (var throttler = new SemaphoreSlim(8))
+                {
+                    await Task.WhenAll(toDownload.Select(async file =>
+                    {
+                        await throttler.WaitAsync(ct);
+                        try { downloaded[file] = await _store.DownloadAsync(uan, file, ct); }
+                        finally { throttler.Release(); }
+                    }));
+                }
+
+                string? Get(string name) => downloaded.TryGetValue(name, out var v) ? v : null;
+
                 var request = new RiskAnalysisRequest
                 {
-                    UdyamJson = await _store.DownloadAsync(uan, MsmeDataFiles.Udyam, ct),
-                    ItrJson = await _store.DownloadAsync(uan, MsmeDataFiles.Itr, ct),
-                    AaJson = await _store.DownloadAsync(uan, MsmeDataFiles.Aa, ct),
-                    GstTaxpayerJson = await _store.DownloadAsync(uan, MsmeDataFiles.GstTaxpayer, ct),
-                    EpfoJson = await _store.DownloadAsync(uan, MsmeDataFiles.Epfo, ct)
+                    UdyamJson = Get(MsmeDataFiles.Udyam),
+                    ItrJson = Get(MsmeDataFiles.Itr),
+                    AaJson = Get(MsmeDataFiles.Aa),
+                    GstTaxpayerJson = Get(MsmeDataFiles.GstTaxpayer),
+                    EpfoJson = Get(MsmeDataFiles.Epfo)
                 };
 
                 foreach (var file in status.FilesPresent.OrderBy(f => f))
                 {
+                    var content = Get(file) ?? string.Empty;
                     if (file.StartsWith(MsmeDataFiles.Gstr3bPrefix, StringComparison.OrdinalIgnoreCase))
-                        request.Gstr3bJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
+                        request.Gstr3bJsons.Add(content);
                     else if (file.StartsWith(MsmeDataFiles.Gstr1SummaryPrefix, StringComparison.OrdinalIgnoreCase))
-                        request.Gstr1SummaryJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
+                        request.Gstr1SummaryJsons.Add(content);
                     else if (file.StartsWith(MsmeDataFiles.Gstr1CdnrPrefix, StringComparison.OrdinalIgnoreCase))
-                        request.Gstr1CdnrJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
+                        request.Gstr1CdnrJsons.Add(content);
                     else if (file.StartsWith(MsmeDataFiles.Gstr1HsnPrefix, StringComparison.OrdinalIgnoreCase))
-                        request.Gstr1HsnJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
+                        request.Gstr1HsnJsons.Add(content);
                     else if (file.StartsWith(MsmeDataFiles.Gstr2aB2bPrefix, StringComparison.OrdinalIgnoreCase))
-                        request.Gstr2aB2bJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
+                        request.Gstr2aB2bJsons.Add(content);
                     else if (file.StartsWith(MsmeDataFiles.Gstr2bPrefix, StringComparison.OrdinalIgnoreCase))
-                        request.Gstr2bJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
+                        request.Gstr2bJsons.Add(content);
                     else if (file.StartsWith(MsmeDataFiles.Gstr1B2bPrefix, StringComparison.OrdinalIgnoreCase))
-                        request.Gstr1B2bJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
+                        request.Gstr1B2bJsons.Add(content);
                 }
 
                 // Diagnostics: confirm which sources actually reached the scorer.
