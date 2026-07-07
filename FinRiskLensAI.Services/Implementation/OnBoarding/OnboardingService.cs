@@ -52,6 +52,26 @@ namespace FinRiskLensAI.Services.Implementation.OnBoarding
 
             return result;
         }
+
+        public async Task<ResultModel<string>> GetUdyamPayload(string uan)
+        {
+            var result = new ResultModel<string>();
+            var data = await _repository.GetUdyamPayload(uan);
+
+            if (data != null)
+            {
+                result.Result = tflResultType.tflSuccess;
+                result.Data = data;
+            }
+            else
+            {
+                result.Result = tflResultType.tflError;
+                result.Message = "No data found.";
+            }
+
+            return result;
+        }
+
         public async Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(UserRegistrationModel entity)
         {
             var result = _repository.AddUpdateUserRegst(entity);
