@@ -17,7 +17,7 @@
 
     <style>
         /* Bhashini language widget — themed to sit in the maroon brandbar */
-        .brandbar { overflow: visible; }                 /* let the language dropdown escape the header */
+        .brandbar { overflow: visible !important; }      /* let the language dropdown escape the header (beats page-level index.css) */
         .bhashini-plugin-container { display: flex; align-items: center; }
         .bhashini-plugin-container .bhashini-dropdown-btn {
             background: rgba(255,255,255,.08);

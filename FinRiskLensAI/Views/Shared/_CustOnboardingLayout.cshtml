@@ -193,7 +193,9 @@
             }
 
         /* Bhashini language widget — themed to sit in the maroon brandbar */
-        .brandbar { overflow: visible; }                 /* let the language dropdown escape the header */
+        /* !important: some pages (e.g. CustLogin) also pull in index.css, whose
+           .brandbar{overflow:hidden} would otherwise re-clip the language dropdown */
+        .brandbar { overflow: visible !important; }
         .bhashini-plugin-container { display: flex; align-items: center; }
         .bhashini-plugin-container .bhashini-dropdown-btn {
             background: rgba(255,255,255,.08);
@@ -209,7 +211,15 @@
             border-color: var(--gold-soft);
         }
         .bhashini-plugin-container .bhashini-dropdown-btn-icon svg { display: block; width: 24px; height: 24px; }
-
+        /* Header widget is always at the top of the page — force the menu to open
+           downward (the plugin's own JS sometimes flips it up, off-screen) and scroll if tall */
+        .bhashini-plugin-container #bhashiniLanguageDropdown {
+            top: calc(100% + 6px) !important;
+            bottom: auto !important;
+            max-height: 70vh;
+            overflow-y: auto;
+            z-index: 2000;
+        }
     </style>
 
 </head>

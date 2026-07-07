@@ -52,7 +52,7 @@ namespace FinRiskLensAI.ML.Services
             _gst.Extract(request.GstTaxpayerJson, request.Gstr3bJsons,
                          request.Gstr1SummaryJsons, request.Gstr1B2bJsons,
                          request.Gstr1CdnrJsons, request.Gstr1HsnJsons,
-                         request.Gstr2aB2bJsons, features);
+                         request.Gstr2aB2bJsons, request.Gstr2bJsons, features);
 
             features.AaCashflowTrendSlope = _trend.ComputeTrend(features.AaMonthlyCredits.Values.ToList());
 
@@ -150,7 +150,12 @@ namespace FinRiskLensAI.ML.Services
                     TopVendorShare = f.GstTopVendorShare,
                     TopCustomers = new(f.GstTopCustomers),
                     TopVendors = new(f.GstTopVendors),
-                    MonthlySales = new(f.GstMonthlyTurnover)
+                    MonthlySales = new(f.GstMonthlyTurnover),
+                    Has2bData = f.GstHas2bData,
+                    ItcAvailableMonthly = f.GstItcAvailableMonthly,
+                    ItcClaimVsAvailable = f.GstItcClaimVsAvailable,
+                    ItcUnavailableShare = f.GstItcUnavailableShare,
+                    SupplierFilingRate = f.GstSupplierFilingRate
                 };
 
             if (f.HasItr)

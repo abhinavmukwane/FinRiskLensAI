@@ -87,12 +87,15 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 - Feature extractors (Newtonsoft `JObject`, tolerant probing) for Udyam, GST, ITR
   (handles ITR-1 and ITR-3 shapes across up to 3 years), AA (dedupes txns by
   `txnId` — same txns appear under multiple FIPs in real responses).
-- GST covers six return types: taxpayer profile, monthly GSTR-3B (turnover),
+- GST covers seven return types: taxpayer profile, monthly GSTR-3B (turnover),
   GSTR-1 summary (B2B share/counterparties), GSTR-1 B2B/e-invoices, GSTR-1 CDNR
   (credit-note revenue reversals), GSTR-1 HSN (product-mix diversity), GSTR-2A
-  (purchase-to-sales trade cycle). **Real GST API responses are wrapped in a
-  `response.message.data` envelope** — `GstFeatureExtractor.Unwrap()` handles
-  wrapped and bare payloads.
+  (purchase-to-sales trade cycle), and **GSTR-2B** (`gstr2b_get_all_details_MMyyyy.json`,
+  added 2026-07-07: ITC claimed-vs-available over-claim check, ITC-unavailable
+  share, supplier filing rate; payload is DOUBLE-nested `response.message.data.data`).
+  **Real GST API responses are wrapped in a `response.message.data` envelope** —
+  `GstFeatureExtractor.Unwrap()` handles wrapped and bare payloads. Appraisal
+  table is now 14 ratios (added ITC-vs-2B ≤100% and supplier filing ≥90%).
 - Six dimensions with doc weights (25/20/15/15/15/10), missing-source weight
   redistribution, NTC neutral default on Debt Serviceability (never zero).
   Missing sources feed neutral values into the ML vector too, not zeros.
