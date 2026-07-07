@@ -316,6 +316,44 @@ img {
     .nav-link .material-symbols-outlined {
         flex: 0 0 24px;
     }
+/*Nav link logout*/
+
+
+.nav-linkLogout {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    /*padding: 10px var(--space-xs);*/
+    border-radius: var(--radius-lg);
+    color: var(--color-on-surface-variant);
+    font-weight: 500;
+    font-size: 16px;
+    transition: background-color .15s ease, color .15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+    .nav-linkLogout.active {
+        background: var(--color-primary-container);
+        color: #f3ebed;
+        font-weight: 600;
+    }
+
+    .nav-linkLogout i {
+        flex: 0 0 20px;
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .nav-linkLogout svg {
+        flex: 0 0 20px;
+    }
+
+    .nav-linkLogout .material-symbols-outlined {
+        flex: 0 0 24px;
+    }
+
+
 
 .sidebar-footer {
     margin-top: auto;
