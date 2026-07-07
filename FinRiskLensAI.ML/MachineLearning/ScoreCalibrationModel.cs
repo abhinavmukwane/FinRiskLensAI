@@ -1,4 +1,5 @@
 using Microsoft.ML;
+using Microsoft.ML.Trainers.LightGbm;
 
 namespace FinRiskLensAI.ML.MachineLearning
 {
@@ -66,12 +67,19 @@ namespace FinRiskLensAI.ML.MachineLearning
             var ml = new MLContext(seed: 42);
             var data = ml.Data.LoadFromEnumerable(_generator.Generate(3000));
 
-            var pipeline = ml.Regression.Trainers.LightGbm(
-                labelColumnName: nameof(ScoreFeatureVector.Label),
-                featureColumnName: nameof(ScoreFeatureVector.Features),
-                numberOfLeaves: 31,
-                numberOfIterations: 150,
-                minimumExampleCountPerLeaf: 20);
+            // Cap training threads so the CPU-bound warmup leaves a core free for the
+            // web server to service requests (blob I/O) — otherwise a cold-start warmup
+            // saturates all cores and concurrent blob reads time out (TaskCanceledException).
+            var options = new LightGbmRegressionTrainer.Options
+            {
+                LabelColumnName = nameof(ScoreFeatureVector.Label),
+                FeatureColumnName = nameof(ScoreFeatureVector.Features),
+                NumberOfLeaves = 31,
+                NumberOfIterations = 150,
+                MinimumExampleCountPerLeaf = 20,
+                NumberOfThreads = Math.Max(1, Environment.ProcessorCount - 1)
+            };
+            var pipeline = ml.Regression.Trainers.LightGbm(options);
 
             return (ml, pipeline.Fit(data));
         }

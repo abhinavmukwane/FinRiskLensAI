@@ -1,5 +1,6 @@
 using FinRiskLensAI.Core.Interfaces;
 using System.Text;
+using Azure.Core;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 
@@ -19,9 +20,24 @@ namespace FinRiskLensAI.ML.Storage
                 ?? throw new InvalidOperationException("Missing AzureBlob:ConnectionString in configuration.");
             var containerName = configuration["AzureBlob:Container"] ?? "msme-data";
 
+            // Resilience: retry transient failures and give each try a generous network
+            // timeout, so a brief thread-pool/CPU stall (e.g. during ML warmup) doesn't
+            // surface as a TaskCanceledException on the request path.
+            var options = new BlobClientOptions
+            {
+                Retry =
+                {
+                    MaxRetries = 3,
+                    Mode = RetryMode.Exponential,
+                    Delay = TimeSpan.FromMilliseconds(500),
+                    MaxDelay = TimeSpan.FromSeconds(10),
+                    NetworkTimeout = TimeSpan.FromSeconds(60)
+                }
+            };
+
             _container = new Lazy<BlobContainerClient>(() =>
             {
-                var client = new BlobContainerClient(connectionString, containerName);
+                var client = new BlobContainerClient(connectionString, containerName, options);
                 client.CreateIfNotExists();
                 return client;
             });

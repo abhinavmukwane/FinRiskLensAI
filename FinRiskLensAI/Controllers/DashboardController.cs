@@ -222,6 +222,13 @@ namespace FinRiskLensAI.Controllers
                     model.EnterpriseName = JObject.Parse(udyamJson)
                         .SelectToken("main_details.name_of_enterprise")?.Value<string>();
             }
+            catch (OperationCanceledException)
+            {
+                // Blob read stalled/cancelled — typically a slow cold start (ML warmup)
+                // saturating the box, or the client navigated away. Not a hard failure.
+                _logger.LogWarning("Financial Health Card load canceled/timed out for {Uan} (likely a warming cold start).", model.Uan);
+                model.LoadError = "Your Financial Health Card is still being prepared while the service warms up. Please refresh in a few seconds.";
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed loading Financial Health Card for {Uan}", model.Uan);
