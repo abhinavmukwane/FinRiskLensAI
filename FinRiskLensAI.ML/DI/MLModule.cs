@@ -4,6 +4,7 @@ using FinRiskLensAI.ML.Features;
 using FinRiskLensAI.ML.MachineLearning;
 using FinRiskLensAI.ML.Services;
 using FinRiskLensAI.ML.Storage;
+using Microsoft.Extensions.Hosting;
 
 namespace FinRiskLensAI.ML.DI
 {
@@ -26,9 +27,15 @@ namespace FinRiskLensAI.ML.DI
             // Blob storage — container client is created lazily on first use
             builder.RegisterType<AzureBlobDataStore>().As<IMsmeDataStore>().SingleInstance();
 
+            // Startup warmup — trains the lazy ML models off the request path. Registered
+            // explicitly as a singleton IHostedService and excluded from the convention
+            // scan below (which would otherwise double-register it as IHostedService).
+            builder.RegisterType<MlWarmupService>().As<IHostedService>().SingleInstance();
+
             // Services by convention (matches the ServicesModule pattern)
             builder.RegisterAssemblyTypes(ThisAssembly)
                    .Where(t => t.Name.EndsWith("Service"))
+                   .Except<MlWarmupService>()
                    .AsImplementedInterfaces().InstancePerLifetimeScope();
         }
     }

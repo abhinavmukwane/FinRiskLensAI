@@ -409,6 +409,8 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
             }
             var sessionId = fiReq.body.sessionId;
 
+            await Task.Delay(3000); // Wait for 3 seconds
+
             // 2) FI Status
             var fiStatus = await FinancialInfoReqStatus(consent.consentHandle, consent.custId, consentId, sessionId).ConfigureAwait(false);
             if (fiStatus?.body == null || fiStatus.body.errorCode != 0)
@@ -418,6 +420,8 @@ namespace FinRiskLensAI.Services.Implementation.AccountAggregator
                 return false;
             }
             _logger.LogInformation("FI status for {Uan}: {Status}.", consent.uan, fiStatus.body.fiRequestStatus);
+
+            await Task.Delay(3000); // Wait for 3 seconds
 
             // 3) FI Fetch
             var data = await FinancialInfoFetch(consent.custId, consentId, sessionId).ConfigureAwait(false);

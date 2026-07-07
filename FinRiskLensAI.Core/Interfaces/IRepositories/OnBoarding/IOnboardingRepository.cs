@@ -16,6 +16,8 @@ namespace FinRiskLensAI.Core.Interfaces.IRepositories.OnBoarding
         Task<ResultModel<StaticResponseModel>> FetchUdyam(string uan);
         Task SaveMsmeData(string json);
         Task<UdyamDetailsModel> GetUdyamDetails(string uan);
+
+        Task<string> GetUdyamPayload(string uan);
         Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(UserRegistrationModel entity);
         Task<ResultModel<UserOtpModel>> AddUpdateUserOtp(UserOtpModel entity);
         Task<ResultModel<UserSessionModel>> FetchUserOTPDet(UserOtpModel model);

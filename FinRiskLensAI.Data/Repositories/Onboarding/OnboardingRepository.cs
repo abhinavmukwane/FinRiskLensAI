@@ -62,6 +62,55 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             return result;
         }
 
+        public async Task<ResultModel<StaticResponseModel>> AddUpdateStaticResponse(StaticResponseModel entity)
+        {
+            var result = new ResultModel<StaticResponseModel>();
+
+            try
+            {
+                var existing = await _context.StaticResponseModel
+                    .FirstOrDefaultAsync(x => x.UdyamNumber == entity.UdyamNumber)
+                    .ConfigureAwait(false);
+
+                if (existing != null)
+                {
+                    // Copy all properties from entity to existing object
+                    entity.MapToModelObject(existing);
+
+                    await _context.SaveChangesAsync().ConfigureAwait(false);
+
+                    result.Result = tflResultType.tflSuccess;
+                    result.Message = "Static Response Updated Successfully";
+                    result.Data = existing;
+                }
+                else
+                {
+                    StaticResponseModel newEntity = new StaticResponseModel();
+
+                    // Copy all properties from entity to new object
+                    entity.MapToModelObject(newEntity);
+
+                    _context.StaticResponseModel.Add(newEntity);
+
+                    await _context.SaveChangesAsync().ConfigureAwait(false);
+
+                    entity.StaticResponcesID = newEntity.StaticResponcesID;
+
+                    result.Result = tflResultType.tflSuccess;
+                    result.Message = "Static Response Saved Successfully";
+                    result.Data = newEntity;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Result = tflResultType.tflError;
+                result.Message = ex.Message;
+                result.Data = null;
+            }
+
+            return result;
+        }
+
         public async Task SaveMsmeData(string json)
         {
             var model = JsonConvert.DeserializeObject<UdyamResponseModel>(json);
@@ -200,6 +249,26 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                 PinCode = data.Pin
             };
         }
+
+        public async Task<string> GetUdyamPayload(string uan)
+        {
+            var data = await (
+                from e in _context.MsmeEnquiries
+                join l in _context.MsmeLocations
+                    on e.MsmeEnquiryID equals l.MsmeEnquiryID into loc
+                from l in loc.DefaultIfEmpty()
+                where e.Uan == uan
+                select new
+                {
+                   e.Payload
+                }).FirstOrDefaultAsync();
+
+            if (data == null)
+                return null;
+
+            return data.Payload;
+        }
+
         public async Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(UserRegistrationModel entity)
         {
             var result = new ResultModel<UserRegistrationModel>();

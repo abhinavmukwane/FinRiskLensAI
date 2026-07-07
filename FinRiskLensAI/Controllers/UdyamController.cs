@@ -1,11 +1,13 @@
 using FinRiskLensAI.Common;
 using FinRiskLensAI.Core.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.Common;
+using FinRiskLensAI.Core.Interfaces.IServices.OnBoarding;
 using FinRiskLensAI.Core.Models.Onboarding;
 using FinRiskLensAI.Core.Models.Universal;
 using FinRiskLensAI.Models;
 using FinRiskLensAI.Utility;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace FinRiskLensAI.Controllers
 {
@@ -19,12 +21,14 @@ namespace FinRiskLensAI.Controllers
     public class UdyamController : Controller
     {
         private readonly IStaticResponseService _staticResponses;
+        private readonly IOnboardingService _onboardService;
         private readonly ILogger<UdyamController> _logger;
 
-        public UdyamController(IStaticResponseService staticResponses, ILogger<UdyamController> logger)
+        public UdyamController(IStaticResponseService staticResponses, ILogger<UdyamController> logger, IOnboardingService OnboardService)
         {
             _staticResponses = staticResponses;
             _logger = logger;
+            _onboardService = OnboardService;
         }
 
         /// <summary>Business Identity &amp; Trust Analysis page.</summary>
@@ -62,9 +66,20 @@ namespace FinRiskLensAI.Controllers
                 var udyam = await _staticResponses.GetStaticCommonResponce<UdyamResponseModel>(uan, StaticResponseType.Udyam);
 
                 if (udyam == null)
-                    model.LoadError = $"No stored Udyam response was found for {uan}.";
+                {
+                    //model.LoadError = $"No stored Udyam response was found for {uan}.";
+                    var msmeData = await _onboardService.GetUdyamPayload(uan);
+
+                    if(msmeData.Result != tflResultType.tflSuccess)
+                        model.LoadError = $"No stored Udyam response was found for {uan}.";
+
+                    var udyamDet = JsonConvert.DeserializeObject<UdyamResponseModel>(msmeData.Data);
+                    model = BuildAnalysis(udyamDet, uan);
+                }
                 else
+                {
                     model = BuildAnalysis(udyam, uan);
+                }
             }
             catch (Exception ex)
             {

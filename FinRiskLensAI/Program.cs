@@ -55,6 +55,18 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysDir))
     .SetApplicationName("FinRiskLensAI");
 
+// Back the session with the SQL Server distributed cache instead of in-memory.
+// Otherwise an app-pool recycle (a heavy re-analyze can trigger one) or a web-farm
+// instance switch wipes the in-memory session, and the next request silently logs
+// the user out (redirected to Auth/CustLogin). SQL-backed session survives both.
+// Table: [FinRiskLensAI].[SessionCache] — see the create SQL in HANDOFF.md.
+builder.Services.AddDistributedSqlServerCache(o =>
+{
+    o.ConnectionString = builder.Configuration["Database:ConnectionStrings:SqlServer"];
+    o.SchemaName = "FinRiskLensAI";
+    o.TableName = "SessionCache";
+});
+
 builder.Services.AddSession(options =>
 {
     options.Cookie.Name = "frlai.sid";

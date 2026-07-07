@@ -56,11 +56,8 @@ async function getDomainLanguage() {
     
     if (response.ok) {
       const data = await response.json();
-      console.log('[Bhashini] Domain configured for language:', data.targetLang);
       return data.targetLang;
     } else if (response.status === 404) {
-      // This is the original domain, not a language-specific one
-      console.log('[Bhashini] Original domain detected');
       return null;
     }
   } catch (error) {
@@ -292,7 +289,7 @@ function initTranslationObserver() {
     }
   );
   
-  debugLog('IntersectionObserver initialized for lazy translation');
+  //debugLog('IntersectionObserver initialized for lazy translation');
 }
 
 // Initialize observer early so MutationObserver can use it
@@ -379,7 +376,7 @@ function translateNodesImmediately(nodes) {
  */
 async function processTranslationBatch(nodes) {
   
-  debugLog('Processing batch of', nodes.length, 'nodes');
+  //debugLog('Processing batch of', nodes.length, 'nodes');
   
   try {
     var textContentArray = nodes.map(function(item, index) {
@@ -709,7 +706,7 @@ function observeHiddenNodes(allNodes) {
     hiddenNodesCount++;
   });
   
-  debugLog('Observing', hiddenNodesCount, 'hidden nodes for lazy translation');
+  //debugLog('Observing', hiddenNodesCount, 'hidden nodes for lazy translation');
 }
 
 // Check for target_lang query param EARLY - before setting selectedTargetLanguageCode
@@ -724,7 +721,6 @@ var selectedTargetLanguageCode;
 if (_earlyTargetLang) {
   // Use the target_lang from URL - if 'en', set to null to prevent translation
   selectedTargetLanguageCode = _earlyTargetLang === 'en' ? null : _earlyTargetLang;
-  console.log('[Bhashini] Early init: Using target_lang from URL:', _earlyTargetLang, '-> selectedTargetLanguageCode:', selectedTargetLanguageCode);
 } else {
   // No target_lang in URL, use saved preference or initial preference
   selectedTargetLanguageCode = localStorage.getItem("preferredLanguage") || initialPreferredLanguage;
@@ -732,7 +728,6 @@ if (_earlyTargetLang) {
   if (selectedTargetLanguageCode === 'en') {
     selectedTargetLanguageCode = null;
   }
-  console.log('[Bhashini] Early init: Using localStorage/initial preference:', selectedTargetLanguageCode);
 }
 
 // Retrieve translationCache from session storage if available
@@ -1078,7 +1073,6 @@ async function getRedirectionUrl(targetLang) {
       )}&target_lang=${targetLang}`
     );
     const data = await res.json();
-    console.log(data, "redirection data");
     if (data && data.replacementUrl) {
       // Backend returns full URL with domain replaced but path/query preserved
       return data.replacementUrl;
@@ -1186,7 +1180,6 @@ function isIgnoredNode(node, originalText) {
 }
 
 function selectLanguage(language) {
-  console.log('[Bhashini] selectLanguage called with:', language);
   // Trim whitespace from language to handle extra spaces in textContent
   language = language.trim();
   // document.querySelector(".bhashini-dropdown-btn-text").textContent = language;
@@ -1201,7 +1194,6 @@ function selectLanguage(language) {
   var selectedLang = supportedTargetLangArr.find(
     (lang) => lang.label === language
   );
-  console.log('[Bhashini] selectedLang found:', selectedLang);
   if (selectedLang) {
     // Update aria-selected on all language options
     var languageOptions = document.querySelectorAll(".language-option");
@@ -1337,7 +1329,7 @@ async function translateElementText(element, target_lang) {
     hiddenNodes.forEach(function(nodeData) {
       observeNodeForTranslation(nodeData);
     });
-    debugLog('Added', hiddenNodes.length, 'dynamic hidden nodes to observer');
+    //debugLog('Added', hiddenNodes.length, 'dynamic hidden nodes to observer');
   }
 }
 var nodesToTranslate = []; // Array to store nodes and their associated language codes
@@ -1492,18 +1484,11 @@ if (isSelectedLang) {
   var languageToUse = null;
   var isFromTargetLangParam = sessionStorage.getItem('bhashini_from_target_lang') === 'true';
 
-  console.log('[Bhashini] === initializeTranslation START ===');
-  console.log('[Bhashini] Current URL:', window.location.href);
-  console.log('[Bhashini] isRedirection:', isRedirection);
-  console.log('[Bhashini] defaultTranslatedLanguage:', defaultTranslatedLanguage);
-  console.log('[Bhashini] isFromTargetLangParam (from session):', isFromTargetLangParam);
-
+  
   // Priority 1: target_lang query param (explicit user selection from another domain)
   const urlParams = new URLSearchParams(window.location.search);
   const targetLangParam = urlParams.get('target_lang');
-  console.log('[Bhashini] Priority 1 - target_lang param:', targetLangParam);
   if (targetLangParam) {
-    console.log('[Bhashini] Priority 1 ACTIVE - Using target_lang:', targetLangParam);
     languageToUse = targetLangParam;
     isFromTargetLangParam = true;
     sessionStorage.setItem('bhashini_from_target_lang', 'true');
@@ -1514,22 +1499,16 @@ if (isSelectedLang) {
     urlParams.delete('target_lang');
     const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '') + window.location.hash;
     window.history.replaceState({}, '', newUrl);
-    console.log('[Bhashini] URL cleaned, languageToUse:', languageToUse, 'isFromTargetLangParam:', isFromTargetLangParam);
   } else if (isFromTargetLangParam) {
     // We already processed target_lang, use the saved preference
     languageToUse = localStorage.getItem("preferredLanguage") || "en";
-    console.log('[Bhashini] Priority 1 - Using saved preference from target_lang:', languageToUse);
   }
 
   // Priority 2: Domain-configured language (only when isRedirection)
-  console.log('[Bhashini] Priority 2 check - languageToUse:', languageToUse, 'isRedirection:', isRedirection);
   if (!languageToUse && isRedirection) {
-    console.log('[Bhashini] Priority 2 ENTERING - fetching domain language...');
     try {
       const domainLanguage = await getDomainLanguage();
-      console.log('[Bhashini] Priority 2 - domainLanguage result:', domainLanguage);
       if (domainLanguage && domainLanguage !== "en") {
-        console.log('[Bhashini] Priority 2 ACTIVE - Using domain-configured language:', domainLanguage);
         languageToUse = domainLanguage;
         localStorage.setItem("preferredLanguage", domainLanguage);
       }
@@ -1542,13 +1521,10 @@ if (isSelectedLang) {
 
   // Priority 3: default-translated-language attribute
   // SKIP redirect if we just processed a target_lang param (prevents bounce back)
-  console.log('[Bhashini] Priority 3 check - languageToUse:', languageToUse, 'defaultTranslatedLanguage:', defaultTranslatedLanguage);
+  
   if (!languageToUse && defaultTranslatedLanguage && defaultTranslatedLanguage !== "en") {
-    console.log('[Bhashini] Priority 3 ENTERING');
     languageToUse = defaultTranslatedLanguage;
-    console.log('[Bhashini] Priority 3 redirect check - isRedirection:', isRedirection, 'isFromTargetLangParam:', isFromTargetLangParam);
     if (isRedirection && !isFromTargetLangParam) {
-      console.log('[Bhashini] Priority 3 - attempting redirect for:', languageToUse);
       try {
         const redirUrl = await getRedirectionUrl(languageToUse);
         if (redirUrl) {
@@ -1561,7 +1537,6 @@ if (isSelectedLang) {
           if (redirOrigin !== currentOrigin && redirHref !== currentHref) {
             localStorage.setItem("preferredLanguage", languageToUse);
             sessionStorage.setItem('bhashini_redirected', '1');
-            console.log('[Bhashini] Redirecting to foreign-origin language URL:', redirHref);
             window.location.href = redirHref;
             return;
           } else {
@@ -1586,15 +1561,12 @@ if (isSelectedLang) {
   // Redirect if: no saved preference, OR saved preference matches initialPreferredLanguage.
   // If user chose a DIFFERENT language (e.g. they selected English explicitly), respect that choice.
   const savedPreference = localStorage.getItem("preferredLanguage");
-  console.log('[Bhashini] Priority 4 check - languageToUse:', languageToUse, 'initialPreferredLanguage:', initialPreferredLanguage, 'savedPreference:', savedPreference);
   // Allow redirect if: no saved preference, OR saved preference matches initialPreferredLanguage
   // (i.e. user hasn't chosen a DIFFERENT language — respect site's redirect intent)
   const shouldRedirectForInitialPreference = !savedPreference || savedPreference === initialPreferredLanguage;
   if (!languageToUse && initialPreferredLanguage && initialPreferredLanguage !== "en" && isRedirection && shouldRedirectForInitialPreference) {
-    console.log('[Bhashini] Priority 4 ACTIVE - Using initial preferred language:', initialPreferredLanguage);
     languageToUse = initialPreferredLanguage;
     if (isRedirection && !isFromTargetLangParam) {
-      console.log('[Bhashini] Priority 4 - attempting redirect for:', languageToUse);
       try {
         const redirUrl = await getRedirectionUrl(languageToUse);
         if (redirUrl) {
@@ -1606,7 +1578,6 @@ if (isSelectedLang) {
           if (redirOrigin !== currentOrigin && redirHref !== currentHref) {
             localStorage.setItem("preferredLanguage", languageToUse);
             sessionStorage.setItem('bhashini_redirected', '1');
-            console.log('[Bhashini] Priority 4 - Redirecting to foreign-origin language URL:', redirHref);
             window.location.href = redirHref;
             return;
           } else {
@@ -1640,7 +1611,6 @@ if (isSelectedLang) {
   // 1. languageToUse is set AND
   // 2. Either languageToUse is not English, OR pageSourceLanguage is not English (translate TO English)
   if (languageToUse && (languageToUse !== "en" || pageSourceLanguage !== "en")) {
-    console.log('[Bhashini] Translation needed - languageToUse:', languageToUse, 'pageSourceLanguage:', pageSourceLanguage);
     selectedTargetLanguageCode = languageToUse;
     isContentTranslated = true;
     translateAllTextNodes(languageToUse);
@@ -1665,8 +1635,6 @@ if (isSelectedLang) {
 // Function to handle dropdown change
 async function onDropdownChange(event) {
   var selectedValue = event.target.value;
-  console.log('[Bhashini] Dropdown changed to:', selectedValue);
-
 
   // Resolve human-readable label for notifications (WCAG 3.2.2)
   var selectedLangObj = supportedTargetLangArr.find(function(l) { return l.code === selectedValue; });
@@ -1690,11 +1658,8 @@ async function onDropdownChange(event) {
 
   // Handle English selection
   if (selectedValue === "en") {
-    console.log('[Bhashini] English selected');
-
     // If page source language is NOT English, we need to translate TO English
     if (pageSourceLanguage !== "en") {
-      console.log('[Bhashini] Page source is not English, translating to English');
       localStorage.setItem("preferredLanguage", selectedValue);
     notifyAndNavigate('Translating this page to English.', function() {
   if (isReload) {
@@ -1710,21 +1675,18 @@ async function onDropdownChange(event) {
     }
 
     // Page source is English - save English preference and reload
-    console.log('[Bhashini] Page source is English - saving English preference');
     localStorage.setItem("preferredLanguage", "en");
     sessionStorage.removeItem('bhashini_from_target_lang');
 
     if (isRedirection) {
       // Use the redirection API - it will return original domain
       var redirectionUrl = await getRedirectionUrl(selectedValue);
-      console.log('[Bhashini] Redirection URL for English:', redirectionUrl);
       if (redirectionUrl) {
         // Ensure target_lang=en is in the URL (backend may not include it)
         var url = new URL(redirectionUrl);
         if (!url.searchParams.has('target_lang')) {
           url.searchParams.set('target_lang', 'en');
         }
-        console.log('[Bhashini] Final redirect URL:', url.href);
         notifyAndNavigate('Redirecting to the original version of this page.', function() {
           window.location.href = url.href;
         });
@@ -1747,17 +1709,13 @@ async function onDropdownChange(event) {
 
   // Perform translation for the selected language
   if (isRedirection) {
-    console.log('[Bhashini] isRedirection is true, fetching redirection URL...');
     var redirectionUrl = await getRedirectionUrl(selectedValue);
-    console.log('[Bhashini] Redirection URL received:', redirectionUrl);
     if (redirectionUrl) {
-      console.log('[Bhashini] Redirecting to:', redirectionUrl);
       notifyAndNavigate('Redirecting to the ' + selectedLangLabel + ' version of this page.', function() {
         window.location.href = redirectionUrl;
       });
     } else {
       // No redirection URL returned (404 or error) - translate in place
-      console.log('[Bhashini] No redirection URL, translating in place');
       localStorage.setItem("preferredLanguage", selectedValue);
       if (isReload) {
         notifyAndNavigate('Translating this page to ' + selectedLangLabel + '.', function() {
@@ -1827,7 +1785,7 @@ async function translateAllTextNodes(target_lang) {
   // Filter to only visible nodes (viewport + 20% buffer below)
   var textNodes = filterVisibleNodes(allTextNodes, 20);
   
-  debugLog(' Total nodes:', allTextNodes.length, '| Visible nodes to translate:', textNodes.length);
+  //debugLog(' Total nodes:', allTextNodes.length, '| Visible nodes to translate:', textNodes.length);
   
   if (textNodes.length > 0) {
     var textContentArray = textNodes.map((node, index) => {

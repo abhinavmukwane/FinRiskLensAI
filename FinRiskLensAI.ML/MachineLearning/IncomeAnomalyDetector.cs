@@ -17,6 +17,9 @@ namespace FinRiskLensAI.ML.MachineLearning
 
         public IncomeAnomalyDetector() => _trained = new(Train);
 
+        /// <summary>Force the (lazy) PCA training now — called at startup (see MlWarmupService).</summary>
+        public void Warmup() => _ = _trained.Value;
+
         private class Row
         {
             [VectorType(FeatureCount)]
