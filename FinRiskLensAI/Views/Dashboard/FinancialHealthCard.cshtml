@@ -386,7 +386,31 @@
                             <div class="fhc-sub" style="font-size:.68rem;">rest settled via ITC</div>
                         </div>
                     </div>
-                    <div class="col-6 col-md-3"><div class="stat-tile"><div class="v">₹@FormatInr(g.ItcMonthlyAvg)</div><div class="k">Net ITC / month</div></div></div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-tile">
+                            <div class="v">₹@FormatInr(g.ItcMonthlyAvg)</div>
+                            <div class="k">Net ITC / month</div>
+                            @if (g.Has2bData) { <div class="fhc-sub" style="font-size:.68rem;">2B available ₹@FormatInr(g.ItcAvailableMonthly)</div> }
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-tile">
+                            <div class="v" style="color:@(g.Has2bData && g.ItcClaimVsAvailable > 1.0 ? "#8b1020" : "#0f5137");">
+                                @(g.Has2bData && g.ItcClaimVsAvailable > 0 ? g.ItcClaimVsAvailable.ToString("P0") : "N/A")
+                            </div>
+                            <div class="k">ITC Claimed vs 2B</div>
+                            <div class="fhc-sub" style="font-size:.68rem;">&gt;100% = over-claiming</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-tile">
+                            <div class="v" style="color:@(g.SupplierFilingRate >= 0.9 ? "#0f5137" : "#9c4a00");">
+                                @(g.Has2bData ? g.SupplierFilingRate.ToString("P0") : "N/A")
+                            </div>
+                            <div class="k">Supplier Filing Rate (2B)</div>
+                            @if (g.Has2bData && g.ItcUnavailableShare > 0) { <div class="fhc-sub" style="font-size:.68rem;">ITC unavailable @g.ItcUnavailableShare.ToString("P1")</div> }
+                        </div>
+                    </div>
                     <div class="col-6 col-md-3">
                         <div class="stat-tile">
                             <div class="v" style="color:@(g.TopCustomerShare > 0.4 ? "#9c4a00" : "#0f5137");">@(g.TopCustomerShare > 0 ? g.TopCustomerShare.ToString("P0") : "N/A")</div>

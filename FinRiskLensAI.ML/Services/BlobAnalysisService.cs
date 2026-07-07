@@ -107,6 +107,8 @@ namespace FinRiskLensAI.ML.Services
                         request.Gstr1HsnJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
                     else if (file.StartsWith(MsmeDataFiles.Gstr2aB2bPrefix, StringComparison.OrdinalIgnoreCase))
                         request.Gstr2aB2bJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
+                    else if (file.StartsWith(MsmeDataFiles.Gstr2bPrefix, StringComparison.OrdinalIgnoreCase))
+                        request.Gstr2bJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
                     else if (file.StartsWith(MsmeDataFiles.Gstr1B2bPrefix, StringComparison.OrdinalIgnoreCase))
                         request.Gstr1B2bJsons.Add(await _store.DownloadAsync(uan, file, ct) ?? string.Empty);
                 }

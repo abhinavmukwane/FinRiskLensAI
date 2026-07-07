@@ -20,6 +20,7 @@ namespace FinRiskLensAI.ML.Features
             IReadOnlyList<string>? gstr1CdnrJsons,
             IReadOnlyList<string>? gstr1HsnJsons,
             IReadOnlyList<string>? gstr2aB2bJsons,
+            IReadOnlyList<string>? gstr2bJsons,
             MsmeFeatureSet features)
         {
             var anyData = false;
@@ -141,6 +142,27 @@ namespace FinRiskLensAI.ML.Features
                 }
             }
 
+            // ── GSTR-2B: ITC available/unavailable + supplier filing discipline.
+            //    Payload is double-nested: response.message.data → { chksum, data: {...} }
+            double itcAvailableTotal = 0, itcUnavailableTotal = 0;
+            int itc2bMonths = 0, suppliersTotal = 0, suppliersFiled = 0;
+            foreach (var outer in ParseAll(gstr2bJsons, ref anyData))
+            {
+                var body = outer["data"] as JObject ?? outer;
+                if (body["itcsumm"] == null && body["docdata"] == null) continue;
+
+                itc2bMonths++;
+                itcAvailableTotal += SumItcHeads(body.SelectToken("itcsumm.itcavl") as JObject);
+                itcUnavailableTotal += SumItcHeads(body.SelectToken("itcsumm.itcunavl") as JObject);
+
+                foreach (var supplier in body.SelectTokens("docdata.b2b[*]").OfType<JObject>())
+                {
+                    suppliersTotal++;
+                    if (!string.IsNullOrWhiteSpace(supplier.Value<string>("supfildt")))
+                        suppliersFiled++;
+                }
+            }
+
             if (!anyData) return;
             features.HasGst = true;
             features.GstB2bShare = totalTax > 0 ? Math.Clamp(b2bTax / totalTax, 0, 1) : 0;
@@ -154,6 +176,21 @@ namespace FinRiskLensAI.ML.Features
                 features.GstCashTaxShare = taxPaidCash / (taxPaidCash + taxPaidItc);
             }
             features.GstItcMonthlyAvg = itcMonths > 0 ? itcNetTotal / itcMonths : 0;
+
+            // ── GSTR-2B derived signals
+            if (itc2bMonths > 0)
+            {
+                features.GstHas2bData = true;
+                features.GstItcAvailableMonthly = Math.Round(itcAvailableTotal / itc2bMonths);
+                if (features.GstItcAvailableMonthly > 0 && features.GstItcMonthlyAvg > 0)
+                    features.GstItcClaimVsAvailable = Math.Round(
+                        Math.Clamp(features.GstItcMonthlyAvg / features.GstItcAvailableMonthly, 0, 3), 4);
+                if (itcAvailableTotal + itcUnavailableTotal > 0)
+                    features.GstItcUnavailableShare = Math.Round(
+                        itcUnavailableTotal / (itcAvailableTotal + itcUnavailableTotal), 4);
+                if (suppliersTotal > 0)
+                    features.GstSupplierFilingRate = Math.Round((double)suppliersFiled / suppliersTotal, 4);
+            }
 
             // ── Customer / vendor concentration (top-5 shares, masked GSTINs)
             FillConcentration(customerValue, features.GstTopCustomers, v => features.GstTopCustomerShare = v);
@@ -201,6 +238,20 @@ namespace FinRiskLensAI.ML.Features
 
         private static double Sum(JObject obj, params string[] fields)
             => fields.Sum(f => obj.Value<double?>(f) ?? 0);
+
+        /// <summary>
+        /// Total tax across a GSTR-2B ITC summary node (itcavl / itcunavl): sums the
+        /// top-level igst/cgst/sgst/cess of each supply category (nonrevsup, revsup,
+        /// othersup, …) — nested b2b/cdnr breakups are skipped to avoid double counting.
+        /// </summary>
+        private static double SumItcHeads(JObject? summaryNode)
+        {
+            if (summaryNode == null) return 0;
+            double total = 0;
+            foreach (var category in summaryNode.Properties().Select(p => p.Value).OfType<JObject>())
+                total += Sum(category, "igst", "cgst", "sgst", "cess");
+            return total;
+        }
 
         /// <summary>Top-5 counterparty shares of total value, GSTINs masked for display.</summary>
         private static void FillConcentration(

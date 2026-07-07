@@ -40,6 +40,17 @@ namespace FinRiskLensAI.Core.Models.Scoring
         public Dictionary<string, double> TopCustomers { get; set; } = new();
         public Dictionary<string, double> TopVendors { get; set; } = new();
         public Dictionary<string, double> MonthlySales { get; set; } = new();
+
+        // ── GSTR-2B (auto-drafted ITC statement)
+        public bool Has2bData { get; set; }
+        /// <summary>Monthly average ITC available per GSTR-2B.</summary>
+        public double ItcAvailableMonthly { get; set; }
+        /// <summary>ITC claimed (3B) vs available (2B) — >1 = over-claiming, a compliance red flag.</summary>
+        public double ItcClaimVsAvailable { get; set; }
+        /// <summary>Share of ITC marked unavailable in 2B, 0..1.</summary>
+        public double ItcUnavailableShare { get; set; }
+        /// <summary>Share of B2B suppliers with a return filing date in 2B, 0..1.</summary>
+        public double SupplierFilingRate { get; set; }
     }
 
     /// <summary>P&L / balance-sheet ratios from ITR (business filers only — null = not derivable).</summary>

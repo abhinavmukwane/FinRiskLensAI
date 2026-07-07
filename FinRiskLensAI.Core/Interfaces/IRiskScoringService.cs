@@ -15,6 +15,7 @@ namespace FinRiskLensAI.Core.Interfaces
         public List<string> Gstr1CdnrJsons { get; set; } = new();       // credit/debit notes
         public List<string> Gstr1HsnJsons { get; set; } = new();        // HSN summaries
         public List<string> Gstr2aB2bJsons { get; set; } = new();       // inward (purchase) invoices
+        public List<string> Gstr2bJsons { get; set; } = new();         // auto-drafted ITC statements
         // EPFO payload slot — source arrives later, wired but unused for now
         public string? EpfoJson { get; set; }
     }

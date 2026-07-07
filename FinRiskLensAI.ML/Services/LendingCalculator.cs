@@ -115,6 +115,17 @@ namespace FinRiskLensAI.ML.Services
                 !hasConsistency ? RatioStatus.NotAvailable : f.GstR1Vs3bConsistency >= 0.90 ? RatioStatus.Strong : f.GstR1Vs3bConsistency >= 0.75 ? RatioStatus.Adequate : RatioStatus.Weak,
                 "Agreement between invoice-level (GSTR-1) and summary (GSTR-3B) declared sales — persistent gaps signal misdeclaration");
 
+            var hasItcMatch = f.GstHas2bData && f.GstItcClaimVsAvailable > 0;
+            Add("ITC Claimed vs 2B Available", f.GstItcClaimVsAvailable,
+                hasItcMatch ? $"{f.GstItcClaimVsAvailable:P0}" : "N/A", "≤ 100%",
+                !hasItcMatch ? RatioStatus.NotAvailable : f.GstItcClaimVsAvailable <= 1.00 ? RatioStatus.Strong : f.GstItcClaimVsAvailable <= 1.10 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "ITC claimed in GSTR-3B vs auto-drafted availability in GSTR-2B — claiming beyond 2B is an over-claim red flag");
+
+            Add("Supplier Filing Discipline (2B)", f.GstSupplierFilingRate,
+                f.GstHas2bData ? $"{f.GstSupplierFilingRate:P0}" : "N/A", "≥ 90%",
+                !f.GstHas2bData ? RatioStatus.NotAvailable : f.GstSupplierFilingRate >= 0.90 ? RatioStatus.Strong : f.GstSupplierFilingRate >= 0.75 ? RatioStatus.Adequate : RatioStatus.Weak,
+                "Share of B2B suppliers whose returns are filed per GSTR-2B — non-filing vendors put the MSME's ITC at risk");
+
             // ── Financial-statement ratios from ITR (business filers with books only)
             Add("EBITDA Margin (ITR)", f.ItrEbitdaMargin ?? 0,
                 f.ItrEbitdaMargin.HasValue ? $"{f.ItrEbitdaMargin:P1}" : "N/A", "≥ 10%",

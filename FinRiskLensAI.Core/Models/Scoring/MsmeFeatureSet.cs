@@ -55,6 +55,17 @@ namespace FinRiskLensAI.Core.Models.Scoring
         public Dictionary<string, double> GstTopCustomers { get; } = new();
         public Dictionary<string, double> GstTopVendors { get; } = new();
 
+        // ── GSTR-2B (auto-drafted ITC statement)
+        public bool GstHas2bData { get; set; }
+        /// <summary>Monthly average ITC available per GSTR-2B (all heads).</summary>
+        public double GstItcAvailableMonthly { get; set; }
+        /// <summary>ITC claimed in GSTR-3B vs available per GSTR-2B — >1 means over-claiming (red flag).</summary>
+        public double GstItcClaimVsAvailable { get; set; }
+        /// <summary>Share of ITC marked unavailable in 2B, 0..1 — vendor-quality signal.</summary>
+        public double GstItcUnavailableShare { get; set; }
+        /// <summary>Share of B2B suppliers whose returns show a filing date in 2B, 0..1.</summary>
+        public double GstSupplierFilingRate { get; set; }
+
         // ── ITR (income + compliance)
         /// <summary>Gross total income keyed by assessment year label (e.g. "2024-2025").</summary>
         public SortedDictionary<string, double> ItrYearlyIncome { get; } = new();

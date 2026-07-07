@@ -150,6 +150,7 @@ Container: msme-data                     (config: AzureBlob:ConnectionString / :
     ├── gstr1_cdnr_MMyyyy.json           ← credit/debit notes (revenue reversals)
     ├── gstr1_hsn_summary_MMyyyy.json    ← HSN summaries (product-mix diversity)
     ├── gstr2a_b2b_MMyyyy.json           ← inward purchases (trade-cycle sanity)
+    ├── gstr2b_get_all_details_MMyyyy.json ← auto-drafted ITC statement (claim-vs-available, supplier filing)
     └── result.json                      ← written by the engine after analysis
 ```
 
@@ -275,6 +276,7 @@ Key engineered features:
 | GST — GSTR-1 CDNR | credit/debit-note value vs turnover (revenue-reversal ratio → Revenue Vitality penalty) |
 | GST — GSTR-1 HSN | distinct HSN/SAC codes sold (product-mix diversity → Business Stability footprint) |
 | GST — GSTR-2A | inward purchase value, purchase-to-sales ratio (healthy trade-cycle band → Business Stability) |
+| GST — GSTR-2B | ITC available vs claimed (over-claim red flag), ITC-unavailable share, supplier filing rate (`supfildt`). Payload is double-nested: `response.message.data.data` |
 | ITR | per-year income series, income trend slope, filed-on-time ratio, years filed |
 | AA | monthly credit/debit series, inflow volatility (CV), days-cash-on-hand, bounce count, UPI share, counterparty diversity, repeat-payer ratio, EMI-to-inflow ratio |
 
@@ -418,7 +420,7 @@ Fair ×0.60, At Risk ×0.35, High Risk ×0. When GST is missing (thin file),
 annual turnover falls back to `bank inflows × 12`. All figures are rounded to
 ₹10k and labelled indicative — never a sanction.
 
-**The twelve credit-appraisal ratios** (each carries value, banking benchmark,
+**The fourteen credit-appraisal ratios** (each carries value, banking benchmark,
 and a Strong/Adequate/Weak status; missing sources report `NotAvailable`, never
 a fake number):
 
@@ -432,6 +434,8 @@ a fake number):
 | Inflow Volatility | coefficient of variation of monthly credits | ≤ 0.30 | earnings steadiness |
 | Credit Note Ratio | `CDNR note value / total turnover` | ≤ 5% | how much headline revenue gets reversed |
 | GSTR-1 vs 3B Consistency | `1 − avg per-period |GSTR-1 taxable − GSTR-3B taxable| / GSTR-3B` | ≥ 90% | invoice-level vs summary declarations agree — persistent gaps signal misdeclaration |
+| ITC Claimed vs 2B Available | `3B itc_net monthly avg / 2B itcavl monthly avg` | ≤ 100% | claiming beyond the auto-drafted 2B availability is an over-claim red flag |
+| Supplier Filing Discipline (2B) | `suppliers with supfildt / total B2B suppliers` | ≥ 90% | non-filing vendors put the MSME's ITC at risk |
 | EBITDA Margin (ITR) | `PBIDTA / business turnover` (ITR P&L) | ≥ 10% | operating profitability from filed books |
 | Net Profit Margin (ITR) | `ProfitAfterTax / business turnover` | ≥ 5% | bottom-line profitability |
 | Debtor Days (ITR) | `sundry debtors / turnover × 365` (needs ITR balance sheet) | ≤ 60 days | how long customers take to pay |
