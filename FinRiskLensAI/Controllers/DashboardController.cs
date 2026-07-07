@@ -2,6 +2,7 @@ using FinRiskLensAI.Common;
 using FinRiskLensAI.Core.Interfaces;
 using FinRiskLensAI.Core.Interfaces.IServices.AccountAggregator;
 using FinRiskLensAI.Core.Interfaces.IServices.Common;
+using FinRiskLensAI.Core.Interfaces.IServices.GST;
 using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Core.Models.Universal;
 using FinRiskLensAI.Models;
@@ -19,14 +20,16 @@ namespace FinRiskLensAI.Controllers
         private readonly ILogger<DashboardController> _logger;
         private readonly IAccountAggregatorService _aaService;
         private readonly IIpRiskService _ipRisk;
+        private readonly IGSTR2And3BResponceService _gstResponces;
 
-        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService, IIpRiskService ipRisk)
+        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService, IIpRiskService ipRisk, IGSTR2And3BResponceService gstResponces)
         {
             _analysis = analysis;
             _store = store;
             _logger = logger;
             _aaService = AAService;
             _ipRisk = ipRisk;
+            _gstResponces = gstResponces;
         }
 
         /// <summary>
@@ -100,6 +103,47 @@ namespace FinRiskLensAI.Controllers
         public IActionResult CustDashboard()
         {
             return View();
+        }
+
+        /// <summary>
+        /// GST Analysis page — the dedicated screen behind the "GST Details"
+        /// sidebar item. Loads the latest stored GSTR-2B/3B responses via
+        /// IGSTR2And3BResponceService.GetResponces(); the UdyamNumber is read
+        /// from the authenticated session inside the service, never from the UI.
+        /// Phase 1: page + data only — the BI charts come in the next phase.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GSTAnalysis()
+        {
+            var model = new GSTAnalysisViewModel
+            {
+                Uan = HttpContext.Session.GetCurrentUser()?.UdyamNumber?.Trim()
+            };
+
+            try
+            {
+                var data = await _gstResponces.GetResponces();
+                if (data != null)
+                {
+                    model.HasData = true;
+                    model.Gstin = data.GSTINNumber;
+                    model.FilingPeriod = data.FilingPeriod;
+                    model.CreatedDate = data.CreatedDate;
+                    model.GSTR2BResponseData = data.GSTR2BResponseData;
+                    model.GSTR3BResponseData = data.GSTR3BResponseData;
+                }
+                else
+                {
+                    model.LoadError = "No GST return data is stored for your account yet. Please fetch your GSTR details from the Dashboard first.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed loading GST analysis for {Uan}", model.Uan);
+                model.LoadError = "Could not load your GST analysis right now. Please try again later.";
+            }
+
+            return View(model);
         }
 
         /// <summary>

@@ -41,6 +41,9 @@ namespace FinRiskLensAI.Core.Common
         /// <summary>Aadhaar — keep only the last 4 digits: XXXXXXXX1234.</summary>
         public static string MaskAadhaar(string? aadhaar) => MaskValue(aadhaar, 0, 4);
 
+        /// <summary>Udyam number — keep the "UDYAM-&lt;state&gt;-" prefix and last 4: UDYAM-MH-20-0067394 → UDYAM-MH-XXXXXX7394.</summary>
+        public static string MaskUdyam(string? uan) => MaskValue(uan, 9, 4);
+
         /// <summary>Mobile — keep the last 4 digits: XXXXXX5360.</summary>
         public static string MaskMobile(string? mobile) => MaskValue(mobile, 0, 4);
 

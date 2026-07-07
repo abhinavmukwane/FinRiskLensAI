@@ -1,0 +1,505 @@
+/* =====================================================================
+   GST ANALYSIS PAGE — /Dashboard/GSTAnalysis only.
+   Ported from the design mockup (gst.css + the mockup dashboard.css
+   tokens). Everything is scoped under .gst-analysis so the mockup's
+   palette/variables never leak into the shared _DashboardLayout chrome
+   (the global --color-primary is #57001d; this page's accent is #8b1538).
+   ===================================================================== */
+
+.gst-analysis {
+    /* Mockup design tokens, wrapper-scoped */
+    --color-primary: #8b1538;
+    --color-primary-hover: #74112f;
+    --color-primary-light: #faf7f8;
+    --color-success: #2e7d32;
+    --color-success-hover: #215c25;
+    --color-success-light: #e6f4ea;
+    --color-warning: #b26a00;
+    --color-warning-hover: #8f5500;
+    --color-warning-light: #fff3e0;
+    --color-danger: #b3261e;
+    --color-danger-hover: #8c1e18;
+    --color-danger-light: #fdecea;
+    --color-surface: #ffffff;
+    --color-surface-glass: rgba(255, 255, 255, 0.85);
+    --color-text-primary: #1e1b18;
+    --color-text-secondary: #564144;
+    --color-text-muted: #897174;
+    --color-border: #ead9df;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+    --shadow-sm: 0 1px 2px 0 rgba(139, 21, 56, 0.02);
+    --shadow-md: 0 4px 14px rgba(139, 21, 56, 0.02), 0 2px 4px -2px rgba(139, 21, 56, 0.02);
+    --shadow-lg: 0 10px 15px -3px rgba(139, 21, 56, 0.03), 0 4px 6px -4px rgba(139, 21, 56, 0.03);
+    --shadow-premium: 0 20px 25px -5px rgba(139, 21, 56, 0.04), 0 8px 10px -6px rgba(139, 21, 56, 0.04);
+    color: var(--color-text-primary);
+}
+
+/* Bootstrap utility recolors — page-scoped */
+.gst-analysis .text-primary { color: var(--color-primary) !important; }
+.gst-analysis .text-success { color: var(--color-success) !important; }
+.gst-analysis .text-success-hover { color: var(--color-success-hover) !important; }
+.gst-analysis .text-warning { color: var(--color-warning) !important; }
+.gst-analysis .text-danger { color: var(--color-danger) !important; }
+.gst-analysis .bg-primary { background-color: var(--color-primary) !important; }
+.gst-analysis .bg-success { background-color: var(--color-success) !important; }
+.gst-analysis .bg-primary-light { background-color: var(--color-primary-light) !important; }
+.gst-analysis .bg-success-light { background-color: var(--color-success-light) !important; }
+.gst-analysis .bg-light { background-color: #faf7f8 !important; }
+.gst-analysis .border-primary { border-color: var(--color-border) !important; }
+.gst-analysis .border-color-border { border-color: var(--color-border) !important; }
+
+.gst-analysis .border-start-md { border-left: 1px solid var(--color-border); }
+@media (max-width: 767px) {
+    .gst-analysis .border-start-md { border-left: none; }
+}
+
+.gst-analysis .border-start-lg { border-left: 1px solid var(--color-border); }
+@media (max-width: 991px) {
+    .gst-analysis .border-start-lg { border-left: none; }
+}
+
+.gst-analysis .text-gradient-primary {
+    background: linear-gradient(135deg, #8b1538 0%, #74112f 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.gst-analysis .font-headline { font-family: var(--font-headline); }
+
+/* Glass Cards */
+.gst-analysis .glass-card {
+    background: var(--color-surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 24px;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.gst-analysis .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), var(--shadow-premium);
+    border-color: rgba(139, 21, 56, 0.2);
+}
+
+.gst-analysis .card-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.gst-analysis .card-heading {
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-primary);
+}
+
+.gst-analysis .card-heading i { color: var(--color-primary); }
+
+/* Business Header Card */
+.gst-analysis .business-header-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border: 1px solid var(--color-border);
+}
+
+.gst-analysis .header-logo-box {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-md);
+    background: var(--color-primary-light);
+    border: 1px solid rgba(139, 21, 56, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    font-size: 28px;
+    box-shadow: var(--shadow-sm);
+}
+
+.gst-analysis .verified-tag {
+    background: var(--color-success-light);
+    color: var(--color-success-hover);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.gst-analysis .header-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 16px;
+    width: 100%;
+}
+
+.gst-analysis .header-info-item { display: flex; flex-direction: column; }
+
+.gst-analysis .header-info-item span {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.gst-analysis .header-info-item strong {
+    font-size: 13px;
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+/* KPI Cards */
+.gst-analysis .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.gst-analysis .kpi-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.gst-analysis .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(139, 21, 56, 0.15);
+}
+
+.gst-analysis .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: transparent;
+}
+
+.gst-analysis .kpi-card.kpi-primary::before { background: var(--color-primary); }
+.gst-analysis .kpi-card.kpi-success::before { background: var(--color-success); }
+.gst-analysis .kpi-card.kpi-warning::before { background: var(--color-warning); }
+.gst-analysis .kpi-card.kpi-danger::before { background: var(--color-danger); }
+
+.gst-analysis .kpi-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--color-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.gst-analysis .kpi-card-header i { font-size: 16px; }
+
+.gst-analysis .kpi-card.kpi-primary i { color: var(--color-primary); }
+.gst-analysis .kpi-card.kpi-success i { color: var(--color-success); }
+.gst-analysis .kpi-card.kpi-warning i { color: var(--color-warning); }
+.gst-analysis .kpi-card.kpi-danger i { color: var(--color-danger); }
+
+.gst-analysis .kpi-value-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.gst-analysis .kpi-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-family: var(--font-headline);
+}
+
+.gst-analysis .kpi-status-pill {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.gst-analysis .kpi-primary .kpi-status-pill { background: var(--color-primary-light); color: var(--color-primary); }
+.gst-analysis .kpi-success .kpi-status-pill { background: var(--color-success-light); color: var(--color-success-hover); }
+.gst-analysis .kpi-warning .kpi-status-pill { background: var(--color-warning-light); color: var(--color-warning-hover); }
+.gst-analysis .kpi-danger .kpi-status-pill { background: var(--color-danger-light); color: var(--color-danger-hover); }
+
+/* SVG Progress Gauges */
+.gst-analysis .gauge-wrapper {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+}
+
+.gst-analysis .gauge-wrapper svg {
+    width: 140px;
+    height: 140px;
+    transform: rotate(-90deg);
+}
+
+.gst-analysis .gauge-circle-bg {
+    fill: none;
+    stroke: #e2e8f0;
+    stroke-width: 10;
+}
+
+.gst-analysis .gauge-circle-progress {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 408; /* 2 * PI * r (r = 65) */
+    stroke-dashoffset: 408;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gst-analysis .gauge-circle-progress.success { stroke: var(--color-success); }
+.gst-analysis .gauge-circle-progress.warning { stroke: var(--color-warning); }
+.gst-analysis .gauge-circle-progress.danger { stroke: var(--color-danger); }
+
+.gst-analysis .gauge-center-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.gst-analysis .gauge-center-val {
+    font-family: var(--font-headline);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.1;
+}
+
+.gst-analysis .gauge-center-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+/* Compliance Timeline */
+.gst-analysis .timeline-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    position: relative;
+}
+
+.gst-analysis .timeline-grid::after {
+    content: '';
+    position: absolute;
+    top: 35px;
+    left: 10px;
+    right: 10px;
+    height: 3px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.gst-analysis .timeline-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+
+.gst-analysis .timeline-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.gst-analysis .timeline-node.success .timeline-circle {
+    border-color: var(--color-success);
+    background: var(--color-success);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(46, 125, 50, 0.2);
+}
+
+.gst-analysis .timeline-node.warning .timeline-circle {
+    border-color: var(--color-warning);
+    background: var(--color-warning);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(178, 106, 0, 0.2);
+}
+
+.gst-analysis .timeline-month {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+/* Tables */
+.gst-analysis .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.gst-analysis .dash-table th {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--color-border);
+    text-align: left;
+}
+
+.gst-analysis .dash-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.gst-analysis .dash-table tbody tr { transition: background-color 0.15s ease; }
+.gst-analysis .dash-table tbody tr:hover { background-color: var(--color-primary-light); }
+.gst-analysis .dash-table td strong { color: var(--color-text-primary); }
+
+.gst-analysis .badge-risk {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.gst-analysis .badge-risk.low { background: var(--color-success-light); color: var(--color-success-hover); }
+.gst-analysis .badge-risk.medium { background: var(--color-warning-light); color: var(--color-warning-hover); }
+.gst-analysis .badge-risk.high { background: var(--color-danger-light); color: var(--color-danger-hover); }
+
+/* Scrollable AI panel */
+.gst-analysis .scroll-panel {
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.gst-analysis .scroll-panel-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    background: #f8fafc;
+    border-left: 3px solid #cbd5e1;
+    font-size: 12.5px;
+    line-height: 1.4;
+    transition: all 0.15s ease;
+}
+
+.gst-analysis .scroll-panel-item:hover {
+    background: #f1f5f9;
+    transform: translateX(2px);
+}
+
+.gst-analysis .scroll-panel-item.check { border-left-color: var(--color-success); }
+.gst-analysis .scroll-panel-item.warning { border-left-color: var(--color-warning); }
+
+.gst-analysis .scroll-panel-item i {
+    margin-top: 2px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.gst-analysis .scroll-panel-item.check i { color: var(--color-success); }
+.gst-analysis .scroll-panel-item.warning i { color: var(--color-warning); }
+
+/* Download Buttons */
+.gst-analysis .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.gst-analysis .btn-report {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.gst-analysis .btn-report:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.gst-analysis .btn-report.btn-report-primary {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(139, 21, 56, 0.15);
+}
+
+.gst-analysis .btn-report.btn-report-primary:hover {
+    background: var(--color-primary-hover);
+    color: #ffffff;
+    box-shadow: 0 6px 15px rgba(139, 21, 56, 0.25);
+}
+
+/* Fade-in */
+.gst-analysis.animate-fade-in,
+.gst-analysis .animate-fade-in {
+    animation: gstFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes gstFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
