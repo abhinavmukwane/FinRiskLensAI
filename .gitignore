@@ -50,6 +50,10 @@ ScaffoldingReadMe.txt
 # dotenv environment variables file
 .env
 
+appsettings.Development.json
+appsettings.*.local.json
+*.pfx
+
 # Others
 ~$*
 *~
