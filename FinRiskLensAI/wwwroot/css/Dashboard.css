@@ -1280,7 +1280,7 @@ img {
 
 .verify-card {
     background: #fff;
-    border-left: 5px solid #8b1538; /* Theme color */
+    border-left: 5px solid #57001d; /* Theme color */
     border-radius: 12px;
     padding: 18px 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,.08);
@@ -1304,8 +1304,8 @@ img {
 
 .btn-submit {
     background: #fff;
-    color: #8b1538;
-    border: 1px solid #8b1538;
+    color: #57001d;
+    border: 1px solid #57001d;
     border-radius: 8px;
     padding: 8px 24px;
     font-weight: 600;
@@ -1313,7 +1313,7 @@ img {
 }
 
     .btn-submit:hover {
-        background: #8b1538;
+        background: #57001d;
         color: #fff;
     }
 
@@ -1330,8 +1330,8 @@ img {
    ===================================================================== */
 
 .udyam-dashboard {
-    --theme-maroon: #8b1538;
-    --theme-maroon-dark: #74112f;
+    --theme-maroon: #57001d;
+    --theme-maroon-dark: #3d0013;
     --theme-maroon-soft: #faf7f8;
     --success-green: #2e7d32;
     --success-green-soft: #e6f4ea;
@@ -1802,7 +1802,7 @@ img {
 }
 
     .custom-input:focus {
-        border-color: #8b1538;
+        border-color: #57001d;
         box-shadow: 0 0 0 .15rem rgba(139, 21, 56, .15);
     }
 
@@ -1816,8 +1816,8 @@ img {
 }
 
 .form-check-input:checked {
-    background: #8b1538;
-    border-color: #8b1538;
+    background: #57001d;
+    border-color: #57001d;
 }
 
 /* Responsive tweaks */
@@ -1908,8 +1908,8 @@ img {
 
 /* ── Modal shell (uses the app's existing fonts, not new ones) ── */
 .ip-audit {
-    --theme-maroon: #8b1538;
-    --theme-maroon-dark: #74112f;
+    --theme-maroon: #57001d;
+    --theme-maroon-dark: #3d0013;
     --success-green: #2e7d32;
     --success-green-soft: #e6f4ea;
     --danger-red: #b3261e;
