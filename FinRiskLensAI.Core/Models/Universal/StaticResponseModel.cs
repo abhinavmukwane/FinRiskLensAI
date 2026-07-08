@@ -25,5 +25,9 @@ namespace FinRiskLensAI.Core.Models.Universal
         public string? ITRNumberResponce { get; set; }
 
         public string? IPResponce { get; set; }
+
+        public string? MCAResponce { get; set; }
+
+        public string? DINResponce { get; set; }
     }
 }

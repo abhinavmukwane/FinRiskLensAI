@@ -37,6 +37,8 @@ namespace FinRiskLensAI.Services.Implementation.Common
                 StaticResponseType.Gst3B => result.Data.GST3BResponce,
                 StaticResponseType.Itr => result.Data.ITRNumberResponce,
                 StaticResponseType.Ip => result.Data.IPResponce,
+                StaticResponseType.Mca => result.Data.MCAResponce,
+                StaticResponseType.Din => result.Data.DINResponce,
                 _ => null
             };
         }

@@ -34,6 +34,10 @@ namespace FinRiskLensAI.Data.Configurations
 
             builder.Property(x => x.IPResponce);
 
+            builder.Property(x => x.MCAResponce);
+
+            builder.Property(x => x.DINResponce);
+
             // Optional: Faster lookup by Udyam Number
             builder.HasIndex(x => x.UdyamNumber)
                    .IsUnique();
