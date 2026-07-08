@@ -86,6 +86,102 @@ namespace FinRiskLensAI.Services.Implementation.Common
             return JsonConvert.SerializeObject(model);
         }
 
+        /// <summary>
+        /// Dummy MCA response mirroring the real API shape. Company name is taken
+        /// from the caller (kept in sync with Udyam/GST); directors are derived from
+        /// the company name, and charges (secured-loan liens) are randomised each
+        /// build so every company shows a different, realistic charge history.
+        /// </summary>
+        public string GetDummyMca(string uan, string companyName, string? pan = null)
+        {
+            var rng = Random.Shared;
+            string D(int n) => new(Enumerable.Range(0, n).Select(_ => (char)('0' + rng.Next(10))).ToArray());
+
+            var stateTok = (uan.Split('-').ElementAtOrDefault(1) ?? "MH").ToUpperInvariant();
+            var (stateCode, stateName) = _states.TryGetValue(stateTok, out var s) ? s : ("27", "Maharashtra");
+
+            companyName = string.IsNullOrWhiteSpace(companyName) ? "FinRiskLens Enterprises Pvt Ltd" : companyName.Trim();
+            var isPrivate = companyName.ToUpperInvariant().Contains("PVT") || companyName.ToUpperInvariant().Contains("PRIVATE");
+            var incYear = DateTime.Today.Year - rng.Next(3, 20);
+            var incorp = new DateTime(incYear, rng.Next(1, 13), rng.Next(1, 28));
+
+            // CIN: <listed><5-digit industry><state token><year><PTC|PLC><6-digit reg>
+            var cin = $"U{D(5)}{stateTok}{incYear}{(isPrivate ? "PTC" : "PLC")}{D(6)}";
+
+            // Directors — first is the promoter (derived from the company's first token).
+            var firstNames = new[] { "Rajesh", "Anita", "Vikram", "Priya", "Suresh", "Neha", "Arun", "Kavita" };
+            var promoter = companyName.Split(' ').FirstOrDefault() ?? "Owner";
+            var directors = new[]
+            {
+                new { din_number = D(8), director_name = $"{promoter} {firstNames[rng.Next(firstNames.Length)]}",
+                      start_date = incorp.ToString("yyyy-MM-dd"), end_date = "1800-01-01", surrendered_din = (string?)null },
+                new { din_number = D(8), director_name = $"{firstNames[rng.Next(firstNames.Length)]} {promoter}",
+                      start_date = incorp.AddDays(rng.Next(30, 400)).ToString("yyyy-MM-dd"), end_date = "1800-01-01", surrendered_din = (string?)null },
+            };
+
+            // Charges — dynamic count, amounts and dates; a mix of open/modified liens.
+            var assets = new[] { "Lien on Fixed Deposits (FD)", "Hypothecation of Stock & Book Debts",
+                                 "Mortgage of Immovable Property", "Charge on Plant & Machinery", "Lien on Current Assets" };
+            var charges = Enumerable.Range(0, rng.Next(3, 9)).Select(_ =>
+            {
+                var created = incorp.AddDays(rng.Next(60, (DateTime.Today - incorp).Days));
+                var modified = rng.Next(2) == 0 ? created.AddDays(rng.Next(30, 300)) : new DateTime(1800, 1, 1);
+                return new
+                {
+                    assets_under_charge = " " + assets[rng.Next(assets.Length)],
+                    charge_amount = (rng.Next(5, 400) * 100000L).ToString(),
+                    date_of_creation = created.ToString("yyyy-MM-dd"),
+                    date_of_modification = modified.ToString("yyyy-MM-dd"),
+                    status = "OPEN"
+                };
+            }).ToArray();
+
+            var response = new
+            {
+                rrn = $"{D(8)}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
+                cin,
+                status_code = "200",
+                message = new
+                {
+                    client_id = "company_" + D(8),
+                    company_id = cin,
+                    company_type = "Company",
+                    company_name = companyName,
+                    details = new
+                    {
+                        company_info = new
+                        {
+                            cin,
+                            roc_code = $"RoC-{stateName}",
+                            registration_number = D(6),
+                            company_category = "Company limited by Shares",
+                            class_of_company = isPrivate ? "Private" : "Public",
+                            company_sub_category = "Non-govt company",
+                            authorized_capital = (rng.Next(1, 50) * 100000L).ToString(),
+                            paid_up_capital = (rng.Next(1, 50) * 100000L).ToString(),
+                            number_of_members = rng.Next(2, 50).ToString(),
+                            date_of_incorporation = incorp.ToString("yyyy-MM-dd"),
+                            registered_address = $"Plot {D(2)}, Industrial Area, {stateName} {stateCode}0015 IN",
+                            address_other_than_ro = "-",
+                            email_id = "info@example.com",
+                            listed_status = "Unlisted",
+                            active_compliance = (string?)null,
+                            suspended_at_stock_exchange = "-",
+                            last_agm_date = incorp.AddYears(1).ToString("yyyy-MM-dd"),
+                            last_bs_date = incorp.AddYears(1).ToString("yyyy-MM-dd"),
+                            company_status = "Active",
+                            status_under_cirp = (string?)null
+                        },
+                        directors,
+                        charges
+                    }
+                },
+                tran_ref_no = D(8)
+            };
+
+            return JsonConvert.SerializeObject(response);
+        }
+
         // Standard GSTIN check-digit: base-36, alternating weights 1,2 over the first 14 chars.
         private static string BuildGstin(string stateCode, string pan, string entityNo)
         {

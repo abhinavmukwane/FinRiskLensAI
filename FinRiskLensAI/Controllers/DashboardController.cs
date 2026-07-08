@@ -21,8 +21,9 @@ namespace FinRiskLensAI.Controllers
         private readonly IAccountAggregatorService _aaService;
         private readonly IIpRiskService _ipRisk;
         private readonly IGSTR2And3BResponceService _gstResponces;
+        private readonly IDummyDataService _dummyData;
 
-        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService, IIpRiskService ipRisk, IGSTR2And3BResponceService gstResponces)
+        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService, IIpRiskService ipRisk, IGSTR2And3BResponceService gstResponces, IDummyDataService dummyData)
         {
             _analysis = analysis;
             _store = store;
@@ -30,6 +31,7 @@ namespace FinRiskLensAI.Controllers
             _aaService = AAService;
             _ipRisk = ipRisk;
             _gstResponces = gstResponces;
+            _dummyData = dummyData;
         }
 
         /// <summary>
@@ -189,8 +191,101 @@ namespace FinRiskLensAI.Controllers
                 copied++;
             }
 
+            // MCA response — same company name as the profile, dynamic charges. Store once.
+            if (!await _store.ExistsAsync(uan, MsmeDataFiles.Mca, ct))
+            {
+                var companyName = user.NameOfEnterprise;
+                if (string.IsNullOrWhiteSpace(companyName))
+                {
+                    var udyamJson = await _store.DownloadAsync(uan, MsmeDataFiles.Udyam, ct);
+                    companyName = udyamJson != null
+                        ? JObject.Parse(udyamJson).SelectToken("main_details.name_of_enterprise")?.Value<string>()
+                        : uan;
+                }
+                var mcaJson = _dummyData.GetDummyMca(uan, companyName ?? uan, user.PanNumber);
+                await _store.UploadAsync(uan, MsmeDataFiles.Mca, mcaJson, ct);
+            }
+
             _logger.LogInformation("Seeded {Count} GST files into {Uan} from template.", copied, uan);
             return Json(new { status = true, copied, message = $"Copied {copied} GST files." });
+        }
+
+        /// <summary>
+        /// MCA (Ministry of Corporate Affairs) company + directors + charges view for
+        /// the logged-in MSME. Reads the stored mca.json from the UAN's blob folder.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> MCADetails(CancellationToken ct)
+        {
+            var uan = HttpContext.Session.GetCurrentUser()?.UdyamNumber;
+            var vm = new McaDetailsViewModel();
+
+            if (string.IsNullOrWhiteSpace(uan))
+            {
+                vm.LoadError = "No Udyam number is linked to your account.";
+                return View(vm);
+            }
+
+            try
+            {
+                var json = await _store.DownloadAsync(uan, MsmeDataFiles.Mca, ct);
+                if (json == null)
+                {
+                    vm.LoadError = "No MCA data found yet. Fetch your financial data first to generate it.";
+                    return View(vm);
+                }
+
+                var root = JObject.Parse(json);
+                var info = root.SelectToken("message.details.company_info");
+                vm.CompanyName = root.SelectToken("message.company_name")?.Value<string>() ?? "";
+                vm.Cin = info?.Value<string>("cin") ?? "";
+                vm.Status = info?.Value<string>("company_status") ?? "";
+                vm.CompanyClass = info?.Value<string>("class_of_company") ?? "";
+                vm.Category = info?.Value<string>("company_category") ?? "";
+                vm.RocCode = info?.Value<string>("roc_code") ?? "";
+                vm.RegisteredAddress = info?.Value<string>("registered_address") ?? "";
+                vm.Listed = info?.Value<string>("listed_status") ?? "";
+                vm.AuthorizedCapital = info?.Value<string>("authorized_capital") ?? "0";
+                vm.PaidUpCapital = info?.Value<string>("paid_up_capital") ?? "0";
+                vm.IncorporationDate = info?.Value<string>("date_of_incorporation") ?? "";
+
+                foreach (var d in root.SelectTokens("message.details.directors[*]"))
+                    vm.Directors.Add(new McaDirector
+                    {
+                        Din = d.Value<string>("din_number") ?? "",
+                        Name = d.Value<string>("director_name") ?? "",
+                        StartDate = d.Value<string>("start_date") ?? ""
+                    });
+
+                foreach (var c in root.SelectTokens("message.details.charges[*]"))
+                {
+                    var amt = long.TryParse(c.Value<string>("charge_amount"), out var a) ? a : 0;
+                    var open = string.Equals(c.Value<string>("status"), "OPEN", StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(c.Value<string>("status"), "Open", StringComparison.OrdinalIgnoreCase);
+                    if (open) { vm.TotalOpenChargeAmount += amt; vm.OpenChargeCount++; }
+                    vm.Charges.Add(new McaCharge
+                    {
+                        Asset = (c.Value<string>("assets_under_charge") ?? "Not specified").Trim(),
+                        Amount = amt,
+                        Created = c.Value<string>("date_of_creation") ?? "",
+                        Modified = c.Value<string>("date_of_modification") ?? "",
+                        Status = open ? "Open" : (c.Value<string>("status") ?? "")
+                    });
+                }
+
+                vm.HasData = true;
+            }
+            catch (OperationCanceledException)
+            {
+                vm.LoadError = "MCA details are still loading. Please refresh in a few seconds.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed loading MCA details for {Uan}", uan);
+                vm.LoadError = "Could not load MCA details right now. Please try again later.";
+            }
+
+            return View(vm);
         }
 
         /// <summary>

@@ -14,6 +14,7 @@ namespace FinRiskLensAI.Core.Models.Storage
         public const string Aa = "aa.json";
         public const string GstTaxpayer = "gst_taxpayer.json";
         public const string Epfo = "epfo.json";
+        public const string Mca = "mca.json";
 
         // Monthly GST files carry a MMyyyy period suffix, e.g. gstr3b_012026.json
         public const string Gstr3bPrefix = "gstr3b_";
@@ -25,7 +26,7 @@ namespace FinRiskLensAI.Core.Models.Storage
         /// <summary>Auto-drafted ITC statement, e.g. gstr2b_get_all_details_MMyyyy.json.</summary>
         public const string Gstr2bPrefix = "gstr2b_";
 
-        private static readonly string[] KnownFixed = { Udyam, Itr, Aa, GstTaxpayer, Epfo, Manifest, Result };
+        private static readonly string[] KnownFixed = { Udyam, Itr, Aa, GstTaxpayer, Epfo, Mca, Manifest, Result };
         private static readonly string[] KnownPrefixes =
             { Gstr3bPrefix, Gstr1SummaryPrefix, Gstr1B2bPrefix, Gstr1CdnrPrefix, Gstr1HsnPrefix, Gstr2aB2bPrefix, Gstr2bPrefix };
 
