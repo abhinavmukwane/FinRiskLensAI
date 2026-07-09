@@ -1,0 +1,142 @@
+/* =====================================================================
+   FinRiskLens AI — brand theme tokens (switchable)
+
+   Theme 1 (default) — IDBI Bank:
+       Surfey Green  #117A8B  (primary text / left of crescent)
+       Orange Passion #F58220 (right of crescent)
+       White         #FFFFFF
+   Theme 2 — classic maroon & gold (the original FinRiskLens palette).
+
+   The active theme is the data-theme attribute on <html>, set by
+   /js/theme.js (persisted in localStorage, key "frl-theme").
+   All page/component CSS must reference these --brand-* variables
+   instead of hardcoded brand hexes.
+   ===================================================================== */
+
+:root,
+:root[data-theme="theme1"] {
+    --brand-primary: #117A8B;          /* Surfey Green */
+    --brand-primary-strong: #0F6E7D;
+    --brand-primary-hover: #0D606E;
+    --brand-primary-dark: #0C5560;
+    --brand-primary-deep: #073840;
+    --brand-secondary: #4A8E9C;
+    --brand-secondary-container: #9CD2DC;
+    --brand-accent: #F58220;           /* Orange Passion */
+    --brand-accent-soft: #FCD9B8;
+    --brand-accent-deep: #B35F0C;
+    --brand-on-primary: #ffffff;
+    --brand-on-primary-muted: #C9E5EA; /* light text on primary gradients */
+    --brand-on-primary-faint: #9FCAD3;
+    --brand-tint-bg: #F1F8F9;          /* faint primary-tinted surface */
+    --brand-tint-bg-2: #E8F3F5;
+    --brand-tint-border: #CFE4E8;      /* primary-tinted hairline */
+    --brand-primary-rgb: 17, 122, 139;
+    --brand-primary-dark-rgb: 12, 85, 96;
+    --brand-secondary-rgb: 74, 142, 156;
+    --brand-accent-rgb: 245, 130, 32;
+    --brand-accent-soft-rgb: 252, 217, 184;
+    --brand-accent-deep-rgb: 179, 95, 12;
+    /* Action buttons — IDBI theme uses Orange Passion */
+    --brand-btn-bg: #F58220;
+    --brand-btn-bg-hover: #D96C0B;
+    --brand-btn-fg: #ffffff;
+    --brand-btn-bg-rgb: 245, 130, 32;
+    /* Dashboard sidebar logout chip */
+    --brand-logout-bg: #FFD2AC;
+    --brand-logout-bg-hover: #FFC291;
+}
+
+:root[data-theme="theme2"] {
+    --brand-primary: #8B1538;
+    --brand-primary-strong: #7A1230;
+    --brand-primary-hover: #74112F;
+    --brand-primary-dark: #57001D;
+    --brand-primary-deep: #36081A;
+    --brand-secondary: #974354;
+    --brand-secondary-container: #FD95A7;
+    --brand-accent: #D4A537;
+    --brand-accent-soft: #F3E2B2;
+    --brand-accent-deep: #725C1E;
+    --brand-on-primary: #ffffff;
+    --brand-on-primary-muted: #F0C9D5;
+    --brand-on-primary-faint: #D79AAB;
+    --brand-tint-bg: #FAF7F8;
+    --brand-tint-bg-2: #F9F1F3;
+    --brand-tint-border: #EAD9DF;
+    --brand-primary-rgb: 139, 21, 56;
+    --brand-primary-dark-rgb: 87, 0, 29;
+    --brand-secondary-rgb: 151, 67, 84;
+    --brand-accent-rgb: 212, 165, 55;
+    --brand-accent-soft-rgb: 243, 226, 178;
+    --brand-accent-deep-rgb: 114, 92, 30;
+    /* Action buttons — classic theme keeps the maroon CTA */
+    --brand-btn-bg: #7A1230;
+    --brand-btn-bg-hover: #57001D;
+    --brand-btn-fg: #ffffff;
+    --brand-btn-bg-rgb: 122, 18, 48;
+    /* Dashboard sidebar logout chip */
+    --brand-logout-bg: rgba(209, 79, 79, .15);
+    --brand-logout-bg-hover: rgba(113, 48, 48, .15);
+}
+
+/* ---------------------------------------------------------------------
+   Progress bars — follow the theme's action colour (orange on Theme 1,
+   maroon on Theme 2). Semantic bars (bg-success/bg-danger/...) keep
+   their own colour because Bootstrap's bg-* utilities are !important.
+   --------------------------------------------------------------------- */
+.progress-bar {
+    background-color: var(--brand-btn-bg);
+}
+
+.progress-bar.bg-primary {
+    background-color: var(--brand-btn-bg) !important;
+}
+
+/* ---------------------------------------------------------------------
+   Theme toggle icon (rendered by Views/Shared/_ThemeSwitch.cshtml) —
+   sits in the header beside the Bhashini translation button. The
+   two-tone dot shows the current palette; clicking switches theme.
+   Default styling matches a light topbar; .brandbar overrides below
+   match the dark landing/onboarding header.
+   --------------------------------------------------------------------- */
+.frl-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid var(--brand-tint-border);
+    border-radius: 10px;
+    padding: .3rem .45rem;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+}
+
+.frl-theme-toggle .frl-theme-dot {
+    display: block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, .12);
+    background: linear-gradient(90deg, var(--brand-primary) 50%, var(--brand-accent) 50%);
+}
+
+.frl-theme-toggle:hover {
+    background: var(--brand-tint-bg);
+    border-color: var(--brand-primary);
+}
+
+.brandbar .frl-theme-toggle {
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .2);
+    border-radius: .75rem;
+}
+
+.brandbar .frl-theme-toggle:hover {
+    background: rgba(255, 255, 255, .15);
+    border-color: var(--brand-accent-soft);
+}
+
+@media print {
+    .frl-theme-toggle { display: none !important; }
+}

@@ -355,7 +355,7 @@
                 <div class="dash-card h-100">
                     <h6 class="card-heading"><i class="bi bi-speedometer me-2"></i>Risk Breakdown</h6>
 
-                    <div class="d-flex flex-wrap gap-4 justify-content-center mb-4 pb-3" style="border-bottom:1px solid #f9f1f3;">
+                    <div class="d-flex flex-wrap gap-4 justify-content-center mb-4 pb-3" style="border-bottom:1px solid var(--brand-tint-bg-2);">
                         @foreach (var (label, pct) in new[] { ("Legal", Model.LegalPct), ("Governance", Model.GovernancePct), ("Charges", Model.ChargesPct), ("Compliance", Model.CompliancePct) })
                         {
                             var stroke = pct >= 80 ? "var(--success-green)" : pct >= 60 ? "var(--warning-orange)" : "var(--danger-red)";
@@ -382,7 +382,7 @@
                         </div>
                     }
 
-                    <div class="text-center mt-4 pt-3" style="border-top:1px solid #f9f1f3;">
+                    <div class="text-center mt-4 pt-3" style="border-top:1px solid var(--brand-tint-bg-2);">
                         <div class="risk-overall-badge"><i class="bi bi-shield-check"></i> Overall: @Model.OverallRiskLabel</div>
                     </div>
                 </div>

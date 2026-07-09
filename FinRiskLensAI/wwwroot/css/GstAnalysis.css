@@ -3,14 +3,14 @@
    Ported from the design mockup (gst.css + the mockup dashboard.css
    tokens). Everything is scoped under .gst-analysis so the mockup's
    palette/variables never leak into the shared _DashboardLayout chrome
-   (the global --color-primary is #57001d; this page's accent is #57001d).
+   (the global --color-primary is var(--brand-primary-dark); this page's accent is var(--brand-primary-dark)).
    ===================================================================== */
 
 .gst-analysis {
     /* Mockup design tokens, wrapper-scoped */
-    --color-primary: #57001d;
-    --color-primary-hover: #3d0013;
-    --color-primary-light: #faf7f8;
+    --color-primary: var(--brand-primary-dark);
+    --color-primary-hover: var(--brand-primary-deep);
+    --color-primary-light: var(--brand-tint-bg);
     --color-success: #2e7d32;
     --color-success-hover: #215c25;
     --color-success-light: #e6f4ea;
@@ -25,15 +25,15 @@
     --color-text-primary: #1e1b18;
     --color-text-secondary: #564144;
     --color-text-muted: #897174;
-    --color-border: #ead9df;
+    --color-border: var(--brand-tint-border);
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-full: 9999px;
-    --shadow-sm: 0 1px 2px 0 rgba(139, 21, 56, 0.02);
-    --shadow-md: 0 4px 14px rgba(139, 21, 56, 0.02), 0 2px 4px -2px rgba(139, 21, 56, 0.02);
-    --shadow-lg: 0 10px 15px -3px rgba(139, 21, 56, 0.03), 0 4px 6px -4px rgba(139, 21, 56, 0.03);
-    --shadow-premium: 0 20px 25px -5px rgba(139, 21, 56, 0.04), 0 8px 10px -6px rgba(139, 21, 56, 0.04);
+    --shadow-sm: 0 1px 2px 0 rgba(var(--brand-primary-rgb), 0.02);
+    --shadow-md: 0 4px 14px rgba(var(--brand-primary-rgb), 0.02), 0 2px 4px -2px rgba(var(--brand-primary-rgb), 0.02);
+    --shadow-lg: 0 10px 15px -3px rgba(var(--brand-primary-rgb), 0.03), 0 4px 6px -4px rgba(var(--brand-primary-rgb), 0.03);
+    --shadow-premium: 0 20px 25px -5px rgba(var(--brand-primary-rgb), 0.04), 0 8px 10px -6px rgba(var(--brand-primary-rgb), 0.04);
     color: var(--color-text-primary);
 }
 
@@ -47,7 +47,7 @@
 .gst-analysis .bg-success { background-color: var(--color-success) !important; }
 .gst-analysis .bg-primary-light { background-color: var(--color-primary-light) !important; }
 .gst-analysis .bg-success-light { background-color: var(--color-success-light) !important; }
-.gst-analysis .bg-light { background-color: #faf7f8 !important; }
+.gst-analysis .bg-light { background-color: var(--brand-tint-bg) !important; }
 .gst-analysis .border-primary { border-color: var(--color-border) !important; }
 .gst-analysis .border-color-border { border-color: var(--color-border) !important; }
 
@@ -62,7 +62,7 @@
 }
 
 .gst-analysis .text-gradient-primary {
-    background: linear-gradient(135deg, #57001d 0%, #3d0013 100%);
+    background: linear-gradient(135deg, var(--brand-primary-dark) 0%, var(--brand-primary-deep) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -86,7 +86,7 @@
 .gst-analysis .glass-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg), var(--shadow-premium);
-    border-color: rgba(139, 21, 56, 0.2);
+    border-color: rgba(var(--brand-primary-rgb), 0.2);
 }
 
 .gst-analysis .card-title-container {
@@ -118,7 +118,7 @@
     height: 64px;
     border-radius: var(--radius-md);
     background: var(--color-primary-light);
-    border: 1px solid rgba(139, 21, 56, 0.15);
+    border: 1px solid rgba(var(--brand-primary-rgb), 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -185,7 +185,7 @@
 .gst-analysis .kpi-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    border-color: rgba(139, 21, 56, 0.15);
+    border-color: rgba(var(--brand-primary-rgb), 0.15);
 }
 
 .gst-analysis .kpi-card::before {
@@ -268,7 +268,7 @@
 
 .gst-analysis .gauge-circle-progress {
     fill: none;
-    stroke: var(--color-primary);
+    stroke: var(--brand-btn-bg);
     stroke-width: 10;
     stroke-linecap: round;
     stroke-dasharray: 408; /* 2 * PI * r (r = 65) */
@@ -481,16 +481,16 @@
 }
 
 .gst-analysis .btn-report.btn-report-primary {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: #ffffff;
-    box-shadow: 0 4px 10px rgba(139, 21, 56, 0.15);
+    background: var(--brand-btn-bg);
+    border-color: var(--brand-btn-bg);
+    color: var(--brand-btn-fg);
+    box-shadow: 0 4px 10px rgba(var(--brand-btn-bg-rgb), 0.15);
 }
 
 .gst-analysis .btn-report.btn-report-primary:hover {
-    background: var(--color-primary-hover);
-    color: #ffffff;
-    box-shadow: 0 6px 15px rgba(139, 21, 56, 0.25);
+    background: var(--brand-btn-bg-hover);
+    color: var(--brand-btn-fg);
+    box-shadow: 0 6px 15px rgba(var(--brand-btn-bg-rgb), 0.25);
 }
 
 /* Fade-in */

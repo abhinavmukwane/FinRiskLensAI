@@ -16,7 +16,9 @@ namespace FinRiskLensAI.Core.Interfaces.IServices.Common
 
         /// <summary>
         /// Sends the login/registration OTP email using the branded HTML template.
+        /// <paramref name="theme"/> is the UI theme active when the OTP was requested
+        /// ("theme1" = IDBI teal/orange, "theme2" = classic maroon) so the email matches it.
         /// </summary>
-        Task<bool> SendLoginOtpAsync(string toEmail, string otpCode, string? recipientName = null, int expiryMinutes = 10, CancellationToken ct = default);
+        Task<bool> SendLoginOtpAsync(string toEmail, string otpCode, string? recipientName = null, int expiryMinutes = 10, string? theme = null, CancellationToken ct = default);
     }
 }

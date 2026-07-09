@@ -1,0 +1,49 @@
+/* Extracted from FinancialHealthCard.cshtml */
+    .fhc-wrap { padding: 24px; max-width: 1320px; margin: 0 auto; font-family: var(--font-data, 'Inter', sans-serif); }
+    .fhc-card { background: #fff; border: 1px solid var(--brand-tint-border); border-radius: 16px; padding: 20px 22px; box-shadow: 0 2px 10px rgba(var(--brand-primary-dark-rgb),.05); height: 100%; }
+    .fhc-title { font-family: var(--font-headline, 'Sora', sans-serif); font-weight: 700; color: var(--brand-primary-dark); }
+    .fhc-sub { color: var(--brand-secondary); font-size: .85rem; }
+    .fhc-section-label { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-secondary); margin-bottom: 12px; }
+
+    .band-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: .85rem; }
+    .band-Excellent { background: #e3f4ea; color: #0f5137; }
+    .band-Good { background: #e8f1e3; color: #3d6b1f; }
+    .band-Fair { background: #fdf3d7; color: #8a6d00; }
+    .band-AtRisk { background: #fde8d7; color: #9c4a00; }
+    .band-HighRisk { background: #fbe0e0; color: #8b1020; }
+
+    .stat-tile { background: var(--brand-tint-bg); border: 1px solid var(--brand-tint-border); border-radius: 12px; padding: 12px 14px; }
+    .stat-tile .v { font-family: var(--font-headline, 'Sora', sans-serif); font-weight: 700; font-size: 1.15rem; color: #2b2026; }
+    .stat-tile .k { font-size: .72rem; color: var(--brand-secondary); text-transform: uppercase; letter-spacing: .06em; }
+
+    .dim-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+    .dim-name { flex: 0 0 210px; font-size: .85rem; color: #2b2026; }
+    .dim-track { flex: 1; height: 10px; border-radius: 999px; background: var(--brand-tint-bg-2); overflow: hidden; }
+    .dim-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--brand-btn-bg), var(--brand-btn-bg-hover)); }
+    .dim-val { flex: 0 0 90px; text-align: right; font-size: .82rem; font-weight: 600; color: var(--brand-primary-dark); }
+    .dim-muted { opacity: .45; }
+
+    .expl-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px dashed #f0e2e7; font-size: .87rem; align-items: flex-start; }
+    .expl-item:last-child { border-bottom: none; }
+    .expl-item .bi { margin-top: 2px; }
+    .expl-dim { font-size: .7rem; color: var(--brand-secondary); text-transform: uppercase; letter-spacing: .05em; }
+
+    .reco-card { border: 1px solid var(--brand-tint-border); border-left: 5px solid var(--brand-primary-dark); border-radius: 12px; padding: 14px 16px; background: #fffdfb; }
+    .reco-amt { font-family: var(--font-headline, 'Sora', sans-serif); font-weight: 700; color: var(--brand-primary-dark); }
+
+    .gauge-box { position: relative; max-width: 340px; margin: 0 auto; }
+    .gauge-center { position: absolute; left: 0; right: 0; bottom: -6px; text-align: center; pointer-events: none; }
+    .gauge-score { font-family: var(--font-headline, 'Sora', sans-serif); font-size: 2.6rem; font-weight: 800; color: var(--brand-primary-dark); line-height: 1; }
+    .gauge-of { font-size: .78rem; color: var(--brand-secondary); }
+
+    .lending-notes { background: var(--brand-tint-bg); border: 1px solid var(--brand-tint-border); border-radius: 12px; padding: 14px 16px; }
+    .lending-notes-head { font-size: .72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--brand-secondary); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .lending-note { display: flex; gap: 10px; align-items: flex-start; font-size: .8rem; line-height: 1.55; color: #5c4a50; padding: 7px 0; border-top: 1px dashed #ecdce2; }
+    .lending-note:first-of-type { border-top: none; padding-top: 0; }
+    .lending-note .bi { color: #2e7d4f; font-size: .85rem; margin-top: 2px; flex-shrink: 0; }
+    .lending-note.warn { color: #7a4a12; }
+    .lending-note.warn .bi { color: #c98a2b; }
+
+    .anomaly-box { border: 1px solid #f3d19c; background: #fff8ec; border-radius: 12px; padding: 14px 16px; font-size: .88rem; }
+    .anomaly-box.flagged { border-color: #e79b9b; background: #fdf0f0; }
+    canvas { max-width: 100%; }

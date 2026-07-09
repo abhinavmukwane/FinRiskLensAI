@@ -1,9 +1,9 @@
-﻿:root {
-    --maroon: #7A1230;
-    --maroon-dark: #4F0A1E;
-    --maroon-deep: #36081A;
-    --gold: #D4A537;
-    --gold-soft: #F3E2B2;
+:root {
+    --maroon: var(--brand-primary-strong);
+    --maroon-dark: var(--brand-primary-dark);
+    --maroon-deep: var(--brand-primary-deep);
+    --gold: var(--brand-accent);
+    --gold-soft: var(--brand-accent-soft);
     --ivory: #FBF8F3;
     --ink: #2B2026;
     --slate: #6E6470;
@@ -38,7 +38,7 @@ body {
         content: "";
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle at 85% 15%, rgba(212, 165, 55, .18), transparent 45%), repeating-linear-gradient(115deg, rgba(255, 255, 255, .03) 0 2px, transparent 2px 26px);
+        background: radial-gradient(circle at 85% 15%, rgba(var(--brand-accent-rgb), .18), transparent 45%), repeating-linear-gradient(115deg, rgba(255, 255, 255, .03) 0 2px, transparent 2px 26px);
         pointer-events: none;
     }
 
@@ -161,7 +161,7 @@ body {
     background: var(--maroon);
     border-color: var(--maroon);
     color: #fff;
-    box-shadow: 0 0 0 5px rgba(122, 18, 48, .12);
+    box-shadow: 0 0 0 5px rgba(var(--brand-primary-rgb), .12);
 }
 
 .rail-step.active .label {
@@ -259,7 +259,7 @@ body {
     .form-control:focus,
     .form-select:focus {
         border-color: var(--maroon);
-        box-shadow: 0 0 0 3px rgba(122, 18, 48, .12);
+        box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), .12);
         background: #fff;
     }
 
@@ -279,9 +279,9 @@ body {
     }
 
 .btn-maroon {
-    background: var(--maroon);
-    border: 1px solid var(--maroon);
-    color: #fff;
+    background: var(--brand-btn-bg);
+    border: 1px solid var(--brand-btn-bg);
+    color: var(--brand-btn-fg);
     font-weight: 600;
     border-radius: 10px;
     padding: .65rem 1.4rem;
@@ -289,9 +289,9 @@ body {
 }
 
     .btn-maroon:hover {
-        background: var(--maroon-dark);
-        border-color: var(--maroon-dark);
-        color: #fff;
+        background: var(--brand-btn-bg-hover);
+        border-color: var(--brand-btn-bg-hover);
+        color: var(--brand-btn-fg);
     }
 
     .btn-maroon:disabled {
@@ -300,16 +300,16 @@ body {
     }
 
 .btn-outline-maroon {
-    border: 1.5px solid var(--maroon);
-    color: var(--maroon);
+    border: 1.5px solid var(--brand-btn-bg);
+    color: var(--brand-btn-bg);
     font-weight: 600;
     border-radius: 10px;
     background: transparent;
 }
 
     .btn-outline-maroon:hover {
-        background: var(--maroon);
-        color: #fff;
+        background: var(--brand-btn-bg);
+        color: var(--brand-btn-fg);
     }
 
 .btn-link-gold {
@@ -347,7 +347,7 @@ body {
 
     .otp-box:focus {
         border-color: var(--maroon);
-        box-shadow: 0 0 0 3px rgba(122, 18, 48, .12);
+        box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), .12);
         background: #fff;
     }
 
@@ -525,7 +525,7 @@ footer.brand-footer {
 .spinner-cv {
     width: 52px;
     height: 52px;
-    border: 4px solid rgba(122, 18, 48, .12);
+    border: 4px solid rgba(var(--brand-primary-rgb), .12);
     border-top-color: var(--maroon);
     border-radius: 50%;
     animation: spin .75s linear infinite;
@@ -696,7 +696,7 @@ footer.brand-footer {
 .rv-map-gradient {
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, #5C2A1E 0%, #A0522D 40%, #C8956C 70%, #D4A537 100%);
+    background: linear-gradient(135deg, #5C2A1E 0%, #A0522D 40%, #C8956C 70%, var(--brand-accent) 100%);
     opacity: .85;
 }
 
@@ -807,7 +807,7 @@ footer.brand-footer {
         }
 
     .rv-card .form-check-input.rv-checkbox:focus {
-        box-shadow: 0 0 0 .2rem rgba(122, 18, 48, .15) !important;
+        box-shadow: 0 0 0 .2rem rgba(var(--brand-primary-rgb), .15) !important;
     }
 
     .rv-card .form-check-input.rv-checkbox:hover {
@@ -832,7 +832,7 @@ footer.brand-footer {
     border: none;
     border-radius: .9rem;
     overflow: hidden;
-    box-shadow: 0 24px 60px -20px rgba(94,0,35,.45);
+    box-shadow: 0 24px 60px -20px rgba(var(--brand-primary-dark-rgb),.45);
 }
 
 #otpDisplayModal .modal-header {
@@ -916,8 +916,8 @@ footer.brand-footer {
     display: flex;
     align-items: flex-start;
     gap: .5rem;
-    background-color: rgba(114,92,30,.08);
-    border: 1px solid rgba(252,221,145,.4);
+    background-color: rgba(var(--brand-accent-deep-rgb),.08);
+    border: 1px solid rgba(var(--brand-accent-soft-rgb),.4);
     border-radius: .5rem;
     padding: .6rem .8rem;
     font-size: .75rem;

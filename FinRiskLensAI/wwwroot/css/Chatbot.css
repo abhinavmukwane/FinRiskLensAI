@@ -4,10 +4,10 @@
    ========================================================================== */
 
 .frl-chatbot {
-    --frl-maroon: #8b1538;
-    --frl-maroon-dark: #74112f;
-    --frl-maroon-soft: #faf7f8;
-    --frl-border: #ead9df;
+    --frl-maroon: var(--brand-primary);
+    --frl-maroon-dark: var(--brand-primary-hover);
+    --frl-maroon-soft: var(--brand-tint-bg);
+    --frl-border: var(--brand-tint-border);
     position: fixed;
     right: 22px;
     bottom: 8px;
@@ -84,7 +84,7 @@
     align-items: center;
     gap: 10px;
     padding: 14px 16px;
-    background: linear-gradient(120deg, #57001d 0%, var(--frl-maroon) 100%);
+    background: linear-gradient(120deg, var(--brand-primary-dark) 0%, var(--frl-maroon) 100%);
     color: #fff;
 }
 
@@ -237,7 +237,7 @@
 
         .frl-chat-input input:focus {
             border-color: var(--frl-maroon);
-            box-shadow: 0 0 0 .15rem rgba(139, 21, 56, .12);
+            box-shadow: 0 0 0 .15rem rgba(var(--brand-primary-rgb), .12);
         }
 
     .frl-chat-input button {

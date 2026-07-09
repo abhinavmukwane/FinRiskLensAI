@@ -78,7 +78,7 @@ namespace FinRiskLensAI.Controllers
         /// GET /Onboarding/SendTestEmail?to=someone@example.com&name=Abhinav
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> SendTestEmail(string to, string? name, CancellationToken ct)
+        public async Task<IActionResult> SendTestEmail(string to, string? name, string? theme, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(to))
                 return Json(new { status = false, message = "Pass ?to=recipient@email.com" });
@@ -86,7 +86,7 @@ namespace FinRiskLensAI.Controllers
             try
             {
                 var otp = Random.Shared.Next(100000, 999999).ToString();
-                var sent = await _emailService.SendLoginOtpAsync(to, otp, name, expiryMinutes: 10, ct);
+                var sent = await _emailService.SendLoginOtpAsync(to, otp, name, expiryMinutes: 10, theme: theme, ct: ct);
 
                 return Json(new
                 {
@@ -125,7 +125,7 @@ namespace FinRiskLensAI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterUser(UserRegistrationModel model,string nameOfEnterprise)
+        public async Task<IActionResult> RegisterUser(UserRegistrationModel model, string nameOfEnterprise, string? theme = null)
         {
             if (model == null)
             {
@@ -156,8 +156,8 @@ namespace FinRiskLensAI.Controllers
             var otp = Random.Shared.Next(100000, 999999).ToString();
 
             // 3. Try sending the OTP email FIRST
-            var emailSent = await _emailService.SendLoginOtpAsync(model.Email, otp, nameOfEnterprise, 
-                            expiryMinutes: 5, ct: HttpContext.RequestAborted);
+            var emailSent = await _emailService.SendLoginOtpAsync(model.Email, otp, nameOfEnterprise,
+                            expiryMinutes: 5, theme: theme, ct: HttpContext.RequestAborted);
            
             // 4. Only persist the OTP if the email actually went out
             var otpModel = new UserOtpModel

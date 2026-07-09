@@ -132,26 +132,6 @@
             </div>
 
             @* Hero animation styles + live-score/chart script *@
-            <style>
-                @@keyframes heroFloatCorner {
-                    0%, 100% { transform: translateY(0); }
-                    50%      { transform: translateY(-14px); }
-                }
-                .hero-float-id { animation: heroFloatCorner 5s ease-in-out infinite; will-change: transform; }
-                .hero-float-chart { animation: heroFloatCorner 7s ease-in-out infinite .5s; will-change: transform; }
-
-                @@keyframes heroPulse {
-                    0%, 100% { opacity: .5; }
-                    50%      { opacity: 1; }
-                }
-                .hero-pulse { animation: heroPulse 2.4s ease-in-out infinite; }
-
-                .hero-bar { height: 20%; transition: height .9s cubic-bezier(.34,1.56,.64,1); }
-
-                @@media (prefers-reduced-motion: reduce) {
-                    .hero-float-id, .hero-float-chart, .hero-pulse { animation: none; }
-                }
-            </style>
             <script>
                 (function () {
                     var scoreEl = document.getElementById('heroScore');
@@ -461,7 +441,7 @@
     <!-- CTA Section -->
     <section class="mx-auto px-margin-desktop py-5" style="max-width: 1440px;">
         <div class="bg-white rounded-5 p-4 p-md-5 text-center border shadow-sm position-relative overflow-hidden"
-             style="background-image: radial-gradient(rgba(87, 0, 29, 0.05) 1px, transparent 1px); background-size: 24px 24px;">
+             style="background-image: radial-gradient(rgba(var(--brand-primary-dark-rgb), 0.05) 1px, transparent 1px); background-size: 24px 24px;">
             <div class="position-absolute start-0 top-0 translate-middle bg-opacity-5 rounded-circle blur-3xl"
                  style="width: 300px; height: 300px; filter: blur(60px);"></div>
             <div class="position-absolute end-0 bottom-0 translate-middle-y  bg-opacity-5 rounded-circle blur-3xl"

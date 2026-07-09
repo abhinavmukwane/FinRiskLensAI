@@ -1,4 +1,4 @@
-﻿
+
 $(document).ready(function () {
 
     var $otpInputs = $(".otp-input");
@@ -123,7 +123,8 @@ $(document).ready(function () {
         $("#email").removeClass("is-invalid");
 
         var model = {
-            Email: email
+            Email: email,
+            theme: (localStorage.getItem('frl-theme') || 'theme1')
         };
 
         var $btn = $("#generateOtpBtn");
@@ -255,7 +256,8 @@ $(document).ready(function () {
         }
 
         var model = {
-            Email: email
+            Email: email,
+            theme: (localStorage.getItem('frl-theme') || 'theme1')
         };
 
         var $btn = $(this);

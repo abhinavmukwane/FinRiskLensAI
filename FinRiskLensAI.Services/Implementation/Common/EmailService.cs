@@ -82,10 +82,10 @@ namespace FinRiskLensAI.Services.Implementation.Common
             }
         }
 
-        public Task<bool> SendLoginOtpAsync(string toEmail, string otpCode, string? recipientName = null, int expiryMinutes = 10, CancellationToken ct = default)
+        public Task<bool> SendLoginOtpAsync(string toEmail, string otpCode, string? recipientName = null, int expiryMinutes = 10, string? theme = null, CancellationToken ct = default)
         {
             var subject = LoginOtpEmailTemplate.Subject(otpCode);
-            var body = LoginOtpEmailTemplate.Build(otpCode, recipientName, expiryMinutes);
+            var body = LoginOtpEmailTemplate.Build(otpCode, recipientName, expiryMinutes, theme);
             return SendEmailAsync(toEmail, subject, body, ct);
         }
     }

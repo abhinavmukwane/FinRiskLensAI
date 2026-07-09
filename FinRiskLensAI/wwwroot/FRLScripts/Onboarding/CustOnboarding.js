@@ -1,4 +1,4 @@
-﻿
+
 $(function () {
 
     $(".rv-mobile-input").prop("disabled", true);
@@ -324,7 +324,7 @@ $(function () {
         $.ajax({
             url: '/Onboarding/RegisterUser',
             type: 'POST',
-            data: { model, nameOfEnterprise },
+            data: { model, nameOfEnterprise, theme: (localStorage.getItem('frl-theme') || 'theme1') },
             success: function (response) {
                 $btn.prop('disabled', false)
                     .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');
@@ -426,7 +426,8 @@ $(function () {
         }
 
         var model = {
-            Email: email
+            Email: email,
+            theme: (localStorage.getItem('frl-theme') || 'theme1')
         };
 
         // Disable + show sending state while the call is in flight
@@ -436,8 +437,7 @@ $(function () {
         $.ajax({
             url: "/Auth/GenCustomerOtp",
             type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify(model),
+            data: model,
             success: function (response) {
                 if (response && response.status) {
                     $('.otp-input').val('');

@@ -32,7 +32,7 @@ namespace FinRiskLensAI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> GenCustomerOtp(UserOtpModel model)
+        public async Task<IActionResult> GenCustomerOtp(UserOtpModel model, string? theme = null)
         {
             try
             {
@@ -67,7 +67,7 @@ namespace FinRiskLensAI.Controllers
 
                 if (otpResult.Result == tflResultType.tflSuccess)
                 {
-                    bool emailSent = await _emailService.SendLoginOtpAsync(model.Email, otp, check.Message, expiryMinutes: 5, ct: HttpContext.RequestAborted);
+                    bool emailSent = await _emailService.SendLoginOtpAsync(model.Email, otp, check.Message, expiryMinutes: 5, theme: theme, ct: HttpContext.RequestAborted);
 
                     if (!emailSent)
                     {

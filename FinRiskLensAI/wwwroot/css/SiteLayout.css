@@ -1,0 +1,18 @@
+/* Extracted from _Layout.cshtml */
+        /* Bhashini language widget — themed to sit in the maroon brandbar */
+        .brandbar { overflow: visible !important; }      /* let the language dropdown escape the header (beats page-level index.css) */
+        .bhashini-plugin-container { display: flex; align-items: center; }
+        .bhashini-plugin-container .bhashini-dropdown-btn {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: .75rem;
+            padding: .3rem .45rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: background .2s ease, border-color .2s ease;
+        }
+        .bhashini-plugin-container .bhashini-dropdown-btn:hover {
+            background: rgba(255,255,255,.15);
+            border-color: var(--gold-soft);
+        }
+        .bhashini-plugin-container .bhashini-dropdown-btn-icon svg { display: block; width: 24px; height: 24px; }

@@ -5,56 +5,7 @@
     var r = Model.Result;
 }
 
-<style>
-    .fhc-wrap { padding: 24px; max-width: 1320px; margin: 0 auto; font-family: var(--font-data, 'Inter', sans-serif); }
-    .fhc-card { background: #fff; border: 1px solid #ead9df; border-radius: 16px; padding: 20px 22px; box-shadow: 0 2px 10px rgba(87,0,29,.05); height: 100%; }
-    .fhc-title { font-family: var(--font-headline, 'Sora', sans-serif); font-weight: 700; color: #57001d; }
-    .fhc-sub { color: #974354; font-size: .85rem; }
-    .fhc-section-label { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #974354; margin-bottom: 12px; }
-
-    .band-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: .85rem; }
-    .band-Excellent { background: #e3f4ea; color: #0f5137; }
-    .band-Good { background: #e8f1e3; color: #3d6b1f; }
-    .band-Fair { background: #fdf3d7; color: #8a6d00; }
-    .band-AtRisk { background: #fde8d7; color: #9c4a00; }
-    .band-HighRisk { background: #fbe0e0; color: #8b1020; }
-
-    .stat-tile { background: #faf7f8; border: 1px solid #ead9df; border-radius: 12px; padding: 12px 14px; }
-    .stat-tile .v { font-family: var(--font-headline, 'Sora', sans-serif); font-weight: 700; font-size: 1.15rem; color: #2b2026; }
-    .stat-tile .k { font-size: .72rem; color: #974354; text-transform: uppercase; letter-spacing: .06em; }
-
-    .dim-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
-    .dim-name { flex: 0 0 210px; font-size: .85rem; color: #2b2026; }
-    .dim-track { flex: 1; height: 10px; border-radius: 999px; background: #f2e6ea; overflow: hidden; }
-    .dim-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #974354, #57001d); }
-    .dim-val { flex: 0 0 90px; text-align: right; font-size: .82rem; font-weight: 600; color: #57001d; }
-    .dim-muted { opacity: .45; }
-
-    .expl-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px dashed #f0e2e7; font-size: .87rem; align-items: flex-start; }
-    .expl-item:last-child { border-bottom: none; }
-    .expl-item .bi { margin-top: 2px; }
-    .expl-dim { font-size: .7rem; color: #974354; text-transform: uppercase; letter-spacing: .05em; }
-
-    .reco-card { border: 1px solid #ead9df; border-left: 5px solid #57001d; border-radius: 12px; padding: 14px 16px; background: #fffdfb; }
-    .reco-amt { font-family: var(--font-headline, 'Sora', sans-serif); font-weight: 700; color: #57001d; }
-
-    .gauge-box { position: relative; max-width: 340px; margin: 0 auto; }
-    .gauge-center { position: absolute; left: 0; right: 0; bottom: -6px; text-align: center; pointer-events: none; }
-    .gauge-score { font-family: var(--font-headline, 'Sora', sans-serif); font-size: 2.6rem; font-weight: 800; color: #57001d; line-height: 1; }
-    .gauge-of { font-size: .78rem; color: #974354; }
-
-    .lending-notes { background: #faf7f8; border: 1px solid #ead9df; border-radius: 12px; padding: 14px 16px; }
-    .lending-notes-head { font-size: .72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #974354; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-    .lending-note { display: flex; gap: 10px; align-items: flex-start; font-size: .8rem; line-height: 1.55; color: #5c4a50; padding: 7px 0; border-top: 1px dashed #ecdce2; }
-    .lending-note:first-of-type { border-top: none; padding-top: 0; }
-    .lending-note .bi { color: #2e7d4f; font-size: .85rem; margin-top: 2px; flex-shrink: 0; }
-    .lending-note.warn { color: #7a4a12; }
-    .lending-note.warn .bi { color: #c98a2b; }
-
-    .anomaly-box { border: 1px solid #f3d19c; background: #fff8ec; border-radius: 12px; padding: 14px 16px; font-size: .88rem; }
-    .anomaly-box.flagged { border-color: #e79b9b; background: #fdf0f0; }
-    canvas { max-width: 100%; }
-</style>
+<link href="~/css/FinancialHealthCard.css" rel="stylesheet" />
 
 <div class="fhc-wrap">
 
@@ -78,7 +29,7 @@
 {
     <button type="button"
             class="btn text-white mt-3"
-            style="background:#57001d;border-radius:10px;padding:8px 22px;font-weight:600;"
+            style="background:var(--brand-btn-bg);border-radius:10px;padding:8px 22px;font-weight:600;"
             onclick="window.open('@Url.Action("FinancialReport", "Report")', '_blank')">
         <i class="bi bi-download me-1"></i>
         Download Report
@@ -94,7 +45,7 @@
     else if (!Model.HasResult)
     {
         <div class="fhc-card text-center py-5">
-            <i class="bi bi-hourglass-split" style="font-size:3rem;color:#974354;"></i>
+            <i class="bi bi-hourglass-split" style="font-size:3rem;color:var(--brand-secondary);"></i>
             <h5 class="fhc-title mt-3">No analysis result yet for @Model.Uan</h5>
             <div class="fhc-sub mb-3">
                 Files in folder: @(Model.Status?.FilesPresent.Count ?? 0)
@@ -103,7 +54,7 @@
                     <br /><span>Missing: @string.Join(", ", Model.Status.FilesMissing)</span>
                 }
             </div>
-            <button id="runAnalysisBtn" class="btn text-white" style="background:#57001d;border-radius:10px;padding:10px 26px;font-weight:600;">
+            <button id="runAnalysisBtn" class="btn text-white" style="background:var(--brand-btn-bg);border-radius:10px;padding:10px 26px;font-weight:600;">
                 <i class="bi bi-cpu me-1"></i> Run AI Analysis Now
             </button>
             <div id="runStatus" class="fhc-sub mt-2"></div>
@@ -142,7 +93,7 @@
                     <div class="fhc-sub mt-3">
                         @(Model.EnterpriseName ?? Model.Uan) &middot; computed @r.ComputedAt.ToString("dd MMM yyyy HH:mm") UTC
                     </div>
-                    <button id="reAnalyzeBtn" class="btn text-white mt-3" style="background:#57001d;border-radius:10px;padding:8px 22px;font-weight:600;">
+                    <button id="reAnalyzeBtn" class="btn text-white mt-3" style="background:var(--brand-btn-bg);border-radius:10px;padding:8px 22px;font-weight:600;">
                         <i class="bi bi-arrow-repeat me-1"></i> Re-analyze Score
                     </button>
                     <div id="reAnalyzeStatus" class="fhc-sub mt-2"></div>
@@ -243,14 +194,14 @@
                 <!-- Eligibility headline tiles -->
                 <div class="row g-3 mb-4">
                     <div class="col-6 col-lg-3">
-                        <div class="stat-tile" style="border-left:4px solid #57001d;">
+                        <div class="stat-tile" style="border-left:4px solid var(--brand-primary-dark);">
                             <div class="v">₹@FormatInr(l.WorkingCapitalLimit)</div>
                             <div class="k">Working Capital Limit</div>
                             <div class="fhc-sub" style="font-size:.7rem;">turnover method (20%)</div>
                         </div>
                     </div>
                     <div class="col-6 col-lg-3">
-                        <div class="stat-tile" style="border-left:4px solid #974354;">
+                        <div class="stat-tile" style="border-left:4px solid var(--brand-secondary);">
                             <div class="v">₹@FormatInr(l.TermLoanCapacity)</div>
                             <div class="k">Term Loan Capacity</div>
                             <div class="fhc-sub" style="font-size:.7rem;">5 yr @@ 11% on EMI headroom</div>
@@ -291,7 +242,7 @@
                                     <div class="fhc-sub" style="font-size:.74rem;">@ratio.Description</div>
                                 </div>
                                 <div class="text-end" style="flex:0 0 90px;">
-                                    <div style="font-weight:700;color:#57001d;">@ratio.Display</div>
+                                    <div style="font-weight:700;color:var(--brand-primary-dark);">@ratio.Display</div>
                                     <div class="fhc-sub" style="font-size:.7rem;">norm @ratio.Benchmark</div>
                                 </div>
                                 <span class="badge" style="flex:0 0 84px;background:@chip.Item2;color:@chip.Item3;">@chip.Item1</span>
@@ -496,7 +447,7 @@
                         <div class="reco-card">
                             <div class="d-flex justify-content-between align-items-start">
                                 <strong>@p.ProductName</strong>
-                                <span class="badge" style="background:#f2e6ea;color:#57001d;">@p.SchemeCode</span>
+                                <span class="badge" style="background:var(--brand-tint-bg-2);color:var(--brand-primary-dark);">@p.SchemeCode</span>
                             </div>
                             <div class="reco-amt my-1">₹@FormatInr((double)p.IndicativeAmountMin) – ₹@FormatInr((double)p.IndicativeAmountMax)</div>
                             <div class="fhc-sub">@p.RecommendationReason</div>
@@ -512,7 +463,10 @@
         <script>
             const dims = @Html.Raw(Json.Serialize(r.Dimensions.Select(d => new { d.Dimension, d.Score, d.MaxPoints })));
             const score = @r.OverallScore.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            const maroon = '#57001d', rose = '#974354';
+            // Brand colors follow the active theme (see ~/css/theme.css)
+            const frlBrand = getComputedStyle(document.documentElement);
+            const maroon = frlBrand.getPropertyValue('--brand-btn-bg').trim() || '#F58220';
+            const rose = frlBrand.getPropertyValue('--brand-secondary').trim() || '#974354';
 
             // ── Score meter: 5 band segments + needle
             const bandColors = ['#c22f3e', '#e08a3c', '#e6c34c', '#7fae5e', '#2e7d4f'];
@@ -557,7 +511,7 @@
                     datasets: [{
                         label: '% of maximum',
                         data: dims.map(d => d.maxPoints > 0 ? Math.round(d.score / d.maxPoints * 100) : 0),
-                        backgroundColor: 'rgba(151,67,84,.18)', borderColor: maroon,
+                        backgroundColor: maroon + '2e', borderColor: maroon,
                         pointBackgroundColor: maroon, borderWidth: 2
                     }]
                 },
@@ -616,7 +570,7 @@
                     type: 'line',
                     data: { labels: keys.map(monthLabel), datasets: [{
                         data: keys.map(k => bank.balances[k]),
-                        borderColor: maroon, backgroundColor: 'rgba(151,67,84,.12)',
+                        borderColor: maroon, backgroundColor: maroon + '1f',
                         fill: true, tension: .35, pointBackgroundColor: maroon
                     }]},
                     options: { maintainAspectRatio: false,
@@ -629,7 +583,7 @@
                     type: 'doughnut',
                     data: { labels: modeKeys, datasets: [{
                         data: modeKeys.map(k => bank.modes[k]),
-                        backgroundColor: ['#57001d', '#974354', '#c98a2b', '#2e7d4f', '#7fae5e', '#8a6d00', '#c22f3e'],
+                        backgroundColor: [maroon, rose, '#c98a2b', '#2e7d4f', '#7fae5e', '#8a6d00', '#c22f3e'],
                         borderColor: '#fff', borderWidth: 2
                     }]},
                     options: { maintainAspectRatio: false, cutout: '58%',
@@ -668,7 +622,7 @@
                                       y: { ticks: { font: { size: 9, family: 'monospace' } } } } }
                     });
                 };
-                shareBar('customerChart', gst.customers, '#974354');
+                shareBar('customerChart', gst.customers, rose);
                 shareBar('vendorChart', gst.vendors, '#c98a2b');
             }
 
@@ -679,7 +633,7 @@
                     labels: dims.map(d => d.dimension),
                     datasets: [
                         { label: 'Earned', data: dims.map(d => d.score), backgroundColor: maroon, borderRadius: 6 },
-                        { label: 'Maximum', data: dims.map(d => d.maxPoints), backgroundColor: '#f2e6ea', borderRadius: 6 }
+                        { label: 'Maximum', data: dims.map(d => d.maxPoints), backgroundColor: frlBrand.getPropertyValue('--brand-tint-bg-2').trim() || '#f2e6ea', borderRadius: 6 }
                     ]
                 },
                 options: {
