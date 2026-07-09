@@ -93,7 +93,7 @@ namespace FinRiskLensAI.Services.Implementation.Common
         /// build so every company shows a different, realistic charge history.
         /// </summary>
         public string GetDummyMca(string uan, string companyName, string? pan = null)
-        {
+        { 
             var rng = Random.Shared;
             string D(int n) => new(Enumerable.Range(0, n).Select(_ => (char)('0' + rng.Next(10))).ToArray());
 
@@ -202,7 +202,7 @@ namespace FinRiskLensAI.Services.Implementation.Common
             var surname = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? fullName;
 
             var dob = DateTime.Today.AddYears(-rng.Next(35, 70)).AddDays(-rng.Next(0, 365));
-            var buildings = new[] { "SONA MAHAL APT", "GREEN VALLEY SOC", "SHANTI NIWAS", "SUNRISE RESIDENCY", "LAKE VIEW APT" };
+            var buildings = new[] { "SONA MAHAL APT", "GREEN VALLEY SOC", "SHANTI NIWAS", "SUNRISE RESIDENCY", "LAKE VIEW APT", "INFOTECH TOWER" };
             var address = $"{rng.Next(1, 400)}, {buildings[rng.Next(buildings.Length)]}";
             var email = $"{surname.ToLowerInvariant()}.{D(4)}@example.com";
 
@@ -214,7 +214,7 @@ namespace FinRiskLensAI.Services.Implementation.Common
                 message = new
                 {
                     client_id = "corporate_din_" + A(20),
-                    din_number = "0000000",
+                    din_number = din,
                     father_name = "  " + surname.ToUpperInvariant(),
                     full_name = fullName,
                     dob = dob.ToString("yyyy-MM-dd"),
