@@ -88,5 +88,18 @@ namespace FinRiskLensAI.Services.Implementation.Common
             var body = LoginOtpEmailTemplate.Build(otpCode, recipientName, expiryMinutes, theme);
             return SendEmailAsync(toEmail, subject, body, ct);
         }
+
+        public Task<bool> SendReportReadyEmailAsync(string toEmail,string? recipientName,string businessName,int financialHealthScore, string riskBand,string reportDate, string reportUrl,
+    string metric1Label, string metric1Value, string metric2Label, string metric2Value,string metric3Label, string metric3Value, string? theme = null,
+    CancellationToken ct = default)
+        {
+            var subject = ReportReadyEmail.Subject(businessName);
+            var body = ReportReadyEmail.Build(
+                recipientName, businessName, financialHealthScore, riskBand, reportDate, reportUrl,
+                metric1Label, metric1Value, metric2Label, metric2Value, metric3Label, metric3Value,
+                theme);
+            return SendEmailAsync(toEmail, subject, body, ct);
+        }
+
     }
 }
