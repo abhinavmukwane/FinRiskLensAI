@@ -182,6 +182,56 @@ namespace FinRiskLensAI.Services.Implementation.Common
             return JsonConvert.SerializeObject(response);
         }
 
+        /// <summary>
+        /// Dummy DIN verification response mirroring the real MCA DIN API shape (rrn /
+        /// din / message / tran_ref_no). The director's name is carried through from the
+        /// MCA response; father name, DOB, address and email are randomised-but-plausible.
+        /// </summary>
+        public string GetDummyDin(string din, string directorName, string? pan = null)
+        {
+            var rng = Random.Shared;
+            string D(int n) => new(Enumerable.Range(0, n).Select(_ => (char)('0' + rng.Next(10))).ToArray());
+            string A(int n)
+            {
+                const string alnum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+                return new(Enumerable.Range(0, n).Select(_ => alnum[rng.Next(alnum.Length)]).ToArray());
+            }
+
+            din = string.IsNullOrWhiteSpace(din) ? D(8) : din.Trim();
+            var fullName = string.IsNullOrWhiteSpace(directorName) ? "Unknown Director" : directorName.Trim();
+            var surname = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? fullName;
+
+            var dob = DateTime.Today.AddYears(-rng.Next(35, 70)).AddDays(-rng.Next(0, 365));
+            var buildings = new[] { "SONA MAHAL APT", "GREEN VALLEY SOC", "SHANTI NIWAS", "SUNRISE RESIDENCY", "LAKE VIEW APT" };
+            var address = $"{rng.Next(1, 400)}, {buildings[rng.Next(buildings.Length)]}";
+            var email = $"{surname.ToLowerInvariant()}.{D(4)}@example.com";
+
+            var response = new
+            {
+                rrn = $"{D(8)}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
+                din,
+                status_code = "200",
+                message = new
+                {
+                    client_id = "corporate_din_" + A(20),
+                    din_number = "0000000",
+                    father_name = "  " + surname.ToUpperInvariant(),
+                    full_name = fullName,
+                    dob = dob.ToString("yyyy-MM-dd"),
+                    nationality = "IN",
+                    present_address = address,
+                    permanent_address = "",
+                    email,
+                    pan_number = string.IsNullOrWhiteSpace(pan) ? null : pan.Trim(),
+                    companies_associated = Array.Empty<object>(),
+                    status = "success"
+                },
+                tran_ref_no = D(8)
+            };
+
+            return JsonConvert.SerializeObject(response);
+        }
+
         // Standard GSTIN check-digit: base-36, alternating weights 1,2 over the first 14 chars.
         private static string BuildGstin(string stateCode, string pan, string entityNo)
         {

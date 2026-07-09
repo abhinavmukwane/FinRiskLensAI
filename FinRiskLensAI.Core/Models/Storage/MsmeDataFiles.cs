@@ -16,6 +16,10 @@ namespace FinRiskLensAI.Core.Models.Storage
         public const string Epfo = "epfo.json";
         public const string Mca = "mca.json";
 
+        // Per-director DIN verification files, e.g. DIN_85111678.json (one per company director).
+        public const string DinPrefix = "DIN_";
+        public static string DinFile(string din) => $"{DinPrefix}{din?.Trim()}.json";
+
         // Monthly GST files carry a MMyyyy period suffix, e.g. gstr3b_012026.json
         public const string Gstr3bPrefix = "gstr3b_";
         public const string Gstr1SummaryPrefix = "gstr1_summary_";
@@ -28,7 +32,7 @@ namespace FinRiskLensAI.Core.Models.Storage
 
         private static readonly string[] KnownFixed = { Udyam, Itr, Aa, GstTaxpayer, Epfo, Mca, Manifest, Result };
         private static readonly string[] KnownPrefixes =
-            { Gstr3bPrefix, Gstr1SummaryPrefix, Gstr1B2bPrefix, Gstr1CdnrPrefix, Gstr1HsnPrefix, Gstr2aB2bPrefix, Gstr2bPrefix };
+            { Gstr3bPrefix, Gstr1SummaryPrefix, Gstr1B2bPrefix, Gstr1CdnrPrefix, Gstr1HsnPrefix, Gstr2aB2bPrefix, Gstr2bPrefix, DinPrefix };
 
         public static bool IsKnown(string fileName)
             => KnownFixed.Contains(fileName, StringComparer.OrdinalIgnoreCase)

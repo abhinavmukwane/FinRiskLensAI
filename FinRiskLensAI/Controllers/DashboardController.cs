@@ -3,11 +3,13 @@ using FinRiskLensAI.Core.Interfaces;
 using FinRiskLensAI.Core.Interfaces.IServices.AccountAggregator;
 using FinRiskLensAI.Core.Interfaces.IServices.Common;
 using FinRiskLensAI.Core.Interfaces.IServices.GST;
+using FinRiskLensAI.Core.Models.Mca;
 using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Core.Models.Universal;
 using FinRiskLensAI.Models;
 using FinRiskLensAI.Utility;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace FinRiskLensAI.Controllers
@@ -192,6 +194,7 @@ namespace FinRiskLensAI.Controllers
             }
 
             // MCA response — same company name as the profile, dynamic charges. Store once.
+            string? mcaJson;
             if (!await _store.ExistsAsync(uan, MsmeDataFiles.Mca, ct))
             {
                 var companyName = user.NameOfEnterprise;
@@ -202,8 +205,33 @@ namespace FinRiskLensAI.Controllers
                         ? JObject.Parse(udyamJson).SelectToken("main_details.name_of_enterprise")?.Value<string>()
                         : uan;
                 }
-                var mcaJson = _dummyData.GetDummyMca(uan, companyName ?? uan, user.PanNumber);
+                mcaJson = _dummyData.GetDummyMca(uan, companyName ?? uan, user.PanNumber);
                 await _store.UploadAsync(uan, MsmeDataFiles.Mca, mcaJson, ct);
+            }
+            else
+            {
+                mcaJson = await _store.DownloadAsync(uan, MsmeDataFiles.Mca, ct);
+            }
+
+            // DIN verification files — one per director from the MCA response, stored as
+            // DIN_<din>.json (e.g. DIN_85111678.json) so each director's profile can be
+            // pulled by DIN. Skips directors without a DIN and any file already present.
+            if (!string.IsNullOrWhiteSpace(mcaJson))
+            {
+                var directors = JsonConvert.DeserializeObject<McaResponseModel>(mcaJson)?
+                    .message?.details?.directors ?? new List<McaResponseModel.McaDirectorModel>();
+
+                foreach (var d in directors)
+                {
+                    var din = d.din_number?.Trim();
+                    if (string.IsNullOrWhiteSpace(din)) continue;
+
+                    var dinFile = MsmeDataFiles.DinFile(din);
+                    if (await _store.ExistsAsync(uan, dinFile, ct)) continue;
+
+                    var dinJson = _dummyData.GetDummyDin(din, d.director_name ?? string.Empty, user.PanNumber);
+                    await _store.UploadAsync(uan, dinFile, dinJson, ct);
+                }
             }
 
             _logger.LogInformation("Seeded {Count} GST files into {Uan} from template.", copied, uan);
