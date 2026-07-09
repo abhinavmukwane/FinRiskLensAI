@@ -1689,20 +1689,6 @@ img {
                 padding-bottom: 0;
             }
 
-    .udyam-dashboard .location-card {
-        background: #1a1147;
-        color: #fff;
-        border-color: #1a1147;
-    }
-
-        .udyam-dashboard .location-card .mini-list li {
-            border-bottom-color: rgba(255, 255, 255, .12);
-        }
-
-        .udyam-dashboard .location-card .mini-list span {
-            opacity: .75;
-        }
-
     .udyam-dashboard .compliance-card {
         background: #f9eef3;
         color: var(--theme-maroon);
@@ -2515,8 +2501,12 @@ img {
 
 /* Split panel */
 .udyam-dashboard .split-panel { display: flex; border-radius: 16px; overflow: hidden; border: 1px solid var(--card-border); }
-.udyam-dashboard .split-left { background: linear-gradient(160deg, #1a1147, #2a1a5e); color: #fff; padding: 28px 24px; flex: 0 0 40%; max-width: 40%; }
-.udyam-dashboard .split-left .mini-list strong { color: #fff; }
+/* Same palette as the Udyam Location Summary card (.compliance-card) */
+.udyam-dashboard .split-left { background: #f9eef3; color: var(--theme-maroon); padding: 28px 24px; flex: 0 0 40%; max-width: 40%; }
+.udyam-dashboard .split-left .mini-list strong { color: var(--theme-maroon); }
+.udyam-dashboard .split-left .mini-list li { border-bottom-color: rgba(139, 21, 56, .1); }
+.udyam-dashboard .split-left .mini-list span { color: var(--text-muted-2); }
+.udyam-dashboard .split-left .card-label { color: var(--theme-maroon); }
 .udyam-dashboard .split-right { background: #fff; padding: 28px 24px; flex: 1; }
 
 /* Vertical stepper */
