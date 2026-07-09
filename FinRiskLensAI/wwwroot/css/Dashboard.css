@@ -1280,7 +1280,7 @@ img {
 
 .verify-card {
     background: #fff;
-    border-left: 5px solid #8b1538; /* Theme color */
+    border-left: 5px solid #57001d; /* Theme color */
     border-radius: 12px;
     padding: 18px 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,.08);
@@ -1304,8 +1304,8 @@ img {
 
 .btn-submit {
     background: #fff;
-    color: #8b1538;
-    border: 1px solid #8b1538;
+    color: #57001d;
+    border: 1px solid #57001d;
     border-radius: 8px;
     padding: 8px 24px;
     font-weight: 600;
@@ -1313,7 +1313,7 @@ img {
 }
 
     .btn-submit:hover {
-        background: #8b1538;
+        background: #57001d;
         color: #fff;
     }
 
@@ -1330,8 +1330,8 @@ img {
    ===================================================================== */
 
 .udyam-dashboard {
-    --theme-maroon: #8b1538;
-    --theme-maroon-dark: #74112f;
+    --theme-maroon: #57001d;
+    --theme-maroon-dark: #3d0013;
     --theme-maroon-soft: #faf7f8;
     --success-green: #2e7d32;
     --success-green-soft: #e6f4ea;
@@ -1802,7 +1802,7 @@ img {
 }
 
     .custom-input:focus {
-        border-color: #8b1538;
+        border-color: #57001d;
         box-shadow: 0 0 0 .15rem rgba(139, 21, 56, .15);
     }
 
@@ -1816,8 +1816,8 @@ img {
 }
 
 .form-check-input:checked {
-    background: #8b1538;
-    border-color: #8b1538;
+    background: #57001d;
+    border-color: #57001d;
 }
 
 /* Responsive tweaks */
@@ -1908,8 +1908,8 @@ img {
 
 /* ── Modal shell (uses the app's existing fonts, not new ones) ── */
 .ip-audit {
-    --theme-maroon: #8b1538;
-    --theme-maroon-dark: #74112f;
+    --theme-maroon: #57001d;
+    --theme-maroon-dark: #3d0013;
     --success-green: #2e7d32;
     --success-green-soft: #e6f4ea;
     --danger-red: #b3261e;
@@ -2409,4 +2409,204 @@ img {
     15% { opacity: 1; }
     50% { transform: translateX(25px) scaleX(1.8); opacity: 1; }
     100% { transform: translateX(55px) scaleX(.1); opacity: 0; }
+}
+
+/* ============================================================
+   MCA — Corporate Intelligence Report (/Mca/MCADetails).
+   Scoped under .udyam-dashboard (shares the same design system
+   as the Udyam page); the DIN detail modal also carries the
+   .udyam-dashboard class so the theme vars resolve inside it.
+   ============================================================ */
+
+/* Categorized AI-observation variants of .signal-list */
+.udyam-dashboard { --info-blue: #1565c0; --info-blue-soft: #e3f2fd; }
+
+    .udyam-dashboard .signal-list li.obs-observation { border-left-color: var(--info-blue); background: #f8fbff; }
+    .udyam-dashboard .signal-list li.obs-observation i { color: var(--info-blue); }
+    .udyam-dashboard .signal-list li.obs-observation .signal-title { color: var(--info-blue); }
+    .udyam-dashboard .signal-list li.obs-risk { border-left-color: var(--warning-orange); background: #fffdf5; }
+    .udyam-dashboard .signal-list li.obs-risk i { color: var(--warning-orange); }
+    .udyam-dashboard .signal-list li.obs-recommendation { border-left-color: var(--theme-maroon); background: var(--theme-maroon-soft); }
+    .udyam-dashboard .signal-list li.obs-recommendation i { color: var(--theme-maroon); }
+    .udyam-dashboard .signal-list li.obs-danger { border-left-color: var(--danger-red); background: #fef8f8; }
+    .udyam-dashboard .signal-list li.obs-danger i { color: var(--danger-red); }
+    .udyam-dashboard .signal-list li.obs-danger .signal-title { color: var(--danger-red); }
+
+/* Directors */
+.udyam-dashboard .director-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--theme-maroon), var(--theme-maroon-dark)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; font-family: 'Outfit', sans-serif; flex-shrink: 0; }
+.udyam-dashboard .director-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 15px; color: var(--theme-maroon); margin: 0 0 2px 0; }
+.udyam-dashboard .director-meta { font-size: 12px; color: var(--text-muted-2); margin: 0; }
+.udyam-dashboard .din-badge { display: inline-block; background: var(--info-blue-soft); color: var(--info-blue); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+
+/* Status dots */
+.udyam-dashboard .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.udyam-dashboard .status-dot.green { background: var(--success-green); }
+.udyam-dashboard .status-dot.orange { background: var(--warning-orange); }
+.udyam-dashboard .status-dot.red { background: var(--danger-red); }
+.udyam-dashboard .status-dot.grey { background: #bbb; }
+
+/* Quick risk indicator + stat cards */
+.udyam-dashboard .risk-indicator-card { background: #fff; border: 1px solid var(--card-border); border-radius: 14px; padding: 16px 18px; text-align: center; transition: all 0.2s ease; }
+.udyam-dashboard .risk-indicator-card:hover { box-shadow: 0 6px 20px rgba(139, 21, 56, .05); }
+.udyam-dashboard .risk-indicator-label { font-size: 11px; font-weight: 600; color: var(--text-muted-2); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+.udyam-dashboard .risk-indicator-value { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: var(--theme-maroon); display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+.udyam-dashboard .stat-card { background: #fff; border: 1px solid var(--card-border); border-radius: 14px; padding: 18px 20px; text-align: center; transition: all 0.2s ease; box-shadow: none; }
+.udyam-dashboard .stat-card:hover { border-color: var(--theme-maroon); transform: none; }
+.udyam-dashboard .stat-value { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 700; color: var(--theme-maroon); line-height: 1.2; }
+.udyam-dashboard .stat-label { font-size: 11px; font-weight: 600; color: var(--text-muted-2); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; }
+
+/* Risk meters */
+.udyam-dashboard .risk-meter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.udyam-dashboard .risk-meter-row:last-child { margin-bottom: 0; }
+.udyam-dashboard .risk-meter-label { font-size: 12px; font-weight: 700; color: var(--text-muted-2); width: 100px; text-align: right; flex-shrink: 0; }
+.udyam-dashboard .risk-meter-bar-bg { flex: 1; height: 10px; background: #f1edf0; border-radius: 999px; overflow: hidden; }
+.udyam-dashboard .risk-meter-bar-fill { height: 100%; border-radius: 999px; transition: width 1.5s ease-in-out; }
+.udyam-dashboard .bar-green { background: var(--success-green); }
+.udyam-dashboard .bar-orange { background: var(--warning-orange); }
+.udyam-dashboard .bar-red { background: var(--danger-red); }
+.udyam-dashboard .bar-maroon { background: var(--theme-maroon); }
+.udyam-dashboard .risk-overall-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--success-green-soft); color: var(--success-green); font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 16px; padding: 8px 24px; border-radius: 999px; letter-spacing: 0.05em; }
+
+.udyam-dashboard .pill-warning { display: inline-block; background: var(--warning-orange-soft); color: var(--warning-orange); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+
+/* Hero banner */
+.udyam-dashboard .hero-banner { background: linear-gradient(135deg, var(--theme-maroon) 0%, var(--theme-maroon-dark) 60%, #3e0920 100%); color: #fff; border-radius: 20px; padding: 36px 40px; position: relative; overflow: hidden; margin-bottom: 28px; }
+.udyam-dashboard .hero-banner::before { content: ""; position: absolute; top: -60px; right: -60px; width: 260px; height: 260px; border-radius: 50%; background: rgba(255,255,255,0.04); }
+.udyam-dashboard .hero-banner::after { content: ""; position: absolute; bottom: -40px; left: 30%; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,0.03); }
+.udyam-dashboard .hero-banner h2 { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 28px; margin: 0; }
+.udyam-dashboard .hero-banner p { opacity: 0.8; margin: 6px 0 0; font-size: 14px; }
+.udyam-dashboard .hero-score-ring { width: 120px; height: 120px; position: relative; flex-shrink: 0; }
+.udyam-dashboard .hero-score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.udyam-dashboard .hero-score-ring .gauge-track { stroke: rgba(255,255,255,0.15); stroke-width: 10; }
+.udyam-dashboard .hero-score-ring .gauge-progress { stroke: #4caf50; stroke-width: 10; }
+.udyam-dashboard .hero-score-ring .score-value { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.udyam-dashboard .hero-score-ring .score-value span { font-size: 32px; font-weight: 700; color: #fff; line-height: 1; }
+.udyam-dashboard .hero-score-ring .score-value small { font-size: 11px; color: rgba(255,255,255,0.7); }
+.udyam-dashboard .hero-stats { display: flex; gap: 32px; margin-top: 16px; flex-wrap: wrap; }
+.udyam-dashboard .hero-stat-item { text-align: center; }
+.udyam-dashboard .hero-stat-item .value { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.2; }
+.udyam-dashboard .hero-stat-item .label { font-size: 11px; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Tabs */
+.udyam-dashboard .mca2-tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--card-border); margin-bottom: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.udyam-dashboard .mca2-tab { padding: 12px 20px; font-size: 13px; font-weight: 700; color: var(--text-muted-2); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s ease; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; }
+.udyam-dashboard .mca2-tab:hover { color: var(--theme-maroon); }
+.udyam-dashboard .mca2-tab.active { color: var(--theme-maroon); border-bottom-color: var(--theme-maroon); }
+.udyam-dashboard .mca2-tab i { margin-right: 6px; }
+
+.udyam-dashboard .tab-panel { display: none; animation: mcaFadeSlideIn 0.4s ease; }
+.udyam-dashboard .tab-panel.active { display: block; }
+
+@keyframes mcaFadeSlideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Charge accordion */
+.udyam-dashboard .mca2-accordion-item { border: 1px solid var(--card-border); border-radius: 14px; margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.2s ease; }
+.udyam-dashboard .mca2-accordion-item:hover { box-shadow: 0 4px 16px rgba(139, 21, 56, .04); }
+.udyam-dashboard .mca2-accordion-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; background: #fff; border: none; width: 100%; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px; color: var(--theme-maroon); transition: background 0.2s ease; }
+.udyam-dashboard .mca2-accordion-header:hover { background: var(--theme-maroon-soft); }
+.udyam-dashboard .mca2-accordion-header .acc-icon { transition: transform 0.3s ease; color: var(--text-muted-2); font-size: 14px; }
+.udyam-dashboard .mca2-accordion-header.open .acc-icon { transform: rotate(180deg); }
+.udyam-dashboard .mca2-accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.3s ease; padding: 0 20px; background: #fff; }
+.udyam-dashboard .mca2-accordion-body.open { max-height: 2000px; padding: 0 20px 20px; }
+
+/* Split panel */
+.udyam-dashboard .split-panel { display: flex; border-radius: 16px; overflow: hidden; border: 1px solid var(--card-border); }
+.udyam-dashboard .split-left { background: linear-gradient(160deg, #1a1147, #2a1a5e); color: #fff; padding: 28px 24px; flex: 0 0 40%; max-width: 40%; }
+.udyam-dashboard .split-left .mini-list strong { color: #fff; }
+.udyam-dashboard .split-right { background: #fff; padding: 28px 24px; flex: 1; }
+
+/* Vertical stepper */
+.udyam-dashboard .v-stepper { position: relative; padding-left: 36px; }
+.udyam-dashboard .v-stepper::before { content: ""; position: absolute; left: 13px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(to bottom, var(--success-green), var(--warning-orange), var(--theme-maroon)); border-radius: 2px; }
+.udyam-dashboard .v-step { position: relative; padding-bottom: 24px; }
+.udyam-dashboard .v-step:last-child { padding-bottom: 0; }
+.udyam-dashboard .v-step-dot { position: absolute; left: -36px; top: 2px; width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 3px solid var(--success-green); display: flex; align-items: center; justify-content: center; z-index: 1; }
+.udyam-dashboard .v-step-dot i { font-size: 12px; color: var(--success-green); }
+.udyam-dashboard .v-step-dot.orange { border-color: var(--warning-orange); }
+.udyam-dashboard .v-step-dot.orange i { color: var(--warning-orange); }
+.udyam-dashboard .v-step-dot.maroon { border-color: var(--theme-maroon); }
+.udyam-dashboard .v-step-dot.maroon i { color: var(--theme-maroon); }
+.udyam-dashboard .v-step-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 13px; color: var(--theme-maroon); margin-bottom: 2px; }
+.udyam-dashboard .v-step-sub { font-size: 11px; color: var(--text-muted-2); }
+
+/* Mini donuts */
+.udyam-dashboard .mini-donut { width: 80px; height: 80px; position: relative; }
+.udyam-dashboard .mini-donut svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.udyam-dashboard .mini-donut .track { fill: none; stroke: #eef0f1; stroke-width: 8; }
+.udyam-dashboard .mini-donut .fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1.5s ease; }
+.udyam-dashboard .mini-donut .center-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 16px; color: var(--theme-maroon); }
+
+/* Director strip */
+.udyam-dashboard .director-strip { display: flex; gap: 16px; overflow-x: auto; padding: 4px 0 8px; -webkit-overflow-scrolling: touch; }
+.udyam-dashboard .director-strip-card { flex: 0 0 280px; border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; background: #fff; cursor: pointer; transition: all 0.3s ease; position: relative; }
+.udyam-dashboard .director-strip-card:hover { transform: translateY(-4px); border-color: var(--theme-maroon); box-shadow: 0 10px 30px rgba(139, 21, 56, 0.08); }
+.udyam-dashboard .director-strip-card .expand-hint { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: var(--theme-maroon-soft); color: var(--theme-maroon); display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.3s ease; }
+.udyam-dashboard .director-strip-card:hover .expand-hint { background: var(--theme-maroon); color: #fff; }
+
+/* Charge heatmap */
+.udyam-dashboard .charge-heatmap { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.udyam-dashboard .heatmap-cell { min-width: 52px; height: 48px; padding: 0 6px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; transition: transform 0.2s ease; cursor: default; }
+.udyam-dashboard .heatmap-cell:hover { transform: scale(1.15); }
+.udyam-dashboard .heatmap-cell .year { font-size: 9px; opacity: 0.7; }
+.udyam-dashboard .heat-low { background: var(--success-green-soft); color: var(--success-green); }
+.udyam-dashboard .heat-medium { background: var(--warning-orange-soft); color: var(--warning-orange); }
+.udyam-dashboard .heat-high { background: var(--danger-red-soft); color: var(--danger-red); }
+
+/* Verification grid */
+.udyam-dashboard .verif-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.udyam-dashboard .verif-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #fdfbfb; border: 1px solid #f9f1f3; border-radius: 10px; font-size: 13px; font-weight: 700; color: var(--theme-maroon); transition: all 0.2s ease; }
+.udyam-dashboard .verif-item:hover { border-color: var(--success-green); }
+.udyam-dashboard .verif-item i { font-size: 18px; }
+.udyam-dashboard .verif-item i.pass { color: var(--success-green); }
+.udyam-dashboard .verif-item i.fail { color: var(--danger-red); }
+
+/* Risk radar */
+.udyam-dashboard .radar-wrap { width: 200px; height: 200px; margin: 0 auto; position: relative; }
+.udyam-dashboard .radar-bg { position: absolute; inset: 0; border-radius: 50%; border: 2px dashed var(--card-border); }
+.udyam-dashboard .radar-bg.inner { inset: 25%; border-color: #f3e7ec; }
+.udyam-dashboard .radar-center { position: absolute; inset: 40%; border-radius: 50%; background: var(--success-green-soft); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px; color: var(--success-green); }
+.udyam-dashboard .radar-label { position: absolute; font-size: 10px; font-weight: 700; color: var(--text-muted-2); text-transform: uppercase; letter-spacing: 0.03em; }
+.udyam-dashboard .radar-label.top { top: -6px; left: 50%; transform: translateX(-50%); }
+.udyam-dashboard .radar-label.right { right: -12px; top: 50%; transform: translateY(-50%); }
+.udyam-dashboard .radar-label.bottom { bottom: -6px; left: 50%; transform: translateX(-50%); }
+.udyam-dashboard .radar-label.left { left: -12px; top: 50%; transform: translateY(-50%); }
+.udyam-dashboard .radar-dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 2; }
+
+/* DIN detail modal (the modal div carries .udyam-dashboard for the vars) */
+.detail-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.detail-modal-overlay.active { opacity: 1; pointer-events: all; }
+
+.detail-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.92); width: 540px; max-width: 94vw; max-height: 85vh; background: #fff; border-radius: 20px; box-shadow: 0 24px 64px rgba(0,0,0,0.15); z-index: 9999; overflow: hidden; opacity: 0; pointer-events: none; transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.detail-modal.active { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: all; }
+.detail-modal-header { background: linear-gradient(135deg, #8b1538, #74112f); color: #fff; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; }
+.detail-modal-header h5 { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 17px; margin: 0; }
+.detail-modal-close { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; }
+.detail-modal-close:hover { background: rgba(255,255,255,0.25); transform: rotate(90deg); }
+.detail-modal-body { padding: 24px 28px; overflow-y: auto; max-height: calc(85vh - 80px); }
+
+.detail-modal .drawer-section-title { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; color: #8b1538; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; margin-top: 20px; padding-bottom: 8px; border-bottom: 2px solid #faf7f8; }
+.detail-modal .drawer-section-title:first-child { margin-top: 0; }
+.detail-modal .drawer-detail-list { list-style: none; padding: 0; margin: 0; }
+.detail-modal .drawer-detail-list li { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #f9f1f3; font-size: 13px; gap: 12px; }
+.detail-modal .drawer-detail-list li:last-child { border-bottom: none; }
+.detail-modal .drawer-detail-list span { color: #767683; font-weight: 500; flex-shrink: 0; }
+.detail-modal .drawer-detail-list strong { color: #8b1538; font-weight: 700; text-align: right; }
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .udyam-dashboard .hero-banner { padding: 28px 24px; }
+    .udyam-dashboard .hero-banner h2 { font-size: 22px; }
+    .udyam-dashboard .hero-stats { gap: 20px; }
+}
+
+@media (max-width: 767.98px) {
+    .udyam-dashboard .hero-score-ring { width: 90px; height: 90px; }
+    .udyam-dashboard .hero-score-ring .score-value span { font-size: 24px; }
+    .udyam-dashboard .hero-stats { flex-wrap: wrap; gap: 14px; }
+    .udyam-dashboard .split-panel { flex-direction: column; }
+    .udyam-dashboard .split-left { flex: none; max-width: 100%; }
 }

@@ -3,13 +3,13 @@
    Ported from the design mockup (gst.css + the mockup dashboard.css
    tokens). Everything is scoped under .gst-analysis so the mockup's
    palette/variables never leak into the shared _DashboardLayout chrome
-   (the global --color-primary is #57001d; this page's accent is #8b1538).
+   (the global --color-primary is #57001d; this page's accent is #57001d).
    ===================================================================== */
 
 .gst-analysis {
     /* Mockup design tokens, wrapper-scoped */
-    --color-primary: #8b1538;
-    --color-primary-hover: #74112f;
+    --color-primary: #57001d;
+    --color-primary-hover: #3d0013;
     --color-primary-light: #faf7f8;
     --color-success: #2e7d32;
     --color-success-hover: #215c25;
@@ -62,7 +62,7 @@
 }
 
 .gst-analysis .text-gradient-primary {
-    background: linear-gradient(135deg, #8b1538 0%, #74112f 100%);
+    background: linear-gradient(135deg, #57001d 0%, #3d0013 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }

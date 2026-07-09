@@ -21,8 +21,9 @@ namespace FinRiskLensAI.Controllers
         private readonly IAccountAggregatorService _aaService;
         private readonly IIpRiskService _ipRisk;
         private readonly IGSTR2And3BResponceService _gstResponces;
+        private readonly IDummyDataService _dummyData;
 
-        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService, IIpRiskService ipRisk, IGSTR2And3BResponceService gstResponces)
+        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService, IIpRiskService ipRisk, IGSTR2And3BResponceService gstResponces, IDummyDataService dummyData)
         {
             _analysis = analysis;
             _store = store;
@@ -30,6 +31,7 @@ namespace FinRiskLensAI.Controllers
             _aaService = AAService;
             _ipRisk = ipRisk;
             _gstResponces = gstResponces;
+            _dummyData = dummyData;
         }
 
         /// <summary>
@@ -189,9 +191,27 @@ namespace FinRiskLensAI.Controllers
                 copied++;
             }
 
+            // MCA response — same company name as the profile, dynamic charges. Store once.
+            if (!await _store.ExistsAsync(uan, MsmeDataFiles.Mca, ct))
+            {
+                var companyName = user.NameOfEnterprise;
+                if (string.IsNullOrWhiteSpace(companyName))
+                {
+                    var udyamJson = await _store.DownloadAsync(uan, MsmeDataFiles.Udyam, ct);
+                    companyName = udyamJson != null
+                        ? JObject.Parse(udyamJson).SelectToken("main_details.name_of_enterprise")?.Value<string>()
+                        : uan;
+                }
+                var mcaJson = _dummyData.GetDummyMca(uan, companyName ?? uan, user.PanNumber);
+                await _store.UploadAsync(uan, MsmeDataFiles.Mca, mcaJson, ct);
+            }
+
             _logger.LogInformation("Seeded {Count} GST files into {Uan} from template.", copied, uan);
             return Json(new { status = true, copied, message = $"Copied {copied} GST files." });
         }
+
+        // MCADetails moved to McaController (/Mca/MCADetails), backed by the
+        // common IStaticResponseService over m_StaticResponces (MCAResponce/DINResponce).
 
         /// <summary>
         /// Financial Health Card — renders the ML risk analysis result for the

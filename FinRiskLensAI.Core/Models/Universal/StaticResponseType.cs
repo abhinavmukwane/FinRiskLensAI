@@ -13,6 +13,8 @@ namespace FinRiskLensAI.Core.Models.Universal
         Gst2B,
         Gst3B,
         Itr,
-        Ip
+        Ip,
+        Mca,
+        Din
     }
 }
