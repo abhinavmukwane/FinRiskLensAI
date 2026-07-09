@@ -12,7 +12,7 @@ namespace FinRiskLensAI.Services.Templates
     /// Table-based layout with inline styles so it renders correctly in
     /// Outlook / Gmail / mobile clients. The palette follows the theme the
     /// user had selected in the web app when the OTP was requested:
-    ///   theme1 (default) — IDBI: Surfey Green #117A8B / Orange Passion #F58220
+    ///   theme1 (default) — IDBI: Surfey Green #117A8B / Orange Passion #f37021
     ///   theme2           — classic maroon #57001D / rose #974354
     /// </summary>
     public static class LoginOtpEmailTemplate
@@ -35,9 +35,9 @@ namespace FinRiskLensAI.Services.Templates
             string FooterText);    // footer line
 
         private static readonly Palette Theme1 = new(
-            Primary: "#117A8B", AccentSoft: "#FCD9B8", PageBg: "#eef4f5",
+            Primary: "#00836c", AccentSoft: "#FCD9B8", PageBg: "#eef4f5",
             CardBorder: "#cfe4e8", OtpBoxBg: "#FDF1E5", OtpBoxBorder: "#F0B683",
-            OtpText: "#F58220",
+            OtpText: "#f37021",
             Note: "#B35F0C", Divider: "#dceaed", BodyText: "#4a5b5f",
             SubtleText: "#75898e", FooterText: "#8aa0a5");
 

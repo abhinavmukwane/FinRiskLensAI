@@ -3,7 +3,7 @@
 
    Theme 1 (default) — IDBI Bank:
        Surfey Green  #117A8B  (primary text / left of crescent)
-       Orange Passion #F58220 (right of crescent)
+       Orange Passion #f37021 (right of crescent)
        White         #FFFFFF
    Theme 2 — classic maroon & gold (the original FinRiskLens palette).
 
@@ -22,7 +22,7 @@
     --brand-primary-deep: #073840;
     --brand-secondary: #4A8E9C;
     --brand-secondary-container: #9CD2DC;
-    --brand-accent: #F58220;           /* Orange Passion */
+    --brand-accent: #f37021;           /* Orange Passion */
     --brand-accent-soft: #FCD9B8;
     --brand-accent-deep: #B35F0C;
     --brand-on-primary: #ffffff;
@@ -38,7 +38,7 @@
     --brand-accent-soft-rgb: 252, 217, 184;
     --brand-accent-deep-rgb: 179, 95, 12;
     /* Action buttons — IDBI theme uses Orange Passion */
-    --brand-btn-bg: #F58220;
+    --brand-btn-bg: #f37021;
     --brand-btn-bg-hover: #D96C0B;
     --brand-btn-fg: #ffffff;
     --brand-btn-bg-rgb: 245, 130, 32;
