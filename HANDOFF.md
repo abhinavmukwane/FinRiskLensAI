@@ -1,4 +1,4 @@
-# Session Handoff — FinRiskLensAI (as of 2026-07-06)
+# Session Handoff — FinRiskLensAI (as of 2026-07-08)
 
 Context file for Claude Code. This summarizes the project state, decisions made,
 and working conventions from the development session on the office PC, so work can
@@ -17,9 +17,10 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 
 ### 1. Database (SQL Server, remote)
 - Connection: remote SQL Server at `103.21.58.192` (moved from 4.247.173.231 on
-  2026-07-03), DB `FinRiskLensAI`, SQL auth (login `FinRiskLensAI`) — full string in
-  `FinRiskLensAI/appsettings.json` (`Database:ConnectionStrings:SqlServer`) and
-  mirrored in `ApplicationDbContextFactory`. `TrustServerCertificate=True` required.
+  2026-07-03), DB `FinRiskLensAI`, SQL auth (login `FinRiskLensAI`) — real string in
+  `appsettings.Development.json` (`Database:ConnectionStrings:SqlServer`); `appsettings.json`
+  has a placeholder now (see §7b). `ApplicationDbContextFactory` (design-time) still hardcodes
+  it — keep it in sync / read from config. `TrustServerCertificate=True` required.
   Tables land in the login's default schema `FinRiskLensAI`, not `dbo`. PostgreSQL
   branch kept in code but unused.
 - **PK convention (2026-07-03): int identity, named `<EntityName>ID`**
@@ -213,6 +214,40 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
   button (validates password + consent first).
 - Note: `IMsmeDataStore` upper-cases folder names, so `"dummy-data"` resolves to `DUMMY-DATA`.
 
+### 7b. Secrets & config (2026-07-08 — repo going PUBLIC)
+- **`appsettings.json` = PLACEHOLDERS only** (localhost / `123456` / `test-*` keys),
+  safe to commit publicly. **Real values live in `appsettings.Development.json`**
+  (same structure, git-ignored). Config layering loads Development.json only when
+  `ASPNETCORE_ENVIRONMENT=Development` (all launch profiles set this) — VS/`dotnet run`
+  pick it up automatically; a published/IIS run without the env var uses the
+  placeholders. New machines: create `appsettings.Development.json` with the real
+  values (ask Abhinav) — it is NOT in git.
+- All keys were **rotated** on 2026-07-07 (SQL pwd, Azure storage key, JWT, SMTP,
+  Finvu, Signzy, Groq, EncryptionKey). Old values in git history must be scrubbed with
+  `git filter-repo --replace-text` before the repo is made public (see the security
+  walkthrough; `ApplicationDbContextFactory.cs` also had a hardcoded conn string).
+- ⚠ Gotcha that bit us: after rotating the SQL password, `appsettings.Development.json`
+  still had the OLD one → `SqlException: Login failed for user 'FinRiskLensAI'`. That
+  looked like "Development.json not loading" but config WAS loading — the credential
+  was just stale. Keep Development.json's values current with the rotated secrets.
+
+### 7c. New pieces since 07-06 (small)
+- `MsmeDataFiles.Mca = "mca.json"` added to the known fixed files (MCA source slot).
+- **GST Analysis page**: `Dashboard/GSTAnalysis` + `GSTAnalysisViewModel` + view, behind
+  the sidebar "GST Details" link. Loads latest stored GSTR-2B/3B via
+  `IGSTR2And3BResponceService.GetResponces()` (UAN from session). Phase 1 = data only,
+  BI charts next.
+- IP-risk service renamed/reshaped: `IIpRiskService.GetIpRiskScoreAsync(ip, uan)`
+  (sources `m_StaticResponces.IPResponce` now, Signzy API when its key is live —
+  `Signzy:*` config added, `UseApi=false`). Used by `Dashboard/GetIpVerificationDetail`
+  for the "Secure Connection IP" popup; client IP is captured into session at login
+  (`UserSessionModel.ClientIP`).
+- `DashboardController` now injects `IGSTR2And3BResponceService` + `IDummyDataService`
+  + `IIpRiskService` alongside the analysis/store/AA services.
+- `AzureBlobDataStore` now builds its `BlobContainerClient` with retry + 60s network
+  timeout (`BlobClientOptions`) so a brief CPU stall during ML warmup doesn't surface
+  as a `TaskCanceledException` on the request path.
+
 ### 7. Account Aggregator — Finvu integration (built 2026-07-05)
 - **API:** Finvu/FinFactor. Config `Finvu:*` in appsettings (`FinvuApi`,
   `AaUserId` `channel@dhanaprayoga`, `AaPassword`, `FinvuChannelId` `finsense`,
@@ -262,8 +297,9 @@ Serilog. Layering: Core → Data → Services → Web, plus a new ML project.
 - `Json files/` at repo root is **git-ignored on purpose**: it holds REAL personal
   data (PAN, Aadhaar, ITR, bank statements). Never commit it; sanitized samples
   would go elsewhere (e.g. `Doc/sample-payloads/`).
-- Credentials (SQL `sa`, Azure storage key, JWT key) live in `appsettings.json` —
-  accepted hackathon trade-off; rotate/move to a secret store before anything public.
+- **Secrets are OUT of `appsettings.json`** (placeholders committed; real values in
+  git-ignored `appsettings.Development.json`) — see §7b. Repo is going public; scrub
+  history before flipping it.
 - Follow repo ground rules in `Doc/00_README.md` (strict layering, `*Repository`/
   `*Service` naming for Autofac auto-registration, decimals 18,4) — EXCEPT the
   entity-base rule, which changed on 2026-07-03: entities derive from
