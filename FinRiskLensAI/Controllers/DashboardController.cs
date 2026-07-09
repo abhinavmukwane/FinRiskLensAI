@@ -8,6 +8,7 @@ using FinRiskLensAI.Core.Models.Storage;
 using FinRiskLensAI.Core.Models.Universal;
 using FinRiskLensAI.Models;
 using FinRiskLensAI.Utility;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -24,8 +25,10 @@ namespace FinRiskLensAI.Controllers
         private readonly IIpRiskService _ipRisk;
         private readonly IGSTR2And3BResponceService _gstResponces;
         private readonly IDummyDataService _dummyData;
-
-        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, IAccountAggregatorService AAService, IIpRiskService ipRisk, IGSTR2And3BResponceService gstResponces, IDummyDataService dummyData)
+        private readonly IEmailService _emailService;
+        public DashboardController(IBlobAnalysisService analysis, IMsmeDataStore store, ILogger<DashboardController> logger, 
+            IAccountAggregatorService AAService, IIpRiskService ipRisk, IGSTR2And3BResponceService gstResponces, 
+            IDummyDataService dummyData, IEmailService emailService)
         {
             _analysis = analysis;
             _store = store;
@@ -34,6 +37,7 @@ namespace FinRiskLensAI.Controllers
             _ipRisk = ipRisk;
             _gstResponces = gstResponces;
             _dummyData = dummyData;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -269,6 +273,57 @@ namespace FinRiskLensAI.Controllers
                 if (udyamJson != null)
                     model.EnterpriseName = JObject.Parse(udyamJson)
                         .SelectToken("main_details.name_of_enterprise")?.Value<string>();
+
+
+                if (model.Result != null)
+                {
+                    try
+                    {
+                        var recipientEmail = HttpContext.Session.GetCurrentUser()?.Email;
+                        var recipientName = HttpContext.Session.GetCurrentUser()?.NameOfEnterprise;
+
+                        if (!string.IsNullOrWhiteSpace(recipientEmail))
+                        {
+                            //var reportUrl = Url.Action(
+                            //    "FinancialHealthCard", "FinancialHealthReport",
+                            //    new { uan = model.Uan }, Request.Scheme)!;
+
+                            string DimText(string name)
+                            {
+                                var d = model.Result.Dimensions.FirstOrDefault(x =>
+                                    string.Equals(x.Dimension, name, StringComparison.OrdinalIgnoreCase));
+                                return d == null ? "N/A" : $"{d.Score:0}/{d.MaxPoints:0}";
+                            }
+
+                            await _emailService.SendReportReadyEmailAsync(
+                                toEmail: recipientEmail,
+                                recipientName: recipientName,
+                                businessName: model.EnterpriseName ?? model.Uan!,
+                                financialHealthScore: (int)Math.Round(model.Result.OverallScore),
+                                riskBand: model.Result.ScoreBand.ToString(),
+                                reportDate: model.Result.ComputedAt.ToString("dd MMM yyyy"),
+                                reportUrl: "",
+                                 metric1Label: "Revenue Vitality",
+                                 metric1Value: DimText("Revenue Vitality"),
+                                 metric2Label: "Cash Flow Health",
+                                 metric2Value: DimText("Cash Flow Health"),
+                                 metric3Label: "Compliance Quotient",
+                                 metric3Value: DimText("Compliance Quotient"),
+                                theme: "theme1",
+                                ct: ct);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Report-ready email skipped for {Uan} — no email on session user.", model.Uan);
+                        }
+                    }
+                    catch (Exception mailEx)
+                    {
+                        // Never let an email failure break the card view
+                        _logger.LogError(mailEx, "Failed sending report-ready email for {Uan}", model.Uan);
+                    }
+                }
+
             }
             catch (OperationCanceledException)
             {
