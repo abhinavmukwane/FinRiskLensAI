@@ -160,7 +160,7 @@ $(function () {
 
             $('#ls1').html('<i class="bi bi-check-circle-fill"></i> Validating Enterprise Identity');
             $('#ls2').html('<i class="bi bi-check-circle-fill"></i> Retrieving Official Records');
-            $('#ls3').html('<i class="bi bi-check-circle-fill"></i> Generating Business Insights');
+            $('#ls3').html('<i class="bi bi-check-circle-fill"></i> Validating Udyam Details');
 
             $('#ls1,#ls2,#ls3').removeClass('active done');
 
