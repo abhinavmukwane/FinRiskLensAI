@@ -304,7 +304,7 @@ $(function () {
     $('#consentCheck').on('change', checkProceedEnabled);
 
 
-    // ---------- STEP 2 → STEP 3 (send OTP) ----------
+
 
     $('#btnProceedToOtp').on('click', function () {
         var model = {
@@ -317,18 +317,15 @@ $(function () {
         };
         const $btn = $(this);
         $btn.prop('disabled', true)
-            .html('<span class="spin-loader"></span> Registering...');
-
+            .html('<span class="spin-loader"></span> Sending OTP...');
         var nameOfEnterprise = $('#rv_entName').text().trim();
-
         $.ajax({
-            url: '/Onboarding/RegisterUser',
+            url: '/Onboarding/GenerateOtp',
             type: 'POST',
             data: { model, nameOfEnterprise, theme: (localStorage.getItem('frl-theme') || 'theme1') },
             success: function (response) {
                 $btn.prop('disabled', false)
                     .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');
-
                 if (response.status) {
                     $('#step2').addClass('d-none');
                     $('#step3').removeClass('d-none');
@@ -348,7 +345,6 @@ $(function () {
                     $('#reviewError').removeClass('d-none');
                     $('#reviewError span').text(response.message);
                     showToast(response.message);
-
                     if (response.clearFields) {
                         $('#rv_email').val('');
                         $('#mobileInput').val('');
@@ -359,12 +355,78 @@ $(function () {
             },
             error: function () {
                 $btn.prop('disabled', false)
-                    .html('<i class="bi bi-send me-1"></i> Register');
+                    .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');
                 $('#reviewError').removeClass('d-none');
                 $('#reviewError span').text('Something went wrong.');
             }
         });
     });
+
+
+
+
+
+    // ---------- STEP 2 → STEP 3 (send OTP) ----------
+
+    //$('#btnProceedToOtp').on('click', function () {
+    //    var model = {
+    //        MsmeEnquiryID: $('#hdnMsmeEnquiryID').val(),
+    //        UdyamNumber: $('#rv_udyam_number').text().trim(),
+    //        MobileNumber: $('#mobileInput').val(),
+    //        Email: $('#rv_email').val(),
+    //        GstinNumber: $('#rv_gstnNumber').text().trim(),
+    //        PanNumber: $('#rv_panNo').text().trim()
+    //    };
+    //    const $btn = $(this);
+    //    $btn.prop('disabled', true)
+    //        .html('<span class="spin-loader"></span> Registering...');
+
+    //    var nameOfEnterprise = $('#rv_entName').text().trim();
+
+    //    $.ajax({
+    //        url: '/Onboarding/RegisterUser',
+    //        type: 'POST',
+    //        data: { model, nameOfEnterprise, theme: (localStorage.getItem('frl-theme') || 'theme1') },
+    //        success: function (response) {
+    //            $btn.prop('disabled', false)
+    //                .html('<i class="bi bi-send me-1"></i> Proceed & Send OTP');
+
+    //            if (response.status) {
+    //                $('#step2').addClass('d-none');
+    //                $('#step3').removeClass('d-none');
+    //                $('#otpEmailTarget').text(model.Email);
+    //                goToRailStep(3);
+    //                startOtpTimer();
+    //                $('.otp-input').first().focus();
+    //                showToast(response.message);
+    //                $('html,body').animate({ scrollTop: 0 }, 300);
+    //                if (response.otp) {
+    //                    $('#otpDisplayValue').text(response.otp);
+    //                    var otpModal = new bootstrap.Modal(document.getElementById('otpDisplayModal'));
+    //                    otpModal.show();
+    //                }
+    //            }
+    //            else {
+    //                $('#reviewError').removeClass('d-none');
+    //                $('#reviewError span').text(response.message);
+    //                showToast(response.message);
+
+    //                if (response.clearFields) {
+    //                    $('#rv_email').val('');
+    //                    $('#mobileInput').val('');
+    //                    $('#btnProceedToOtp').prop('disabled', true);
+    //                    $('#rv_email').focus();
+    //                }
+    //            }
+    //        },
+    //        error: function () {
+    //            $btn.prop('disabled', false)
+    //                .html('<i class="bi bi-send me-1"></i> Register');
+    //            $('#reviewError').removeClass('d-none');
+    //            $('#reviewError span').text('Something went wrong.');
+    //        }
+    //    });
+    //});
 
 
     // ---------- OTP BOX BEHAVIOUR ----------
@@ -480,68 +542,115 @@ $(function () {
     // ---------- STEP 3 → STEP 4 (verify OTP) ----------
 
     $('#btnVerifyOtp').on('click', function () {
-
         const code = $('.otp-input').map(function () {
             return this.value;
         }).get().join('');
-
         if (code.length != 6) {
-
             $('#otpError')
                 .removeClass('d-none')
                 .html('<i class="bi bi-exclamation-triangle-fill me-1"></i> Please enter all 6 digits.');
-
             return;
         }
-
         var model = {
+            MsmeEnquiryID: $('#hdnMsmeEnquiryID').val(),
             Email: $("#rv_email").val(),
             MobileNumber: $("#mobileInput").val(),
             OTP: code
         };
-
         var $btn = $(this);
-
         $btn.prop("disabled", true)
             .html('<span class="spin-loader"></span> Verifying...');
-
         $.ajax({
-
             url: "/Onboarding/FetchUserOTPDet",
             type: "POST",
             data: model,
-
             success: function (res) {
-
                 $btn.prop("disabled", false)
                     .html('<i class="bi bi-check-circle me-1"></i> Verify & Continue');
-
                 if (res.status) {
                     showToast(res.message);
                     window.location.href = res.redirectUrl;
                 }
                 else {
-
                     $('#otpError')
                         .removeClass('d-none')
                         .html('<i class="bi bi-exclamation-triangle-fill me-1"></i> ' + res.message);
-
                     $('.otp-input').val('');
                     $('.otp-input').first().focus();
                 }
             },
-
             error: function () {
-
                 $btn.prop("disabled", false)
                     .html('<i class="bi bi-check-circle me-1"></i> Verify & Continue');
-
                 alert("Something went wrong.");
             }
-
         });
-
     });
+
+
+    //$('#btnVerifyOtp').on('click', function () {
+
+    //    const code = $('.otp-input').map(function () {
+    //        return this.value;
+    //    }).get().join('');
+
+    //    if (code.length != 6) {
+
+    //        $('#otpError')
+    //            .removeClass('d-none')
+    //            .html('<i class="bi bi-exclamation-triangle-fill me-1"></i> Please enter all 6 digits.');
+
+    //        return;
+    //    }
+
+    //    var model = {
+    //        Email: $("#rv_email").val(),
+    //        MobileNumber: $("#mobileInput").val(),
+    //        OTP: code
+    //    };
+
+    //    var $btn = $(this);
+
+    //    $btn.prop("disabled", true)
+    //        .html('<span class="spin-loader"></span> Verifying...');
+
+    //    $.ajax({
+
+    //        url: "/Onboarding/FetchUserOTPDet",
+    //        type: "POST",
+    //        data: model,
+
+    //        success: function (res) {
+
+    //            $btn.prop("disabled", false)
+    //                .html('<i class="bi bi-check-circle me-1"></i> Verify & Continue');
+
+    //            if (res.status) {
+    //                showToast(res.message);
+    //                window.location.href = res.redirectUrl;
+    //            }
+    //            else {
+
+    //                $('#otpError')
+    //                    .removeClass('d-none')
+    //                    .html('<i class="bi bi-exclamation-triangle-fill me-1"></i> ' + res.message);
+
+    //                $('.otp-input').val('');
+    //                $('.otp-input').first().focus();
+    //            }
+    //        },
+
+    //        error: function () {
+
+    //            $btn.prop("disabled", false)
+    //                .html('<i class="bi bi-check-circle me-1"></i> Verify & Continue');
+
+    //            alert("Something went wrong.");
+    //        }
+
+    //    });
+
+    //});
 
 
 });

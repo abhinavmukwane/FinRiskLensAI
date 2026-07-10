@@ -15,13 +15,15 @@ namespace FinRiskLensAI.Core.Interfaces.IServices.OnBoarding
     public interface IOnboardingService
     {
         Task<ResultModel<StaticResponseModel>> FetchUdyam(string uan);
-        Task SaveMsmeData(string json);
+        Task<SaveMsmeResultModel> SaveMsmeData(string json);
         Task<ResultModel<UdyamDetailsModel>> GetUdyamDetails(string uan);
         Task<ResultModel<string>> GetUdyamPayload(string uan);
-        Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(UserRegistrationModel entity);
+        Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(int? msmeEnquiryId, string email, string clientIp);
+        //Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(UserRegistrationModel entity);
         Task<ResultModel<UserOtpModel>> AddUpdateUserOtp(UserOtpModel entity);
         Task<ResultModel<UserSessionModel>> FetchUserOTPDet(UserOtpModel model);
         Task<bool> IsUdyamRegistered(string uan);
         Task<ResultModel<UserOtpModel>> ValidateCustomerEmail(string email);
+        //Task AddUpdateUserRegst(int? msmeEnquiryID, string? email, string clientIp);
     }
 }

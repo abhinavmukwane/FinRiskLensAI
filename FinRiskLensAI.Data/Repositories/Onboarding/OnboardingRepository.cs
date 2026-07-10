@@ -6,6 +6,7 @@ using FinRiskLensAI.Core.Models;
 using FinRiskLensAI.Core.Models.Onboarding;
 using FinRiskLensAI.Core.Models.Universal;
 using FinRiskLensAI.Core.Models.User_Activity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
@@ -111,15 +112,37 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             return result;
         }
 
-        public async Task SaveMsmeData(string json)
+        public async Task<SaveMsmeResultModel> SaveMsmeData(string json)
         {
             var model = JsonConvert.DeserializeObject<UdyamResponseModel>(json);
 
             if (model == null)
-                return;
+                return new SaveMsmeResultModel { Status = false, Message = "Invalid data." };
 
-            bool exists = await _context.MsmeEnquiries.AnyAsync(x => x.Uan == model.uan);
+            var existing = await _context.MsmeEnquiries.FirstOrDefaultAsync(x => x.Uan == model.uan);
+            if (existing != null)
+            {
+                // User is already registered
+                if (existing.IsRegister == true)
+                {
+                    return new SaveMsmeResultModel
+                    {
+                        Status = true,
+                        AlreadyRegistered = true,
+                        MsmeEnquiryID = existing.MsmeEnquiryID,
+                        Message = "User is already registered. Kindly login."
+                    };
+                }
 
+                // MSME record exists but registration is pending
+                return new SaveMsmeResultModel
+                {
+                    Status = true,
+                    AlreadyRegistered = false,
+                    MsmeEnquiryID = existing.MsmeEnquiryID,
+                    Message = "MSME details found."
+                };
+            }
 
             var enquiry = new MsmeEnquiry
             {
@@ -208,6 +231,13 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             }
 
             await _context.SaveChangesAsync();
+
+            return new SaveMsmeResultModel
+            {
+                Status = true,
+                AlreadyRegistered = false,
+                MsmeEnquiryID = enquiry.MsmeEnquiryID
+            };
         }
         public async Task<UdyamDetailsModel> GetUdyamDetails(string uan)
         {
@@ -269,35 +299,78 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
             return data.Payload;
         }
 
-        public async Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(UserRegistrationModel entity)
+        public async Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(int? msmeEnquiryId, string email, string clientIp)
         {
             var result = new ResultModel<UserRegistrationModel>();
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                var enquiry = await _context.MsmeEnquiries
+                    .FirstOrDefaultAsync(x => x.MsmeEnquiryID == msmeEnquiryId && x.Email == email);
+
+                if (enquiry == null)
+                {
+                    result.Result = tflResultType.tflWarning;
+                    result.Message = "MSME enquiry record not found.";
+                    return result;
+                }
+
+                if (enquiry.IsRegister == true)
+                {
+                    result.Result = tflResultType.tflWarning;
+                    result.Message = "This user is already registered.";
+                    return result;
+                }
+
                 var dup = await _context.UserRegistration
-                    .FirstOrDefaultAsync(x => x.Email == entity.Email || x.MobileNumber == entity.MobileNumber);
+                    .FirstOrDefaultAsync(x => x.Email == enquiry.Email || x.MobileNumber == enquiry.MobileNumber);
                 if (dup != null)
                 {
                     result.Result = tflResultType.tflWarning;
-                    result.Message = dup.Email == entity.Email
+                    result.Message = dup.Email == enquiry.Email
                         ? "This email is already registered."
                         : "This mobile number is already registered.";
                     return result;
                 }
 
-                UserRegistrationModel paObj = new UserRegistrationModel();
-                entity.MapToModelObject(paObj);
-                paObj.CreatedAt = DateTime.Now;
-                paObj.CreatedBy = "1";      
-                _context.UserRegistration.Add(paObj);
+                var userReg = new UserRegistrationModel
+                {
+                    MsmeEnquiryID = enquiry.MsmeEnquiryID,
+                    Email = enquiry.Email,
+                    MobileNumber = enquiry.MobileNumber,
+                    UdyamNumber = enquiry.Uan,
+                    GstinNumber = enquiry.GstinNumber,
+                    PanNumber = enquiry.PanNumber,
+                    IPAddress = clientIp,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = "SYSTEM"
+                };
+                _context.UserRegistration.Add(userReg);
                 await _context.SaveChangesAsync();
 
+                var otpRec = await _context.UserOtpModel
+                    .FirstOrDefaultAsync(x => x.MsmeEnquiryID == msmeEnquiryId && x.Email == email);
+                if (otpRec != null)
+                {
+                    otpRec.UserRegistrationID = userReg.UserRegistrationID;
+                    otpRec.UpdatedAt = DateTime.Now;
+                    otpRec.UpdatedBy = "system";
+                }
+
+                enquiry.IsRegister = true;
+                enquiry.UpdatedAt = DateTime.Now;
+                enquiry.UpdatedBy = "system";
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
                 result.Result = tflResultType.tflSuccess;
-                result.Message = "Data Saved Successfully";
-                result.Data = paObj;
+                result.Message = "User registered successfully.";
+                result.Data = userReg;
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 result.Result = tflResultType.tflError;
                 result.Message = ex.Message;
                 result.Data = null;
@@ -410,7 +483,7 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
                 result.Message = "OTP validated successfully.";
                 result.Data = new UserSessionModel
                 {
-                    UserRegistrationID = registration?.UserRegistrationID ?? entity.UserRegistrationID,
+                    UserRegistrationID = registration?.UserRegistrationID ?? 0,
                     MsmeEnquiryID = enquiryId,
                     NameOfEnterprise = enterpriseName,
                     Email = entity.Email,
@@ -483,6 +556,7 @@ namespace FinRiskLensAI.Data.Repositories.Onboarding
 
             return result;
         }
+
 
     }
 }

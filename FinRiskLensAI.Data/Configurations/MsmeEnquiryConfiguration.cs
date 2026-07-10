@@ -43,6 +43,7 @@ namespace FinRiskLensAI.Data.Configurations
 
             // Full raw API response — no length cap
             builder.Property(x => x.Payload).IsRequired();
+            builder.Property(x => x.IsRegister).IsRequired().HasDefaultValue(false);
 
             // UAN is the cache lookup key: one enquiry row per Udyam number
             builder.HasIndex(x => x.Uan).IsUnique();
