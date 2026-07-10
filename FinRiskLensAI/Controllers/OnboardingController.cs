@@ -34,45 +34,93 @@ namespace FinRiskLensAI.Controllers
             return View();
         }
 
+
         [HttpPost]
         public async Task<IActionResult> FetchUdyam(string uan)
         {
             try
             {
-                if (await _onboardingService.IsUdyamRegistered(uan))
-                {
-                    return Json(new
-                    {
-                        status = false,
-                        isRegistered = true,
-                        message = "User is already registered. Kindly login."
-                    });
-                }
                 var result = await _onboardingService.FetchUdyam(uan);
+                SaveMsmeResultModel saveResult;
+                string effectiveUan;
 
                 if (result.Result == tflResultType.tflSuccess && result.Data != null)
                 {
-                    await _onboardingService.SaveMsmeData(result.Data.UdyamNumberResponce);
-
-                    return Json(new{status = true, uan = result.Data.UdyamNumber, message = "Success"});
+                    saveResult = await _onboardingService.SaveMsmeData(result.Data.UdyamNumberResponce);
+                    effectiveUan = result.Data.UdyamNumber;
                 }
                 else
                 {
                     var dummyUdyamResp = _dummyData.GetDummyUdyam(uan);
+                    saveResult = await _onboardingService.SaveMsmeData(dummyUdyamResp);
+                    effectiveUan = uan;
 
-                    await _onboardingService.SaveMsmeData(dummyUdyamResp);
-
-                    // Drop udyam.json into the UAN's blob folder so the ML pipeline has source data.
-                    await _store.UploadAsync(uan, MsmeDataFiles.Udyam, dummyUdyamResp, HttpContext.RequestAborted);
-
-                    return Json(new { status = true, uan = uan, message = "Success" });
+                    // Only upload for ML pipeline if this is a genuinely new enquiry.
+                    if (!saveResult.AlreadyRegistered)
+                    {
+                        await _store.UploadAsync(uan, MsmeDataFiles.Udyam, dummyUdyamResp, HttpContext.RequestAborted);
+                    }
                 }
+
+                if (!saveResult.Status)
+                {
+                    return Json(new { status = false, message = saveResult.Message ?? "Failed to save MSME data." });
+                }
+
+                if (saveResult.AlreadyRegistered)
+                {
+                    return Json(new
+                    {
+                        status = true,
+                        isRegistered = true,
+                        message = saveResult.Message ?? "User is already registered. Kindly login."
+                    });
+                }
+
+                return Json(new
+                {
+                    status = true,
+                    isRegistered = false,
+                    uan = effectiveUan,
+                    message = "Success"
+                });
             }
             catch (Exception ex)
             {
-                return Json(new{status = false, message = ex.Message});
+                return Json(new { status = false, message = ex.Message });
             }
         }
+
+        //[HttpPost]
+        //public async Task<IActionResult> FetchUdyam(string uan)
+        //{
+        //    try
+        //    {
+        //        var result = await _onboardingService.FetchUdyam(uan);
+
+        //        if (result.Result == tflResultType.tflSuccess && result.Data != null)
+        //        {
+        //            await _onboardingService.SaveMsmeData(result.Data.UdyamNumberResponce);
+
+        //            return Json(new{status = true, uan = result.Data.UdyamNumber, message = "Success"});
+        //        }
+        //        else
+        //        {
+        //            var dummyUdyamResp = _dummyData.GetDummyUdyam(uan);
+
+        //            await _onboardingService.SaveMsmeData(dummyUdyamResp);
+
+        //            // Drop udyam.json into the UAN's blob folder so the ML pipeline has source data.
+        //            await _store.UploadAsync(uan, MsmeDataFiles.Udyam, dummyUdyamResp, HttpContext.RequestAborted);
+
+        //            return Json(new { status = true, uan = uan, message = "Success" });
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new{status = false, message = ex.Message});
+        //    }
+        //}
         /// <summary>
         /// Dev/test only — sends the login-OTP template email with a random code.
         /// GET /Onboarding/SendTestEmail?to=someone@example.com&name=Abhinav
@@ -124,91 +172,102 @@ namespace FinRiskLensAI.Controllers
             }
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> RegisterUser(UserRegistrationModel model, string nameOfEnterprise, string? theme = null)
+        public async Task<IActionResult> GenerateOtp(UserRegistrationModel model, string nameOfEnterprise, string theme)
         {
-            if (model == null)
+            try
             {
-                return Json(new { status = false, message = "Invalid request." });
+                // 1. Basic validation (adjust as per your model)
+                if (string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.MobileNumber))
+                {
+                    return Json(new { status = false, message = "Email and Mobile Number are required.", clearFields = false });
+                }
+
+                // 2. Generate OTP
+                var otp = Random.Shared.Next(100000, 999999).ToString();
+
+                // 3. Try sending the OTP email FIRST
+                var emailSent = await _emailService.SendLoginOtpAsync(model.Email, otp, nameOfEnterprise,
+                                expiryMinutes: 5, theme: theme, ct: HttpContext.RequestAborted);
+
+                if (!emailSent)
+                {
+                    return Json(new { status = false, message = "Failed to send OTP email. Please try again.", clearFields = false });
+                }
+
+                // 4. Only persist the OTP if the email actually went out
+                var otpModel = new UserOtpModel
+                {
+                    MsmeEnquiryID = model.MsmeEnquiryID,
+                    Email = model.Email,
+                    MobileNumber = model.MobileNumber,
+                    OTP = _encryption.EncryptString(otp),
+                };
+
+                var otpResult = await _onboardingService.AddUpdateUserOtp(otpModel);
+                if (otpResult == null)
+                {
+                    return Json(new { status = false, message = "OTP sent but could not be saved. Please contact support." });
+                }
+
+                return Json(new
+                {
+                    status = true,
+                    message = "OTP sent successfully to your email.",
+                    otp = otp
+                });
             }
-
-            // Resolve the client IP via the single common helper and persist it
-            // with the registration record (public IP on localhost via ipify).
-            model.IPAddress = await IP_Get_Service.GetClientIPAddressAsync(HttpContext);
-
-            // 1. Register / update the user first
-            var result = await _onboardingService.AddUpdateUserRegst(model);
-            if (result.Result == tflResultType.tflWarning)
+            catch (Exception ex)
             {
-                return Json(new { status = false, message = result.Message, clearFields = true });
+                return Json(new { status = false, message = "Something went wrong while generating OTP." });
             }
-            if (result.Result == tflResultType.tflError)
-            {
-                return Json(new { status = false, message = "Something went wrong." });
-            }
-
-            if (string.IsNullOrWhiteSpace(model.Email))
-            {
-                return Json(new { status = false, message = "Email is required to send OTP." });
-            }
-
-            // 2. Generate OTP
-            var otp = Random.Shared.Next(100000, 999999).ToString();
-
-            // 3. Try sending the OTP email FIRST
-            var emailSent = await _emailService.SendLoginOtpAsync(model.Email, otp, nameOfEnterprise,
-                            expiryMinutes: 5, theme: theme, ct: HttpContext.RequestAborted);
-           
-            // 4. Only persist the OTP if the email actually went out
-            var otpModel = new UserOtpModel
-            {
-
-                UserRegistrationID = result.Data.UserRegistrationID,
-                MsmeEnquiryID = result.Data.MsmeEnquiryID,
-                Email = model.Email,
-                MobileNumber = model.MobileNumber,
-                OTP = _encryption.EncryptString(otp),
-            };
-
-            var otpResult = await _onboardingService.AddUpdateUserOtp(otpModel);
-            if (otpResult == null)
-            {
-                return Json(new { status = false, message = "OTP sent but could not be saved. Please contact support." });
-            }
-
-            return Json(new
-            {
-                status = true,
-                message = "OTP sent successfully to your email.",
-                otp = otp 
-            });
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> FetchUserOTPDet(UserOtpModel model)
         {
             var result = await _onboardingService.FetchUserOTPDet(model);
-
-            if (result.Result == tflResultType.tflSuccess)
+            if (result.Result != tflResultType.tflSuccess)
             {
-                // Capture the client IP once and keep it with the session user.
-                result.Data.ClientIP = await IP_Get_Service.GetClientIPAddressAsync(HttpContext);
-                HttpContext.Session.SetCurrentUser(result.Data);
-
-                return Json(new
-                {
-                    status = true,
-                    message = "OTP validated successfully.",
-                    redirectUrl = Url.Action("CustDashboard", "Dashboard")
-                });
+                return Json(new { status = false, message = result.Message });
             }
+
+            var clientIp = await IP_Get_Service.GetClientIPAddressAsync(HttpContext);
+
+            var regResult = await _onboardingService.AddUpdateUserRegst(model.MsmeEnquiryID , model.Email, clientIp);
+            if (regResult.Result != tflResultType.tflSuccess)
+            {
+                return Json(new { status = false, message = regResult.Message });
+            }
+
+            var sessionUser = new UserSessionModel
+            {
+                UserRegistrationID = regResult.Data.UserRegistrationID,
+                MsmeEnquiryID = regResult.Data.MsmeEnquiryID,
+                Email = regResult.Data.Email,
+                MobileNumber = regResult.Data.MobileNumber,
+                ClientIP = clientIp,
+                UdyamNumber=regResult.Data.UdyamNumber,
+                PanNumber= regResult.Data.PanNumber,
+                GstinNumber= regResult.Data.GstinNumber,
+            };
+
+            HttpContext.Session.SetCurrentUser(sessionUser);
+            //regResult.Data.ClientIP = await IP_Get_Service.GetClientIPAddressAsync(HttpContext);
+            //HttpContext.Session.SetCurrentUser(regResult.Data);
 
             return Json(new
             {
-                status = false,
-                message = result.Message
+                status = true,
+                message = "OTP validated successfully.",
+                redirectUrl = Url.Action("CustDashboard", "Dashboard")
             });
         }
+
+
 
 
     }

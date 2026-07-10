@@ -43,6 +43,7 @@ namespace FinRiskLensAI.Core.Models.Onboarding
 
         public string? GstinNumber { get; set; }
         public string? PanNumber { get; set; }
+        public bool IsRegister { get; set; }
 
         /// <summary>The complete Udyam API response JSON, stored as-is.</summary>
         public string Payload { get; set; } = string.Empty;

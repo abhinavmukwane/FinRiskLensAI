@@ -31,9 +31,10 @@ namespace FinRiskLensAI.Data.Configurations
                    .HasMaxLength(500);
 
             builder.HasOne(x => x.UserRegistration)
-                   .WithMany()
-                   .HasForeignKey(x => x.UserRegistrationID)
-                   .OnDelete(DeleteBehavior.Cascade);
+       .WithMany()
+       .HasForeignKey(x => x.UserRegistrationID)
+       .IsRequired(false)
+       .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(x => x.MsmeEnquiry)
                    .WithMany()

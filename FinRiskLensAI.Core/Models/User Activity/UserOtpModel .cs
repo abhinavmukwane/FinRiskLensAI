@@ -13,7 +13,7 @@ namespace FinRiskLensAI.Core.Models.User_Activity
     {
         public int UserOtpID { get; set; }
 
-        public int UserRegistrationID { get; set; }
+        public int? UserRegistrationID { get; set; }
 
         public int? MsmeEnquiryID { get; set; }
 

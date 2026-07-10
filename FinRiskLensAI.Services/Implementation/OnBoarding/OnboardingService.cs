@@ -28,9 +28,9 @@ namespace FinRiskLensAI.Services.Implementation.OnBoarding
         {
             return await _repository.FetchUdyam(uan);
         }
-        public async Task SaveMsmeData(string json)
+        public async Task<SaveMsmeResultModel> SaveMsmeData(string json)
         {
-            await _repository.SaveMsmeData(json);
+            return await _repository.SaveMsmeData(json);
         }
 
         public async Task<ResultModel<UdyamDetailsModel>> GetUdyamDetails(string uan)
@@ -72,9 +72,9 @@ namespace FinRiskLensAI.Services.Implementation.OnBoarding
             return result;
         }
 
-        public async Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(UserRegistrationModel entity)
+        public async Task<ResultModel<UserRegistrationModel>> AddUpdateUserRegst(int? msmeEnquiryId, string email, string clientIp)
         {
-            var result = _repository.AddUpdateUserRegst(entity);
+            var result = _repository.AddUpdateUserRegst(msmeEnquiryId,email,clientIp);
 
             return await result;
         }
