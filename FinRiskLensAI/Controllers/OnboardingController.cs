@@ -253,6 +253,7 @@ namespace FinRiskLensAI.Controllers
                 UdyamNumber=regResult.Data.UdyamNumber,
                 PanNumber= regResult.Data.PanNumber,
                 GstinNumber= regResult.Data.GstinNumber,
+                NameOfEnterprise = result.Data.NameOfEnterprise
             };
 
             HttpContext.Session.SetCurrentUser(sessionUser);
