@@ -17,7 +17,6 @@ Built for **IDBI Innovate 2026** (Problem Statement 3 — Financial Health Score
 | 🌐 **Live site** | https://finrisklensai.com/ |
 | 🎥 **Demo video** | https://video.finrisklensai.com/ &nbsp;·&nbsp; [Google Drive](https://drive.google.com/file/d/1XT7sGQz7xUhoUDwbNTN6Qij5t8e_v5ea/view?usp=sharing) |
 | 📄 **Submission deck (PDF)** | [`Doc/ASM FinTech Developer_Prototype Submission_IDBI Innovate.pdf`](Doc/ASM%20FinTech%20Developer_Prototype%20Submission_IDBI%20Innovate.pdf) |
-| 📑 **Editable deck (PPTX)** | [`Doc/Prototype Submission Deck _ IDBI Innovate.pptx`](Doc/Prototype%20Submission%20Deck%20_%20IDBI%20Innovate.pptx) |
 | 📚 **Full docs** | [`Doc/00_README.md`](Doc/00_README.md) → [`Doc/08_ML_ENGINE.md`](Doc/08_ML_ENGINE.md) |
 
 ## The problem
