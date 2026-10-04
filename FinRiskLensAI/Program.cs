@@ -1,11 +1,13 @@
-﻿using Autofac;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FinRiskLensAI.Common;
 using FinRiskLensAI.Core.DI;
+using FinRiskLensAI.Data.DbContextEDMX;
 using FinRiskLensAI.Data.DI;
 using FinRiskLensAI.ML.DI;
 using FinRiskLensAI.Services.DI;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.IO;
 
@@ -123,6 +125,22 @@ app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Health probe for uptime monitoring (UptimeRobot and similar). Anonymous and
+// session-free on purpose: a monitor must never be redirected to a login page, and
+// must not write a session row every few minutes.
+//
+// It checks the database rather than just returning 200, because the app is unusable
+// without SQL — a probe that only proves the process is alive would report "up" while
+// every page is erroring.
+//
+// Side benefit: a monitor polling this every 5 minutes keeps the IIS app pool warm,
+// which is what removes the ~19s cold-start penalty on the first real visitor.
+app.MapGet("/health", async (ApplicationDbContext db, CancellationToken ct) =>
+        await db.Database.CanConnectAsync(ct)
+            ? Results.Text("Healthy", "text/plain")
+            : Results.Text("Unhealthy: database unreachable", "text/plain", statusCode: 503))
+   .AllowAnonymous();
 
 app.MapControllers();
 
