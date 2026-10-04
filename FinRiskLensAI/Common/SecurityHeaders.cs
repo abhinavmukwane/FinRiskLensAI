@@ -15,10 +15,11 @@ namespace FinRiskLensAI.Common
         //                             ApexCharts, Leaflet, Font Awesome
         //  Google Fonts             : stylesheet (googleapis) + font files (gstatic)
         //  Bhashini                 : the language-translation widget
-        //  CARTO                    : basemap tiles for the IP-audit map
+        //  OpenStreetMap            : basemap tiles for the IP-audit map
         //  lh3.googleusercontent    : marketing images on the landing page
         private const string Cdn = "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com";
         private const string Bhashini = "https://translation-plugin.bhashini.co.in";
+        private const string Osm = "https://tile.openstreetmap.org https://*.tile.openstreetmap.org";
         private const string BhashiniApi = "https://bhashini.gov.in https://api.finrisklensai.com";
 
         /// <summary>
@@ -52,7 +53,7 @@ namespace FinRiskLensAI.Common
                 $"script-src 'self' 'unsafe-inline' {Cdn} {Bhashini}",
                 $"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com {Cdn} {Bhashini}",
                 $"font-src 'self' data: https://fonts.gstatic.com {Cdn}",
-                $"img-src 'self' data: blob: https://lh3.googleusercontent.com https://*.basemaps.cartocdn.com {Cdn} {Bhashini}",
+                $"img-src 'self' data: blob: https://lh3.googleusercontent.com {Osm} {Cdn} {Bhashini}",
                 $"connect-src {connect}",
                 "frame-src 'self'",
                 "object-src 'none'",

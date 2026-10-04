@@ -126,10 +126,12 @@
 
         mapInited = true;
         const map = L.map('popupMap', { center: [lat, lng], zoom: 12, zoomControl: true });
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-            subdomains: 'abcd',
-            maxZoom: 20
+        // OpenStreetMap's own tiles: free, no API key, no sign-up. CARTO's
+        // basemaps.cartocdn.com used to work key-less and now returns a blank
+        // "API KEY REQUIRED" watermark tile instead of the map.
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
         }).addTo(map);
 
         const pin = L.divIcon({
