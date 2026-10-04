@@ -33,6 +33,12 @@ HANDOFF.md
 .vs/
 bin/
 obj/
+
+# ASP.NET Data Protection keys — these sign the session cookies.
+# Generated at runtime, never to be committed, and must NOT be deleted on a
+# live server: losing them logs every active user out.
+App_Data/DataProtectionKeys/
+**/App_Data/DataProtectionKeys/
 *.user
 *.suo
 *.vsuo
